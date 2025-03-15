@@ -9,6 +9,5 @@
 require('./styles/style.scss');
 
 // Import JavaScript modules
-require('./js/parameter.js');
+// Nous avons déplacé parameter.js dans un block spécifique pour éviter les erreurs
 
-console.log('This log comes from assets/app.js - welcome to Webpack Encore! 🎉');

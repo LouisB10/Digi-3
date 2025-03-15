@@ -16,7 +16,21 @@
                     <h3>{{ user.userFirstName }}</h3>
                     <h3>{{ user.userLastName }}</h3>
                     <p>{{ user.userEmail }}</p>
-                    <p>Salarié</p>
+                    <p>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            Administrateur
+                        {% elseif is_granted('ROLE_RESPONSABLE') %}
+                            Responsable
+                        {% elseif is_granted('ROLE_PROJECT_MANAGER') %}
+                            Chef de projet
+                        {% elseif is_granted('ROLE_LEAD_DEVELOPER') %}
+                            Lead développeur
+                        {% elseif is_granted('ROLE_DEVELOPER') %}
+                            Développeur
+                        {% else %}
+                            Utilisateur
+                        {% endif %}
+                    </p>
                 </div>
             </div>
 
@@ -33,10 +47,25 @@
 
             <nav class="sidebar-nav card">
                 <ul>
-                    <a href="#" class="btn-link">Page d'accueil <i class="fas fa-home"></i></a>
+                    <a href="{{ path('app_dashboard') }}" class="btn-link">Page d'accueil <i class="fas fa-home"></i></a>
+                    
+                    {% if permissions.canViewProjects %}
+                    <a href="#" class="btn-link">Projets</a>
+                    {% endif %}
+                    
+                    {% if permissions.canViewCustomers %}
+                    <a href="#" class="btn-link">Clients</a>
+                    {% endif %}
+                    
+                    {% if permissions.canViewUsers %}
+                    <a href="#" class="btn-link">Utilisateurs</a>
+                    {% endif %}
+                    
+                    {% if permissions.canViewParameters %}
+                    <a href="#" class="btn-link">Paramètres</a>
+                    {% endif %}
+                    
                     <a href="#" class="btn-link">Calendrier</a>
-                    <a href="#" class="btn-link">Efficacité des tâches</a>
-                    <a href="#" class="btn-link">Productivité individuelle</a>
                 </ul>
             </nav>
         </div>
@@ -51,6 +80,7 @@
                         scrolling="no"></iframe>
             </div>
 
+            {% if permissions.canViewProjects %}
             <div class="project-info card">
                 <h4>12 Projets Actifs</h4>
                 <div class="project-progress">
@@ -61,6 +91,7 @@
                 </div>
                 <a href="#" class="more-info">En savoir plus</a>
             </div>
+            {% endif %}
 
             <div class="efficiency-box card">
                 <h4>Efficacité des tâches</h4>
@@ -71,12 +102,25 @@
                 <p>Liste de tâches + un total</p>
                 <p>Comparaison entre effort prévisionnel et réel</p>
             </div>
+            
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-panel card">
+                <h4>Panneau d'administration</h4>
+                <p>Accès rapide aux fonctionnalités d'administration</p>
+                <div class="admin-links">
+                    <a href="#" class="admin-link">Gestion des utilisateurs</a>
+                    <a href="#" class="admin-link">Configuration de l'application</a>
+                    <a href="#" class="admin-link">Logs système</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
 {% endblock %}
 
 {% block stylesheets %}
+{{ parent() }}
 <style>
     body {
         color: #000; /* Texte global en noir */
@@ -142,10 +186,9 @@
     .sidebar-nav ul {
         list-style: none;
         padding: 0;
-    }
-
-    .sidebar-nav li {
-        margin: 10px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .sidebar-nav a {
@@ -153,12 +196,13 @@
         text-decoration: none;
         color: #fff;
         font-weight: bold;
-        background-color:rgb(0, 0, 0);
-        border: 1px solidrgb(0, 0, 0);
+        background-color: rgb(0, 0, 0);
+        border: 1px solid rgb(0, 0, 0);
         padding: 10px 15px;
         border-radius: 5px;
         text-align: center;
         transition: background-color 0.3s, color 0.3s;
+        width: 100%;
     }
 
     .sidebar-nav a:hover {
@@ -203,6 +247,32 @@
 
     .more-info:hover {
         text-decoration: underline;
+    }
+    
+    .admin-panel {
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+    }
+    
+    .admin-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .admin-link {
+        display: block;
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    
+    .admin-link:hover {
+        background-color: #0056b3;
     }
 </style>
 {% endblock %}

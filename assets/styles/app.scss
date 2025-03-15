@@ -1,21 +1,155 @@
-// Variables
-$primary-color: skyblue;
+// ======================================
+// VARIABLES
+// ======================================
 
-// Styles globaux
-body {
-    background-color: $primary-color;
+// Couleurs
+$white: #ffffff;
+$white-alpha-85: rgba(255, 255, 255, 0.85);
+$white-alpha-50: rgba(255, 255, 255, 0.5);
+$white-alpha-15: rgba(255, 255, 255, 0.15);
+
+$dark: rgba(41, 41, 41, 1);
+$dark-alpha-85: rgba(41, 41, 41, 0.85);
+$dark-alpha-50: rgba(41, 41, 41, 0.5);
+$dark-alpha-15: rgba(41, 41, 41, 0.15);
+
+$blue: #1cdaff;
+$green: #00fca8;
+$grey: #d9d9d9;
+
+// Couleur primaire
+$primary: $blue;
+
+// Gradients
+$primary-gradient: linear-gradient(90deg, $blue, $green);
+$header-gradient: linear-gradient(-130deg, $blue, $green);
+
+// Breakpoints pour le responsive
+$mobile: 576px;
+$tablet: 768px;
+$desktop: 992px;
+$large-desktop: 1200px;
+
+// Mixins pour le responsive
+@mixin mobile {
+  @media (max-width: #{$mobile}) {
+    @content;
+  }
 }
 
-// Réinitialisation des styles
+@mixin tablet {
+  @media (max-width: #{$tablet}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (max-width: #{$desktop}) {
+    @content;
+  }
+}
+
+@mixin large-desktop {
+  @media (max-width: #{$large-desktop}) {
+    @content;
+  }
+}
+
+// ======================================
+// RESET
+// ======================================
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+  font-weight: 400;
 }
 
-// Styles de base
-html, body {
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    color: #333;
-} 
+html {
+  scroll-behavior: smooth;
+}
+
+// ======================================
+// STYLES DE BASE
+// ======================================
+body {
+  background-color: $dark;
+  width: 100vw;
+  height: 100vh;
+  font-family: "Varela Round", sans-serif !important;
+  overflow-x: hidden;
+}
+
+a,
+p,
+h1,
+h2,
+h3,
+h4,
+label,
+th,
+td,
+input,
+button,
+textarea,
+select {
+  text-align: center;
+  color: $white;
+  font-family: "Varela Round", sans-serif !important;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  outline: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font-family: "Varela Round", sans-serif !important;
+}
+
+a {
+  cursor: pointer;
+}
+
+// ======================================
+// CLASSES UTILITAIRES
+// ======================================
+.flex-col {
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Styles pour la scrollbar
+.need-scrollbar {
+  overflow-y: scroll;
+  
+  &::-webkit-scrollbar {
+    width: 9px;
+    border-radius: 5px;
+    border: 1px solid $dark-alpha-15;
+    background: $dark-alpha-15;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: rgba(41, 41, 41, 0.56);
+    border: 1px solid $dark-alpha-15;
+    
+    &:hover {
+      background: #555;
+    }
+  }
+}
+
+

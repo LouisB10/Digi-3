@@ -1,0 +1,15 @@
+/* Définition de la police Varela Round */
+@font-face {
+  font-family: 'Varela Round';
+  src: url('/fonts/varela-round/varela-round-regular.woff2') format('woff2'),
+       url('/fonts/varela-round/varela-round-regular.woff') format('woff'),
+       url('/fonts/varela-round/VarelaRound-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Appliquer la police à tous les éléments */
+html, body, button, input, select, textarea, .auth-submit {
+  font-family: 'Varela Round', sans-serif !important;
+} 

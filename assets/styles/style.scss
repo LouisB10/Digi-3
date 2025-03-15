@@ -1,274 +1,884 @@
-/***************************REGLES GENERALES*************************/
-// Variables
-:root {
-  --w: #ffffff;
-  --w-c: rgba(255, 255, 255, 0.85);
-  --w-cm: rgba(255, 255, 255, 0.5);
-  --w-cp: rgba(255, 255, 255, 0.15);
+// Importer les styles de base, variables et utilitaires
+@use 'app' as *;
 
-  --d: rgba(41, 41, 41, 1);
-  --d-c: rgba(41, 41, 41, 0.85);
-  --d-cm: rgba(41, 41, 41, 0.5);
-  --d-cp: rgba(41, 41, 41, 0.15);
-
-  --b: #1cdaff;
-  --g: #00fca8;
-  --gr: #d9d9d9;
-}
-
-// Reset
-* {
-  margin: 0;
-  padding: 0;
-  text-decoration: none;
-  list-style: none;
-  font-family: "Varela Round", sans-serif;
-  font-weight: 400;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background-color: var(--d);
-  width: 100vw;
-  height: 100vh;
-  justify-content: space-between !important;
-  overflow-x: hidden;
-}
-
-// Utility classes
-.flex-col {
-  flex-direction: column;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.flex {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// Elements
-button {
-  cursor: pointer;
-  border: 0;
-  outline: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-}
-
-a,
-button {
-  transition: all 0.3s ease;
+// ======================================
+// HEADER & NAVIGATION
+// ======================================
+.home-header {
+  width: 100%;
+  padding: 1rem 2rem;
+  background-color: $dark;
   
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
-// Header
-header {
   nav {
-    padding: 0 2rem;
+    width: 100%;
+    justify-content: space-between;
     
-    ul {
-      gap: 2rem;
-      
-      li {
-        a {
-          color: var(--w);
+    .header-logo {
+      a {
+        img {
+          height: 50px;
+          
+          @include mobile {
+            height: 40px;
+          }
+        }
+      }
+    }
+    
+    .header-buttons {
+      a {
+        padding: 0.75rem 1.5rem;
+        background: $primary-gradient;
+        border-radius: 25px;
+        color: $dark;
+        
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
-        &.active a::after {
-          content: "";
-          display: block;
-          width: 100%;
-          height: 2px;
-          background-color: var(--b);
-          margin-top: 0.25rem;
+        @include mobile {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
         }
       }
     }
   }
 }
 
-.header-logo {
-  img {
-    width: 150px;
-  }
-}
-
-.header-search {
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  border: none;
-  background-color: var(--d-cm);
-  color: var(--w);
+// ======================================
+// PAGE D'ACCUEIL
+// ======================================
+.home-section {
+  width: 100vw;
+  background-image: url('../images/bg.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  padding-top: 6rem;
+  gap: 4rem;
   
-  &::placeholder {
-    color: var(--w-cm);
+  @include tablet {
+    padding-top: 4rem;
+    gap: 3rem;
   }
-}
-
-.logout-form {
-  background: none;
-  border: none;
-  cursor: pointer;
   
-  button {
-    img {
-      width: 24px;
+  @include mobile {
+    padding-top: 2rem;
+    gap: 2rem;
+  }
+
+  .home-content {
+    gap: 2rem;
+    width: 85%;
+    
+    @include mobile {
+      width: 90%;
+      gap: 1rem;
+    }
+  }
+
+  .home-illustration {
+    width: 85%;
+    border-radius: 20px;
+    
+    @include tablet {
+      width: 90%;
+    }
+    
+    @include mobile {
+      width: 95%;
+    }
+  }
+
+  h1 {
+    font-size: 5rem;
+    
+    @include desktop {
+      font-size: 4rem;
+    }
+    
+    @include tablet {
+      font-size: 3rem;
+    }
+    
+    @include mobile {
+      font-size: 2.5rem;
+      text-align: center;
+    }
+  }
+
+  p {
+    width: 85%;
+    font-size: 2rem;
+    background: $primary-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
+    @include desktop {
+      font-size: 1.8rem;
+    }
+    
+    @include tablet {
+      font-size: 1.5rem;
+      width: 90%;
+    }
+    
+    @include mobile {
+      font-size: 1.2rem;
+      width: 95%;
+      text-align: center;
     }
   }
 }
 
-.logout-dialog {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.5);
+.cta-button {
+  padding: 0.75rem 1.5rem;
+  background: $primary-gradient;
+  border-radius: 25px;
+  color: $dark;
   
-  &-content {
-    background-color: var(--w);
-    padding: 2rem;
-    border-radius: 10px;
-    text-align: center;
-    max-width: 400px;
-  }
-  
-  &-header {
-    margin-bottom: 1.5rem;
-  }
-  
-  &-buttons {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1.5rem;
-  }
-}
-
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
+  transition: all 0.3s ease;
   
   &:hover {
-    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   }
-}
-
-.dialog-btn {
-  padding: 0.5rem 1.5rem;
-  border-radius: 5px;
   
-  &:nth-child(2) {
-    background-color: var(--b);
+  @include mobile {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
 }
 
-.header-account {
-  cursor: pointer;
-  
-  img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-  }
-}
-
-// Home section
-.home-section {
+// ======================================
+// AUTHENTIFICATION
+// ======================================
+body.auth-page {
+  overflow: hidden;
   height: 100vh;
-  background-image: url('../images/bg.png');
-  background-size: cover;
-  background-position: center;
-  color: var(--w);
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  background-color: $dark;
+}
+
+.auth-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $dark;
+  position: relative;
+  z-index: 1;
   
-  div {
-    max-width: 600px;
+  @include tablet {
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100vh;
   }
   
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-  
-  p {
-    font-size: 1.2rem;
-  }
-  
-  img {
-    max-width: 100%;
+  @include mobile {
+    flex-direction: column;
+    padding: 1rem;
+    overflow-y: auto;
   }
 }
 
-// Parameter styles
+.auth-section {
+  overflow: hidden;
+  background-image: url('../images/bg.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  display: flex;
+  height: 100vh;
+  z-index: 2;
+  
+  &.hidden {
+    display: none !important;
+  }
+  
+  @include tablet {
+    width: 100%;
+    padding: 2rem 0;
+    height: auto;
+    min-height: 50vh;
+  }
+  
+  @include mobile {
+    flex-direction: column-reverse;
+    width: 100%;
+    padding: 1rem 0;
+    height: auto;
+  }
+
+  form {
+    width: 50vw;
+    gap: 2rem;
+    display: flex;      
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    
+    @include tablet {
+      width: 90vw;
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+    
+    @include mobile {
+      gap: 1rem;
+      padding: 1rem;
+      width: 100%;
+      max-width: 100%;
+      margin: 0.5rem 0;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      
+      @include tablet {
+        font-size: 2rem;
+      }
+      
+      @include mobile {
+        font-size: 1.8rem;
+      }
+    }
+
+    .form-group {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      
+      @include mobile {
+        max-width: 100%;
+      }
+    }
+
+    label {
+      font-size: 1.2rem;
+      color: $white;
+      text-align: left;
+      
+      @include mobile {
+        font-size: 1rem;
+      }
+    }
+
+    input {
+      padding: 1rem 0.5rem;
+      border-radius: 10px;
+      border: 1px solid $white;
+      background-color: transparent;
+      width: 100%;
+      box-sizing: border-box;
+      color: rgba(255, 255, 255, 0.7);
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      
+      &:focus {
+        outline: 2px solid $blue;
+        border-color: $blue;
+      }
+      
+      @include mobile {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+    
+    .error {
+      color: #ff6b6b;
+      background-color: rgba(255, 107, 107, 0.1);
+      padding: 0.75rem;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 400px;
+      text-align: left;
+      margin-top: -1rem;
+      
+      @include mobile {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+.auth-decorate {
+  width: 40%;
+  padding: 4rem;
+  background: $primary-gradient;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 2rem;
+  height: 100vh;
+  width: 50vw;
+  background-image: linear-gradient($green, $blue);
+  
+  @include tablet {
+    width: 100vw;
+    height: auto;
+    min-height: 50vh;
+    padding: 3rem 1rem;
+  }
+  
+  @include mobile {
+    width: 100%;
+    max-width: 100%;
+    margin: 0.5rem 0;
+    padding: 2rem 1rem;
+    height: auto;
+  }
+
+  h3 {
+    font-size: 3rem;
+    color: $dark;
+    
+    @include tablet {
+      font-size: 2.5rem;
+    }
+    
+    @include mobile {
+      font-size: 2rem;
+    }
+  }
+
+  p {
+    color: $dark;
+    font-size: 1.5rem;
+    line-height: 1.6;
+    width: 75%;
+    
+    @include tablet {
+      font-size: 1.3rem;
+      width: 90%;
+    }
+    
+    @include mobile {
+      font-size: 1.1rem;
+      width: 95%;
+    }
+  }
+
+  a {
+    padding: 0.5rem 1.5rem;
+    border-radius: 15px;
+    border: 2px solid $dark;
+    color: $dark;
+    
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: $dark;
+      color: $white;
+    }
+    
+    &:focus {
+      outline: 3px solid $dark;
+      outline-offset: 2px;
+    }
+    
+    @include mobile {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.auth-submit {
+  padding: 1rem 3rem;
+  background-image: linear-gradient($green, $blue);
+  border: none;
+  border-radius: 10px;
+  color: $dark;
+  font-size: 1.5rem;
+  font-family: "Varela Round", sans-serif !important;
+  
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:focus {
+    outline: 3px solid $blue;
+    outline-offset: 2px;
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  @include tablet {
+    padding: 0.75rem 2rem;
+    font-size: 1.3rem;
+  }
+  
+  @include mobile {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+.password-container {
+  position: relative;
+  width: 100% !important;
+
+  .toggle-password {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    
+    &:focus {
+      outline: 2px solid $blue;
+      border-radius: 50%;
+    }
+    
+    img {
+      width: 20px;
+      height: 20px;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+      
+      @include mobile {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.password-requirements {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: $white-alpha-85;
+  
+  @include mobile {
+    font-size: 0.8rem;
+  }
+  
+  ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    
+    li {
+      margin-bottom: 0.25rem;
+      text-align: left;
+      
+      &.valid {
+        color: $green;
+      }
+      
+      &.invalid {
+        color: #ff6b6b;
+      }
+    }
+  }
+}
+
+.forgot-password-link {
+  color: $white-alpha-85;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  margin-top: -1rem;
+  align-self: flex-end;
+  
+  &:hover {
+    color: $white;
+  }
+  
+  &:focus {
+    outline: 2px solid $blue;
+    color: $white;
+    padding: 0.2rem;
+  }
+  
+  @include mobile {
+    font-size: 0.8rem;
+    margin-top: -0.5rem;
+  }
+}
+
+// Modal styles
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background-color: $dark-alpha-85;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  margin: auto;
+  
+  @include mobile {
+    padding: 1.5rem;
+    width: 95%;
+    margin: 10% auto;
+  }
+  
+  h2 {
+    margin-bottom: 2rem;
+    color: $white;
+    
+    @include mobile {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+  }
+  
+  .close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    color: $white;
+    cursor: pointer;
+    
+    &:hover {
+      color: $blue;
+    }
+    
+    &:focus {
+      outline: 2px solid $blue;
+      color: $blue;
+    }
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    @include mobile {
+      gap: 1rem;
+    }
+    
+    label {
+      color: $white;
+    }
+    
+    input {
+      padding: 0.75rem;
+      border-radius: 5px;
+      border: 1px solid $white-alpha-50;
+      background-color: transparent;
+      color: $white;
+      
+      &:focus {
+        outline: 2px solid $blue;
+        border-color: $blue;
+      }
+      
+      @include mobile {
+        padding: 0.5rem;
+      }
+    }
+  }
+  
+  .success-message {
+    color: $green;
+    background-color: rgba(46, 213, 115, 0.1);
+    padding: 1rem;
+    border-radius: 5px;
+    text-align: center;
+    margin: 1rem 0;
+    
+    @include mobile {
+      padding: 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// ======================================
+// PARAMÈTRES
+// ======================================
 .parameter_landing {
   width: 100%;
   padding: 2rem;
   gap: 2rem;
+  
+  @include tablet {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+    gap: 1rem;
+  }
 }
 
 .parameter_menu {
   width: 20%;
-  background-color: var(--d-c);
+  background-color: $dark-alpha-85;
   border-radius: 10px;
+  
+  @include tablet {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
   
   ul {
     width: 100%;
     padding: 1rem;
+    
+    @include tablet {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
     
     li {
       padding: 1rem;
       border-radius: 5px;
       margin-bottom: 0.5rem;
       
+      @include tablet {
+        margin-bottom: 0;
+      }
+      
+      @include mobile {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+      }
+      
       a {
-        color: var(--w);
-        font-weight: bold;
+        color: $white;
+        
       }
     }
   }
 }
 
 .parameter_menu_active {
-  background-color: var(--b);
+  background-color: $blue;
   
   a {
-    color: var(--d) !important;
+    color: $dark !important;
   }
 }
 
 .parameter_content {
   width: 75%;
-  background-color: var(--d-c);
+  background-color: $dark-alpha-85;
   border-radius: 10px;
   padding: 2rem;
   
+  @include tablet {
+    width: 100%;
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+  }
+  
   h2 {
-    color: var(--w);
+    color: $white;
     margin-bottom: 1.5rem;
+    
+    @include mobile {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
   }
 }
 
-// Account page
+// Config section
+.config {
+  width: 100%;
+  
+  h3 {
+    color: $white;
+    margin-bottom: 1.5rem;
+    
+    @include mobile {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+.searchBar {
+  margin-bottom: 2rem;
+  
+  @include mobile {
+    margin-bottom: 1.5rem;
+  }
+  
+  select {
+    margin-right: 1rem;
+    
+    @include mobile {
+      margin-right: 0.5rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+#searchForm {
+  gap: 1rem;
+  
+  @include mobile {
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  input {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border: none;
+    
+    @include mobile {
+      padding: 0.5rem;
+      width: 100%;
+    }
+  }
+  
+  button {
+    img {
+      width: 20px;
+      
+      @include mobile {
+        width: 16px;
+      }
+    }
+  }
+}
+
+.config table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  
+  @include mobile {
+    margin-bottom: 1.5rem;
+  }
+  
+  thead {
+    background-color: $blue;
+    
+    tr {
+      border-radius: 10px;
+      
+      th {
+        padding: 1rem;
+        text-align: left;
+        color: $dark;
+        
+        
+        @include mobile {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+#parameter_table {
+  background-color: $dark-alpha-15;
+  border-radius: 10px;
+  
+  tr {
+    border-bottom: 1px solid $dark-alpha-50;
+    transition: all 0.3s ease;
+  }
+  
+  td {
+    padding: 1rem;
+    color: $white;
+    
+    @include mobile {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    &:nth-child(5) {
+      display: flex;
+      gap: 1rem;
+      
+      @include mobile {
+        gap: 0.5rem;
+      }
+    }
+  }
+}
+
+#deleteBtn {
+  img {
+    width: 20px;
+    
+    @include mobile {
+      width: 16px;
+    }
+  }
+}
+
+// ======================================
+// COMPTE UTILISATEUR
+// ======================================
 .account-page {
   padding: 2rem;
-  color: var(--w);
+  color: $white;
+  
+  @include tablet {
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+  }
 }
 
 .account-header {
   width: 100%;
   margin-bottom: 2rem;
+  
+  @include mobile {
+    margin-bottom: 1.5rem;
+  }
 }
 
 .account-info {
@@ -280,8 +890,12 @@ header {
   
   p:nth-child(1) {
     font-size: 1.5rem;
-    font-weight: bold;
+    
     margin-bottom: 0.5rem;
+    
+    @include mobile {
+      font-size: 1.2rem;
+    }
   }
 }
 
@@ -290,6 +904,11 @@ header {
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
+  
+  @include mobile {
+    width: 120px;
+    height: 120px;
+  }
 }
 
 .profile-pic {
@@ -306,6 +925,10 @@ header {
     
     img {
       width: 40px;
+      
+      @include mobile {
+        width: 30px;
+      }
     }
     
     &:hover {
@@ -313,9 +936,13 @@ header {
         transform: scale(1.1);
       }
       
-      background-color: var(--b);
+      background-color: $blue;
       border-radius: 50%;
       padding: 0.5rem;
+      
+      @include mobile {
+        padding: 0.3rem;
+      }
     }
   }
 }
@@ -327,21 +954,39 @@ header {
   h3 {
     margin-bottom: 1.5rem;
     font-size: 1.8rem;
+    
+    @include mobile {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
   }
 }
 
 .account-email,
 .account-password {
   width: 100%;
-  background-color: var(--d-c);
+  background-color: $dark-alpha-85;
   border-radius: 10px;
   padding: 2rem;
   margin-bottom: 2rem;
+  
+  @include tablet {
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .account-body form {
   width: 100%;
   gap: 1.5rem;
+  
+  @include mobile {
+    gap: 1rem;
+  }
   
   div {
     width: 100%;
@@ -355,29 +1000,64 @@ header {
     padding: 0.75rem;
     border-radius: 5px;
     border: none;
-    background-color: var(--d-cm);
-    color: var(--w);
+    background-color: $dark-alpha-50;
+    color: $white;
+    
+    @include mobile {
+      padding: 0.5rem;
+    }
   }
 }
 
 .btn-submit {
-  background-color: var(--b);
-  color: var(--d);
+  background-color: $blue;
+  color: $dark;
   padding: 0.75rem 2rem;
   border-radius: 5px;
-  font-weight: bold;
+  
   
   &:active {
     transform: scale(0.98);
   }
+  
+  @include mobile {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+  }
 }
 
-// About page
+// ======================================
+// MENTIONS LÉGALES
+// ======================================
 .about-page {
   padding: 2rem;
   
+  @include tablet {
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+  }
+  
   p, h2, h3 {
-    color: var(--w);
+    color: $white;
+    
+    @include mobile {
+      font-size: 0.9rem;
+    }
+  }
+  
+  h2 {
+    @include mobile {
+      font-size: 1.5rem;
+    }
+  }
+  
+  h3 {
+    @include mobile {
+      font-size: 1.2rem;
+    }
   }
 }
 
@@ -385,217 +1065,25 @@ header {
   max-height: 70vh;
   overflow-y: auto;
   padding: 2rem;
-}
-
-.need-scrollbar {
-  overflow-y: auto;
   
-  &::-webkit-scrollbar {
-    width: 10px;
-    background-color: var(--d-cp);
-    border-radius: 5px;
+  @include tablet {
+    padding: 1.5rem;
+    max-height: 60vh;
   }
   
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--b);
-    border-radius: 5px;
-    
-    &:hover {
-      background-color: var(--g);
-    }
-  }
-}
-
-// Config section
-.config {
-  width: 100%;
-  
-  h3 {
-    color: var(--w);
-    margin-bottom: 1.5rem;
-  }
-}
-
-.searchBar {
-  margin-bottom: 2rem;
-  
-  select {
-    margin-right: 1rem;
-  }
-}
-
-#searchForm {
-  gap: 1rem;
-  
-  input {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    border: none;
-  }
-  
-  button {
-    img {
-      width: 20px;
-    }
-  }
-}
-
-.config table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 2rem;
-  
-  thead {
-    background-color: var(--b);
-    
-    tr {
-      border-radius: 10px;
-      
-      th {
-        padding: 1rem;
-        text-align: left;
-        color: var(--d);
-        font-weight: bold;
-      }
-    }
-  }
-}
-
-#parameter_table {
-  background-color: var(--d-cp);
-  border-radius: 10px;
-  
-  tr {
-    border-bottom: 1px solid var(--d-cm);
-    transition: all 0.3s ease;
-  }
-  
-  td {
+  @include mobile {
     padding: 1rem;
-    color: var(--w);
-    
-    &:nth-child(5) {
-      display: flex;
-      gap: 1rem;
-    }
+    max-height: 50vh;
   }
 }
 
-#deleteBtn {
-  img {
-    width: 20px;
-  }
+// Utilitaires
+.hidden {
+  display: none !important;
 }
 
-// Auth section
-.auth-section {
-  height: 100vh;
-  background-color: var(--d);
+// Règle spécifique pour les boutons de type submit
+button[type="submit"] {
+  font-family: "Varela Round", sans-serif !important;
 }
 
-.auth-container {
-  form {
-    h2 {
-      margin-bottom: 2rem;
-    }
-    
-    width: 400px;
-    background-color: var(--w);
-    padding: 2rem;
-    border-radius: 10px;
-  }
-}
-
-#login_form,
-#register_form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  
-  div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  input {
-    padding: 0.75rem;
-    border-radius: 5px;
-    border: 1px solid var(--gr);
-    
-    &:focus {
-      border-color: var(--b);
-      outline: none;
-    }
-    
-    &[type="checkbox"] {
-      width: auto;
-      margin-right: 0.5rem;
-    }
-  }
-  
-  div:nth-child(3) {
-    flex-direction: row;
-    align-items: center;
-    
-    input {
-      margin: 0;
-    }
-    
-    label {
-      font-size: 0.9rem;
-      color: var(--d-cm);
-    }
-  }
-}
-
-.auth-submit {
-  background-color: var(--b);
-  color: var(--w);
-  padding: 0.75rem;
-  border-radius: 5px;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-}
-
-.auth-decorate {
-  width: 400px;
-  color: var(--w);
-  text-align: center;
-  
-  h3, p {
-    margin-bottom: 1rem;
-  }
-  
-  h3 {
-    font-size: 2rem;
-  }
-  
-  p {
-    opacity: 0.8;
-  }
-  
-  a {
-    color: var(--b);
-    text-decoration: underline;
-    
-    &:hover {
-      color: var(--g);
-    }
-  }
-}
-
-.password-container {
-  position: relative;
-  width: 100%;
-}
-
-.toggle-password {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: var(--d-cm);
-} 

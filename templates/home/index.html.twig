@@ -1,36 +1,42 @@
 {# templates/home/index.html.twig #} {% extends 'base.html.twig' %} {% block
 title %}Digi-3 - Page d'accueil{% endblock %} {% block body %}
-<header class="home-header">
-  <nav class="flex">
+<header class="home-header" role="banner">
+  <nav class="flex" role="navigation" aria-label="Navigation principale">
     <div class="header-logo">
-      <a href="{{ path('home_index') }}" class="flex">
-        <img src="/img/header/home-logo.png" alt="Logo Digi-3" />
+      <a href="{{ path('home_index') }}" class="flex" aria-label="Accueil Digi-3">
+        <img src="{{ asset('images/header/home-logo.png') }}" alt="Logo Digi-3" />
       </a>
     </div>
     {% if app.user %}
     <div class="header-buttons flex">
-      <a href="{{ path('app_dashboard') }}">Accéder au site</a>
+      <a href="{{ path('app_dashboard') }}" role="button" class="cta-button" aria-label="Accéder au tableau de bord">Accéder au site</a>
     </div>
     {% else %}
     <div class="header-buttons flex">
-      <a href="{{ path('app_auth') }}">Se connecter ou s'inscrire</a>
+      <a href="{{ path('app_auth') }}" role="button" class="cta-button" aria-label="Se connecter ou s'inscrire">Se connecter ou s'inscrire</a>
     </div>
     {% endif %}
   </nav>
 </header>
-<section class="flex-col">
-  <div class="home-section flex-col">
-    <div class="flex-col">
-      <h1>
-        Simplifiez le suivi des <br />
-        salariés et des missions
-      </h1>
-      <p>
-        Notre application enregistre et chiffre efficacement les activités
-        réalisées par vos salariés
-      </p>
+<main id="main-content" role="main">
+  <section class="flex-col" aria-labelledby="main-heading">
+    <div class="home-section flex-col">
+      <div class="home-content flex-col">
+        <h1 id="main-heading">
+          Simplifiez le suivi des <br />
+          salariés et des missions
+        </h1>
+        <p>
+          Notre application enregistre et chiffre efficacement les activités
+          réalisées par vos salariés
+        </p>
+      </div>
+      <img 
+        src="{{ asset('images/gestion.png') }}" 
+        alt="Illustration représentant la gestion de projets avec des personnes travaillant sur des tableaux de bord" 
+        class="home-illustration"
+      />
     </div>
-    <img src="/img/gestion.png" alt="Image gestion de projets" />
-  </div>
-</section>
+  </section>
+</main>
 {% endblock %}

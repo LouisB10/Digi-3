@@ -1,76 +1,97 @@
 {% extends 'base.html.twig' %} {% block title %}Digi-3 - Page
-d'authentification{% endblock %} {% block body %}
-<div class="auth-container">
+d'authentification{% endblock %} {% block stylesheets %}
+{{ parent() }}
+{% endblock %} {% block body_class %}auth-page{% endblock %}
+{% block body %}
+<main class="auth-container">
   <!-- Section de connexion -->
-  <div class="auth-section flex" id="loginSection" style="display: none">
-    <form id="login_form" method="POST" action="{{ path('app_auth') }}">
-      <input
-        type="hidden"
-        name="_csrf_token"
-        value="{{ csrf_token('authenticate') }}"
-      />
+  <div class="auth-section flex" id="loginSection">
+    {{ form_start(login_form, {'attr': {'id': 'login_form', 'class': 'auth-form', 'aria-labelledby': 'login-heading'}}) }}
+      <h2 id="login-heading">Connexion</h2>
       <input type="hidden" name="action" value="login" />
 
-      <label for="login_email">Email</label>
-      <input type="email" id="login_email" name="email" required />
-
-      <label for="login_password">Mot de passe</label>
-      <div class="password-container">
-        <input type="password" id="login_password" name="password" required />
-        <span class="toggle-password" onclick="togglePasswordVisibility('login_password')">
-          <img src="/img/icons/eye.png" alt="Afficher/Masquer le mot de passe" style="width: 15px; height: 15px;">
-        </span>
+      <div class="form-group">
+        {{ form_label(login_form.email) }}
+        {{ form_widget(login_form.email) }}
+        {{ form_errors(login_form.email) }}
       </div>
 
-      <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
+      <div class="form-group">
+        {{ form_label(login_form.password) }}
+        <div class="password-container">
+          {{ form_widget(login_form.password) }}
+          <span class="toggle-password" data-target="{{ login_form.password.vars.id }}" aria-label="Afficher/Masquer le mot de passe" role="button" tabindex="0">
+            <img src="{{ asset('build/images/icons/eye.png') }}" alt="" aria-hidden="true" />
+          </span>
+        </div>
+        {{ form_errors(login_form.password) }}
+      </div>
+
+      {% if login_form.remember_me is defined %}
+      <div class="form-group form-check">
+        {{ form_widget(login_form.remember_me) }}
+        {{ form_label(login_form.remember_me) }}
+      </div>
+      {% endif %}
+
+      <a href="{{ path('app_reset_password_request') }}" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
 
       {% if error %}
       <div class="error" role="alert">{{ error }}</div>
       {% endif %}
 
       <button type="submit" class="auth-submit">Se connecter</button>
-    </form>
+    {{ form_end(login_form) }}
     <div class="auth-decorate flex-col">
       <h3>Bonjour mon ami !</h3>
       <p>
         Entrez vos informations personnelles et commencez l'aventure avec nous
       </p>
-      <a href="" id="switchToRegister">S'inscrire</a>
+      <a href="#" id="switchToRegister" class="auth-switch-btn" aria-label="Passer à l'inscription">S'inscrire</a>
     </div>
   </div>
   <!-- Section d'inscription -->
-  <div class="auth-section flex" id="registerSection">
+  <div class="auth-section flex hidden" id="registerSection">
     <div class="auth-decorate flex-col">
       <h3>Content de te revoir !</h3>
       <p>
         Pour rester dans l'aventure avec nous, connectez-vous avec vos
         informations personnelles.
       </p>
-      <a href="" id="switchToLogin">Se connecter</a>
+      <a href="#" id="switchToLogin" class="auth-switch-btn" aria-label="Passer à la connexion">Se connecter</a>
     </div>
-    <form id="register_form" method="POST" action="{{ path('app_register') }}">
-      <input
-        type="hidden"
-        name="csrf_token"
-        value="{{ csrf_token('authenticate') }}"
-      />
+    {{ form_start(registration_form, {'attr': {'id': 'register_form', 'class': 'auth-form', 'aria-labelledby': 'register-heading'}, 'action': path('app_register')}) }}
+      <h2 id="register-heading">Inscription</h2>
       <input type="hidden" name="action" value="register" />
 
-      <label for="first_name">Prénom :</label>
-      <input type="text" id="first_name" name="first_name" required />
+      <div class="form-group">
+        {{ form_label(registration_form.first_name) }}
+        {{ form_widget(registration_form.first_name) }}
+        {{ form_errors(registration_form.first_name) }}
+      </div>
 
-      <label for="last_name">Nom :</label>
-      <input type="text" id="last_name" name="last_name" required />
+      <div class="form-group">
+        {{ form_label(registration_form.last_name) }}
+        {{ form_widget(registration_form.last_name) }}
+        {{ form_errors(registration_form.last_name) }}
+      </div>
 
-      <label for="register_email">Email</label>
-      <input type="email" id="register_email" name="email" required />
+      <div class="form-group">
+        {{ form_label(registration_form.email) }}
+        {{ form_widget(registration_form.email) }}
+        {{ form_errors(registration_form.email) }}
+      </div>
 
-      <label for="register_password">Mot de passe</label>
-      <div class="password-container">
-        <input type="password" id="register_password" name="password" required />
-        <span class="toggle-password" onclick="togglePasswordVisibility('register_password')">
-          <img src="/img/icons/eye.png" alt="Afficher/Masquer le mot de passe" style="width: 15px; height: 15px;">
-        </span>
+      <div class="form-group">
+        {{ form_label(registration_form.password) }}
+        <div class="password-container">
+          {{ form_widget(registration_form.password) }}
+          <span class="toggle-password" data-target="{{ registration_form.password.vars.id }}" aria-label="Afficher/Masquer le mot de passe" role="button" tabindex="0">
+            <img src="{{ asset('build/images/icons/eye.png') }}" alt="" aria-hidden="true" />
+          </span>
+        </div>
+        {{ form_errors(registration_form.password) }}
+        <div id="password-requirements" class="password-requirements" aria-live="polite"></div>
       </div>
 
       {% if error %}
@@ -78,216 +99,18 @@ d'authentification{% endblock %} {% block body %}
       {% endif %}
 
       <button type="submit" class="auth-submit">S'inscrire</button>
-    </form>
+    {{ form_end(registration_form) }}
   </div>
-</div>
-<!-- Ajouter la modale de réinitialisation -->
-<div id="resetPasswordModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Réinitialisation du mot de passe</h2>
-        <form id="resetPasswordForm">
-            <label for="reset_email">Email</label>
-            <input type="email" id="reset_email" name="email" required>
-            <button type="submit" class="auth-submit">Envoyer le lien</button>
-        </form>
+</main>
+
+{% for label, messages in app.flashes %}
+  {% for message in messages %}
+    <div class="flash-{{ label }}" role="alert">
+      {{ message }}
     </div>
-</div>
-{% endblock %} {% block javascripts %}
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Éléments DOM
-    const loginSection = document.getElementById("loginSection");
-    const registerSection = document.getElementById("registerSection");
-    const switchToRegister = document.getElementById("switchToRegister");
-    const switchToLogin = document.getElementById("switchToLogin");
-    const registerForm = document.getElementById("register_form");
-    const passwordInput = document.getElementById("register_password");
+  {% endfor %}
+{% endfor %}
 
-    // Fonction pour basculer la visibilité du mot de passe
-    window.togglePasswordVisibility = function(inputId) {
-        const passwordInput = document.getElementById(inputId);
-        const icon = passwordInput.parentElement.querySelector('.toggle-password img');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.src = '/img/icons/eye-off.png'; // Change l'icône si tu en as une différente
-        } else {
-            passwordInput.type = 'password';
-            icon.src = '/img/icons/eye.png';
-        }
-    }
-
-    // Fonction de validation du mot de passe
-    function validatePassword(password) {
-        const constraints = {
-            minLength: 8,
-            requireSpecialChar: true,
-            requireNumber: true,
-            requireUppercase: true
-        };
-
-        const errors = [];
-
-        if (password.length < constraints.minLength) {
-            errors.push('Le mot de passe doit contenir au moins 8 caractères');
-        }
-
-        if (constraints.requireSpecialChar && !/[^a-zA-Z\d]/.test(password)) {
-            errors.push('Le mot de passe doit contenir au moins un caractère spécial');
-        }
-
-        if (constraints.requireNumber && !/\d/.test(password)) {
-            errors.push('Le mot de passe doit contenir au moins un chiffre');
-        }
-
-        if (constraints.requireUppercase && !/[A-Z]/.test(password)) {
-            errors.push('Le mot de passe doit contenir au moins une majuscule');
-        }
-
-        return errors;
-    }
-
-    // Validation en temps réel
-    passwordInput.addEventListener('input', function() {
-        const errors = validatePassword(this.value);
-        const existingErrors = registerForm.querySelectorAll('.password-error');
-        existingErrors.forEach(error => error.remove());
-
-        if (errors.length > 0) {
-            const errorContainer = document.createElement('div');
-            errorContainer.className = 'password-error';
-            errorContainer.style.color = 'red';
-            errorContainer.style.marginTop = '5px';
-            errorContainer.innerHTML = errors.join('<br>');
-            this.parentNode.appendChild(errorContainer);
-        }
-    });
-
-    // Gestion du formulaire d'inscription
-    registerForm.addEventListener("submit", function (event) {
-        event.preventDefault();
-        const password = passwordInput.value;
-        const passwordErrors = validatePassword(password);
-
-        if (passwordErrors.length > 0) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.style.color = 'red';
-            errorDiv.textContent = passwordErrors.join(', ');
-            this.insertBefore(errorDiv, this.firstChild);
-            return;
-        }
-
-        const submitButton = this.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.innerHTML = 'Inscription en cours...';
-
-        const formData = new FormData(this);
-
-        fetch('{{ path('app_register') }}', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Réponse du serveur:', data); // Ajoutez ceci
-            if (data.success) {
-                submitButton.innerHTML = 'Inscription réussie !';
-                submitButton.style.backgroundColor = '#4CAF50';
-                setTimeout(() => {
-                    window.location.href = data.redirect;
-                }, 1000);
-            } else {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error';
-                errorDiv.style.color = 'red';
-                errorDiv.textContent = data.errors;
-                this.insertBefore(errorDiv, this.firstChild);
-            }
-        })
-        .catch(error => {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error';
-            errorDiv.style.color = 'red';
-            errorDiv.textContent = 'Une erreur est survenue. Veuillez réessayer.';
-            this.insertBefore(errorDiv, this.firstChild);
-        })
-        .finally(() => {
-            submitButton.disabled = false;
-            if (!submitButton.innerHTML.includes('réussie')) {
-                submitButton.innerHTML = 'S\'inscrire';
-            }
-        });
-    });
-
-    // Gestion de la navigation entre les sections
-    function showRegisterSection() {
-        loginSection.style.display = "none";
-        registerSection.style.display = "flex";
-    }
-
-    function showLoginSection() {
-        registerSection.style.display = "none";
-        loginSection.style.display = "flex";
-    }
-
-    switchToRegister.addEventListener("click", function (event) {
-        event.preventDefault();
-        showRegisterSection();
-    });
-
-    switchToLogin.addEventListener("click", function (event) {
-        event.preventDefault();
-        showLoginSection();
-    });
-
-    // Gestion de la modale de réinitialisation du mot de passe
-    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-    const resetPasswordModal = document.getElementById("resetPasswordModal");
-    const closeModal = resetPasswordModal.querySelector(".close");
-    const resetPasswordForm = document.getElementById("resetPasswordForm");
-
-    forgotPasswordLink.addEventListener("click", function (event) {
-        event.preventDefault();
-        loginSection.style.display = "none";
-        resetPasswordModal.style.display = "block";
-    });
-
-    closeModal.addEventListener("click", function () {
-        resetPasswordModal.style.display = "none";
-    });
-
-    window.addEventListener("click", function (event) {
-        if (event.target === resetPasswordModal) {
-            resetPasswordModal.style.display = "none";
-        }
-    });
-
-    resetPasswordForm.addEventListener("submit", function (event) {
-        event.preventDefault();
-        const email = document.getElementById("reset_email").value;
-
-        fetch('{{ path('app_reset_password') }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: email })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Un lien de réinitialisation a été envoyé à votre adresse email.');
-                resetPasswordModal.style.display = "none";
-            } else {
-                alert('Erreur : ' + data.error);
-            }
-        })
-        .catch(error => {
-            alert('Une erreur est survenue. Veuillez réessayer.');
-        });
-    });
-  });
-</script>
+{% endblock %} {% block page_scripts %}
+<script src="{{ asset('js/auth.js') }}"></script>
 {% endblock %}

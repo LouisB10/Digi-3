@@ -2,7 +2,7 @@
     <nav class="flex">
         <div class="header-logo">
             <a href="{{ path('home_index') }}" class="flex">
-                <img src="/img/header/home-logo.png" alt="Logo Digi-3">
+                <img src="/images/header/home-logo.png" alt="Logo Digi-3">
             </a> 
         </div>
         <ul class="flex">
@@ -16,12 +16,9 @@
                 <a href="{{ path('app_parameter_generaux') }}">Paramètres</a>
             </li>
         </ul>
-        <input type="text" class="header-search" placeholder="Rechercher" class="search-input">
-        <a href="{{ path('app_parameter_generaux') }}" class="header-account flex">
-        </a>
         <form action="{{ path('app_logout') }}" method="post" class="logout-form flex" onsubmit="return showLogoutDialog(event);">
             <button type="submit" class="logout-btn flex">
-                <img src="/img/header/deconnect.png" alt="Icône déconnexion">
+                <img src="/images/header/deconnect.png" alt="Icône déconnexion">
             </button>
         </form>
     </nav>

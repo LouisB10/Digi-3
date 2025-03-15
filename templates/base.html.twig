@@ -12,33 +12,35 @@
     <meta name="google-site-verification" content="">
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('img/favicon/favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/favicon/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('img/favicon/android-chrome-512x512.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('img/favicon/android-chrome-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon/favicon-16x16.png') }}">
+    <link rel="icon" href="{{ asset('favicon/favicon.ico') }}" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('favicon/android-chrome-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="384x384" href="{{ asset('favicon/android-chrome-384x384.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon/favicon-16x16.png') }}">
     
-    <link rel="stylesheet" href="{{ asset('styles/style.css') }}" async>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <!-- Préchargement de la police -->
+    <link rel="preload" href="{{ asset('fonts/varela-round/varela-round-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+    
+    <!-- Police Varela Round locale -->
+    <link rel="stylesheet" href="{{ asset('fonts/varela-round/varela-round.css') }}">
 
     <!-- Open Graph -->
     <meta property="og:title" content="Digi-3 - Gestion de projets">
     <meta property="og:description" content="Digi-3 est une application de gestions de projets et de salariés">
-    <meta property="og:image" content="{{ asset('assets/img/readme.webp') }}">
+    <meta property="og:image" content="{{ asset('build/images/gestion.png') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.digi-3.fr">
     
     {% block stylesheets %}{% endblock %}
-            {{ encore_entry_link_tags('app') }}
+    {{ encore_entry_link_tags('app') }}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     {% block body %}{% endblock %}
     {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-    <script src="{{ asset('script/parameter.js') }}"></script>
+        {{ encore_entry_script_tags('app') }}
     {% endblock %}
+    
+    {% block page_scripts %}{% endblock %}
 </body>
 </html>
