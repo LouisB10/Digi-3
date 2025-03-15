@@ -2,9 +2,14 @@
 
 namespace App\Entity;
 
+use App\Enum\TaskComplexity;
+use App\Enum\TaskPriority;
+use App\Enum\TaskStatus;
 use App\Repository\TasksRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: TasksRepository::class)]
 class Tasks
@@ -18,61 +23,60 @@ class Tasks
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 35)]
+    #[ORM\Column(name: 'task_type', length: 35)]
     private ?string $taskType = null;
 
-    #[ORM\Column(length: 35)]
+    #[ORM\Column(length: 100)]
     private ?string $taskName = null;
 
-
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: Types::TEXT)]
     private ?string $taskDescription = null;
 
-    #[ORM\Column(length: 35, nullable: true)]
-    private ?string $taskStatus = null;
+    #[ORM\Column(name: 'task_status', type: 'string', length: 50)]
+    private ?string $taskStatus = TaskStatus::NEW->value;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $taskParent = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $taskUser = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $taskRealStartDate = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $taskRealEndDate = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $taskTargetStartDate = null;
-
-    #[ORM\Column(length: 35, nullable: true)]
-    private ?string $taskComplexity = null;
-
-    #[ORM\Column(length: 35, nullable: true)]
-    private ?string $taskPriority = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $taskTargetEndDate = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $taskDateFrom = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $taskDateTo = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $taskUserMaj = null;
-
-    #[ORM\ManyToOne(targetEntity: ManagerProject::class, inversedBy: "tasks")]
+    #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?ManagerProject $project = null;
+    private ?Project $taskProject = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $taskCategory = null; // Catégorie de la tâche
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $taskAssignedTo = null;
 
-    #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $taskAttachments = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $taskStartDate = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $taskEndDate = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $taskTargetDate = null;
+
+    #[ORM\Column(name: 'task_complexity', type: 'string', length: 50)]
+    private ?string $taskComplexity = TaskComplexity::MODERATE->value;
+
+    #[ORM\Column(name: 'task_priority', type: 'string', length: 50)]
+    private ?string $taskPriority = TaskPriority::MEDIUM->value;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $taskUpdatedBy = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $taskUpdatedAt;
+
+    #[ORM\OneToMany(mappedBy: 'task', targetEntity: TasksComments::class, orphanRemoval: true)]
+    private Collection $comments;
+
+    #[ORM\OneToMany(mappedBy: 'task', targetEntity: TasksAttachments::class, orphanRemoval: true)]
+    private Collection $attachments;
+
+    public function __construct()
+    {
+        $this->taskUpdatedAt = new \DateTime();
+        $this->comments = new ArrayCollection();
+        $this->attachments = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -87,40 +91,17 @@ class Tasks
     public function setTaskName(string $taskName): static
     {
         $this->taskName = $taskName;
-
         return $this;
     }
 
-    public function getTaskStatus(): ?string
+    public function getTaskStatus(): ?TaskStatus
     {
-        return $this->taskStatus;
+        return $this->taskStatus ? TaskStatus::from($this->taskStatus) : null;
     }
 
-    public function setTaskStatus(?string $taskStatus): self
+    public function setTaskStatus(TaskStatus $taskStatus): static
     {
-        $this->taskStatus = $taskStatus;
-        return $this;
-    }
-
-    public function getTaskCategory(): ?string
-    {
-        return $this->taskCategory;
-    }
-
-    public function setTaskCategory(?string $taskCategory): self
-    {
-        $this->taskCategory = $taskCategory;
-        return $this;
-    }
-
-    public function getTaskAttachments(): ?array
-    {
-        return $this->taskAttachments;
-    }
-
-    public function setTaskAttachments(?array $taskAttachments): self
-    {
-        $this->taskAttachments = $taskAttachments;
+        $this->taskStatus = $taskStatus->value;
         return $this;
     }
 
@@ -132,151 +113,105 @@ class Tasks
     public function setTaskDescription(string $taskDescription): static
     {
         $this->taskDescription = $taskDescription;
-
         return $this;
     }
 
-    public function getTaskParent(): ?int
+    public function getTaskProject(): ?Project
     {
-        return $this->taskParent;
+        return $this->taskProject;
     }
 
-    public function setTaskParent(?int $taskParent): static
+    public function setTaskProject(?Project $taskProject): static
     {
-        $this->taskParent = $taskParent;
-
+        $this->taskProject = $taskProject;
         return $this;
     }
 
-    public function getTaskUser(): ?int
+    public function getTaskAssignedTo(): ?User
     {
-        return $this->taskUser;
+        return $this->taskAssignedTo;
     }
 
-    public function setTaskUser(?int $taskUser): static
+    public function setTaskAssignedTo(?User $taskAssignedTo): static
     {
-        $this->taskUser = $taskUser;
-
+        $this->taskAssignedTo = $taskAssignedTo;
         return $this;
     }
 
-    public function getTaskRealStartDate(): ?\DateTimeInterface
+    public function getTaskStartDate(): ?\DateTimeInterface
     {
-        return $this->taskRealStartDate;
+        return $this->taskStartDate;
     }
 
-    public function setTaskRealStartDate(?\DateTimeInterface $taskRealStartDate): static
+    public function setTaskStartDate(?\DateTimeInterface $taskStartDate): static
     {
-        $this->taskRealStartDate = $taskRealStartDate;
-
+        $this->taskStartDate = $taskStartDate;
         return $this;
     }
 
-    public function getTaskRealEndDate(): ?\DateTimeInterface
+    public function getTaskEndDate(): ?\DateTimeInterface
     {
-        return $this->taskRealEndDate;
+        return $this->taskEndDate;
     }
 
-    public function setTaskRealEndDate(?\DateTimeInterface $taskRealEndDate): static
+    public function setTaskEndDate(?\DateTimeInterface $taskEndDate): static
     {
-        $this->taskRealEndDate = $taskRealEndDate;
-
+        $this->taskEndDate = $taskEndDate;
         return $this;
     }
 
-    public function getTaskTargetStartDate(): ?\DateTimeInterface
+    public function getTaskTargetDate(): ?\DateTimeInterface
     {
-        return $this->taskTargetStartDate;
+        return $this->taskTargetDate;
     }
 
-    public function setTaskTargetStartDate(?\DateTimeInterface $taskTargetStartDate): static
+    public function setTaskTargetDate(?\DateTimeInterface $taskTargetDate): static
     {
-        $this->taskTargetStartDate = $taskTargetStartDate;
-
+        $this->taskTargetDate = $taskTargetDate;
         return $this;
     }
 
-    public function getTaskComplexity(): ?string
+    public function getTaskComplexity(): ?TaskComplexity
     {
-        return $this->taskComplexity;
+        return $this->taskComplexity ? TaskComplexity::from($this->taskComplexity) : null;
     }
 
-    public function setTaskComplexity(?string $taskComplexity): static
+    public function setTaskComplexity(TaskComplexity $taskComplexity): static
     {
-        $this->taskComplexity = $taskComplexity;
-
+        $this->taskComplexity = $taskComplexity->value;
         return $this;
     }
 
-    public function getTaskPriority(): ?string
+    public function getTaskPriority(): ?TaskPriority
     {
-        return $this->taskPriority;
+        return $this->taskPriority ? TaskPriority::from($this->taskPriority) : null;
     }
 
-    public function setTaskPriority(?string $taskPriority): static
+    public function setTaskPriority(TaskPriority $taskPriority): static
     {
-        $this->taskPriority = $taskPriority;
-
+        $this->taskPriority = $taskPriority->value;
         return $this;
     }
 
-    public function getTaskTargetEndDate(): ?\DateTimeInterface
+    public function getTaskUpdatedBy(): ?User
     {
-        return $this->taskTargetEndDate;
+        return $this->taskUpdatedBy;
     }
 
-    public function setTaskTargetEndDate(?\DateTimeInterface $taskTargetEndDate): static
+    public function setTaskUpdatedBy(?User $taskUpdatedBy): static
     {
-        $this->taskTargetEndDate = $taskTargetEndDate;
-
+        $this->taskUpdatedBy = $taskUpdatedBy;
         return $this;
     }
 
-    public function getTaskDateFrom(): ?\DateTimeInterface
+    public function getTaskUpdatedAt(): ?\DateTimeInterface
     {
-        return $this->taskDateFrom;
+        return $this->taskUpdatedAt;
     }
 
-    public function setTaskDateFrom(?\DateTimeInterface $taskDateFrom): static
+    public function setTaskUpdatedAt(\DateTimeInterface $taskUpdatedAt): static
     {
-        $this->taskDateFrom = $taskDateFrom;
-
-        return $this;
-    }
-
-    public function getTaskDateTo(): ?\DateTimeInterface
-    {
-        return $this->taskDateTo;
-    }
-
-    public function setTaskDateTo(?\DateTimeInterface $taskDateTo): static
-    {
-        $this->taskDateTo = $taskDateTo;
-
-        return $this;
-    }
-
-    public function getTaskUserMaj(): ?int
-    {
-        return $this->taskUserMaj;
-    }
-
-    public function setTaskUserMaj(?int $taskUserMaj): static
-    {
-        $this->taskUserMaj = $taskUserMaj;
-
-        return $this;
-    }
-
-    public function getProject(): ?ManagerProject
-    {
-        return $this->project;
-    }
-
-    public function setProject(?ManagerProject $project): static
-    {
-        $this->project = $project;
-
+        $this->taskUpdatedAt = $taskUpdatedAt;
         return $this;
     }
 
@@ -285,14 +220,65 @@ class Tasks
         return $this->taskType;
     }
 
-    public function setTaskType(?string $taskType): self
+    public function setTaskType(string $taskType): static
     {
-        if (!in_array($taskType, $this->getAllowedTaskTypes(), true)) {
-            throw new \InvalidArgumentException(sprintf('Invalid task type: %s', $taskType));
-        }
-
         $this->taskType = $taskType;
+        return $this;
+    }
 
+    /**
+     * @return Collection<int, TasksComments>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(TasksComments $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setTask($this);
+        }
+        return $this;
+    }
+
+    public function removeComment(TasksComments $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getTask() === $this) {
+                $comment->setTask(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TasksAttachments>
+     */
+    public function getAttachments(): Collection
+    {
+        return $this->attachments;
+    }
+
+    public function addAttachment(TasksAttachments $attachment): static
+    {
+        if (!$this->attachments->contains($attachment)) {
+            $this->attachments->add($attachment);
+            $attachment->setTask($this);
+        }
+        return $this;
+    }
+
+    public function removeAttachment(TasksAttachments $attachment): static
+    {
+        if ($this->attachments->removeElement($attachment)) {
+            // set the owning side to null (unless already changed)
+            if ($attachment->getTask() === $this) {
+                $attachment->setTask(null);
+            }
+        }
         return $this;
     }
 

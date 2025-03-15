@@ -8,12 +8,35 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<TasksComments>
+ *
+ * @method TasksComments|null find($id, $lockMode = null, $lockVersion = null)
+ * @method TasksComments|null findOneBy(array $criteria, array $orderBy = null)
+ * @method TasksComments[]    findAll()
+ * @method TasksComments[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class TasksCommentsRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, TasksComments::class);
+    }
+
+    public function save(TasksComments $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(TasksComments $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 
     //    /**

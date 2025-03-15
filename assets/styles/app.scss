@@ -1,0 +1,21 @@
+// Variables
+$primary-color: skyblue;
+
+// Styles globaux
+body {
+    background-color: $primary-color;
+}
+
+// Réinitialisation des styles
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+// Styles de base
+html, body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+} 

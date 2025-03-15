@@ -2,15 +2,18 @@
 
 namespace App\Entity;
 
+use App\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(name: 'users')]
+#[UniqueEntity(fields: ['userEmail'], message: 'Il existe déjà un compte avec cet email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -18,38 +21,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 35)]
+    #[ORM\Column(name: 'user_first_name', length: 50)]
     #[Assert\NotBlank(message: 'Le prénom ne peut pas être vide.')]
     #[Assert\Length(
         min: 2,
-        max: 35,
+        max: 50,
         minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
     )]
     private ?string $userFirstName = null;
 
-    #[ORM\Column(length: 35)]
+    #[ORM\Column(name: 'user_last_name', length: 50)]
     #[Assert\NotBlank(message: 'Le nom ne peut pas être vide.')]
     #[Assert\Length(
         min: 2,
-        max: 35,
+        max: 50,
         minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
         maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
     )]
     private ?string $userLastName = null;
 
-    #[ORM\Column(length: 35, unique: true)]
+    #[ORM\Column(name: 'user_email', length: 180, unique: true)]
     #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.')]
-    #[Assert\Email(message: 'L\'email n\'est pas valide.')]
+    #[Assert\Email(message: 'L\'email {{ value }} n\'est pas un email valide.')]
     private ?string $userEmail = null;
 
-    #[ORM\Column(length: 255)]
-    private string $userAvatar = '/img/account/default-avatar.jpg';
+    #[ORM\Column(name: 'user_avatar', length: 255)]
+    private string $userAvatar = '/build/images/account/default-avatar.jpg';
 
-    #[ORM\Column(length: 35)]
-    private string $userRole = 'ROLE_USER';
+    #[ORM\Column(name: 'user_role', type: 'string', length: 50)]
+    private ?string $userRole = UserRole::USER->value;
 
-    #[ORM\Column(length: 255)]
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column(name: 'user_password', length: 255)]
     #[Assert\NotBlank(message: 'Le mot de passe ne peut pas être vide.')]
     #[Assert\Length(
         min: 8,
@@ -61,19 +67,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $userPassword = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(name: 'user_date_from', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $userDateFrom = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(name: 'user_date_to', type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $userDateTo = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(name: 'user_user_maj', nullable: true)]
     private ?int $userUserMaj = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(name: 'reset_token', type: 'string', length: 100, nullable: true)]
     private ?string $resetToken = null;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[ORM\Column(name: 'reset_token_expires_at', type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $resetTokenExpiresAt = null;
 
     public function getEmail(): ?string
@@ -129,14 +135,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUserRole(): ?string
+    public function getUserRole(): ?UserRole
     {
-        return $this->userRole;
+        return $this->userRole ? UserRole::from($this->userRole) : null;
     }
 
-    public function setUserRole(string $userRole): static
+    public function setUserRole(UserRole $userRole): static
     {
-        $this->userRole = $userRole;
+        $this->userRole = $userRole->value;
         return $this;
     }
 
@@ -255,13 +261,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             ->setUserEmail($email)
             ->setPassword($hashedPassword)
             ->setUserDateFrom(new \DateTime())
-            ->setUserAvatar('/img/account/default-avatar.jpg')
-            ->setUserRole('ROLE_USER')
+            ->setUserAvatar('/build/images/account/default-avatar.jpg')
+            ->setUserRole(UserRole::USER)
             ->setResetToken(null)
             ->setResetTokenExpiresAt(null)
             ->setUserDateTo(null)
             ->setUserUserMaj(null);
 
         return $user;
+    }
+
+    public function getFullName(): string
+    {
+        return $this->userFirstName . ' ' . $this->userLastName;
     }
 }

@@ -1,0 +1,43 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /uploads/
+Disallow: /parameter/users/
+Disallow: /parameter/customers/edit/
+Disallow: /parameter/projects/edit/
+Disallow: /parameter/tasks/edit/
+Disallow: /login
+Disallow: /register
+Disallow: /auth
+Disallow: /reset-password
+Disallow: /*.php$
+Disallow: /*?*
+
+# Autoriser les assets publics
+Allow: /build/
+Allow: /favicon/
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.gif$
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.svg$
+Allow: /*.woff$
+Allow: /*.woff2$
+
+# Sitemap
+Sitemap: https://digi-3.com/sitemap.xml
+
+# Temps d'attente entre les requêtes
+Crawl-delay: 10
+
+# Règles spécifiques pour les bots majeurs
+User-agent: Googlebot
+Crawl-delay: 5
+
+User-agent: Bingbot
+Crawl-delay: 5
+
+User-agent: DuckDuckBot
+Crawl-delay: 5 

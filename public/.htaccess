@@ -1,0 +1,122 @@
+# Activation du module de réécriture d'URL
+RewriteEngine On
+
+# Forcer HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Redirection vers le fichier index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Sécuriser le dossier uploads
+<Directory "/uploads">
+    Options -Indexes
+    AllowOverride None
+    Require all granted
+    
+    # N'autoriser que certains types de fichiers
+    <FilesMatch "\.(?i:jpe?g|png|gif|pdf|doc|docx|xls|xlsx)$">
+        Order allow,deny
+        Allow from all
+    </FilesMatch>
+</Directory>
+
+# Protection des dossiers sensibles
+<DirectoryMatch "^/.*/(?:config|src|vendor|templates)/">
+    Order deny,allow
+    Deny from all
+</DirectoryMatch>
+
+# Protéger les fichiers sensibles
+<FilesMatch "^(\.env|composer\.json|composer\.lock|symfony\.lock|package\.json|package-lock\.json|webpack\.config\.js)">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Mise en cache des assets statiques
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Fonts
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    
+    # CSS, JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # Autres
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+</IfModule>
+
+# Compression GZIP
+<IfModule mod_deflate.c>
+    # Compresser HTML, CSS, JavaScript, Text, XML et fonts
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE font/otf
+    AddOutputFilterByType DEFLATE font/ttf
+    
+    # Supprimer les navigateurs hérités
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+    
+    # Ne pas compresser les images (déjà compressées)
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|ico)$ no-gzip
+</IfModule>
+
+# Protection contre les injections XSS et autres vulnérabilités
+<IfModule mod_headers.c>
+    # Sécurité générale
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    
+    # Protection CSRF pour les formulaires
+    Header set X-CSRF-Token "Required"
+    
+    # Cacher les informations sur le serveur
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
+
+# Désactiver l'affichage du contenu des répertoires
+Options -Indexes
+
+# Protection contre les attaques par injection de fichiers
+<FilesMatch "\.(phtml|php|PhP|php5|suspected)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Autoriser PHP uniquement dans le répertoire public
+<FilesMatch "^index\.php$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>

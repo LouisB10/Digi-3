@@ -32,10 +32,12 @@
     <meta property="og:url" content="https://www.digi-3.fr">
     
     {% block stylesheets %}{% endblock %}
+            {{ encore_entry_link_tags('app') }}
 </head>
 <body>
     {% block body %}{% endblock %}
     {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
     <script src="{{ asset('script/parameter.js') }}"></script>
     {% endblock %}
 </body>

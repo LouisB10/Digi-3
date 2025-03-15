@@ -24,7 +24,7 @@
             <input id="file" type="file" name="profile_picture" />
             <img
               id="output"
-              src="{{ user.userAvatar }}"
+              src="{{ asset(user.userAvatar) }}"
               alt="Photo de profil de {{ user.userEmail }}"
             />
           </div>

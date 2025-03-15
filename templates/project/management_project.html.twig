@@ -14,10 +14,10 @@
             {% for project in projects %}
             <li class="{{ current_project and current_project.id == project.id ? 'active' : '' }}">
                 <a href="{{ path('app_management_project', { 'id': project.id }) }}">
-                    {{ project.name }}
+                    {{ project.projectName }}
                 </a>
                 <button type="button" class="delete-button" onclick="showDeletePopup({{ project.id }})">
-                    <img src="/img/delete.png" alt="Supprimer" class="delete-icon">
+                    <img src="/build/images/delete.png" alt="Supprimer" class="delete-icon">
                 </button>
             </li>
             {% endfor %}
@@ -26,24 +26,23 @@
       
 <main class="project-details">
     {% if current_project %}
-        <h2>{{ current_project.name }}</h2>
-        <p>{{ current_project.description }}</p>
+        <h2>{{ current_project.projectName }}</h2>
+        <p>{{ current_project.projectDescription }}</p>
 
         <div class="project-dates">
             <div>
-                <span>Début prévisionnel :</span> {{ current_project.getStartDateForecast() ? current_project.getStartDateForecast().format('d-m-Y') : 'Non défini' }}
-                <span>Début réel :</span> <span class="real">{{ current_project.getStartDate() ? current_project.getStartDate().format('d-m-Y') : 'Non défini' }}</span>
+                <span>Début prévisionnel :</span> {{ current_project.projectStartDate ? current_project.projectStartDate.format('d-m-Y') : 'Non défini' }}
             </div>
             <div>
-                <span>Fin prévisionnelle :</span> {{ current_project.getEndDateForecast() ? current_project.getEndDateForecast().format('d-m-Y') : 'Non défini' }}
-                <span>Fin réelle :</span> <span class="real">{{ current_project.getEndDate() ? current_project.getEndDate().format('d-m-Y') : 'Non défini' }}</span>
+                <span>Fin prévisionnelle :</span> {{ current_project.projectTargetDate ? current_project.projectTargetDate.format('d-m-Y') : 'Non défini' }}
+                <span>Fin réelle :</span> <span class="real">{{ current_project.projectEndDate ? current_project.projectEndDate.format('d-m-Y') : 'Non défini' }}</span>
             </div>
         </div>
 
         <div>
             <label>Chef de projet :</label>
             <span>
-                {{ app.user ? app.user.userFirstName() ~ ' ' ~ app.user.userLastName() : 'Non défini' }}
+                {{ current_project.projectManager ? current_project.projectManager.getFullName() : 'Non défini' }}
             </span>
             <br>           
             <button class="add-task-button" onclick="showTaskForm()">Créer une tâche</button>
@@ -54,10 +53,10 @@
                     {{ form_row(taskForm.taskDescription) }}
                     {{ form_row(taskForm.taskType) }}
                     {{ form_row(taskForm.taskStatus) }}
-                    {{ form_row(taskForm.taskCategory) }}
-                    {{ form_row(taskForm.taskAttachments) }}
-                    {{ form_row(taskForm.taskDateFrom) }}
-                    {{ form_row(taskForm.taskDateTo) }}
+                    {{ form_row(taskForm.taskPriority) }}
+                    {{ form_row(taskForm.taskComplexity) }}
+                    {{ form_row(taskForm.taskStartDate) }}
+                    {{ form_row(taskForm.taskTargetDate) }}
                     <button type="submit">Ajouter la tâche</button>
                 {{ form_end(taskForm) }}
             </div>
@@ -76,9 +75,10 @@
                             <p><strong>Description :</strong> {{ task.taskDescription }}</p>
                             <p><strong>Type :</strong> {{ task.taskType }}</p>
                             <p><strong>Statut :</strong> {{ task.taskStatus }}</p>
-                            <p><strong>Catégorie :</strong> {{ task.taskCategory }}</p>
-                            <p><strong>Date de début :</strong> <span>{{ task.taskDateFrom ? task.taskDateFrom.format('d-m-Y') : 'Non définie' }}</span></p>
-                            <p><strong>Date de fin :</strong> <span>{{ task.taskDateTo ? task.taskDateTo.format('d-m-Y') : 'Non définie' }}</span></p>
+                            <p><strong>Priorité :</strong> {{ task.taskPriority }}</p>
+                            <p><strong>Complexité :</strong> {{ task.taskComplexity }}</p>
+                            <p><strong>Date de début :</strong> <span>{{ task.taskStartDate ? task.taskStartDate.format('d-m-Y') : 'Non définie' }}</span></p>
+                            <p><strong>Date de fin :</strong> <span>{{ task.taskEndDate ? task.taskEndDate.format('d-m-Y') : 'Non définie' }}</span></p>
                         </div>
                     </div>
                 {% endfor %}

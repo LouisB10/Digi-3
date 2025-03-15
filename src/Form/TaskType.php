@@ -3,14 +3,16 @@
 namespace App\Form;
 
 use App\Entity\Tasks;
+use App\Enum\TaskPriority;
+use App\Enum\TaskComplexity;
+use App\Enum\TaskStatus;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\PercentType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class TaskType extends AbstractType
@@ -21,47 +23,62 @@ class TaskType extends AbstractType
             ->add('taskName', TextType::class, [
                 'label' => 'Nom de la tâche',
             ])
-            ->add('taskDescription', TextType::class, [
+            ->add('taskDescription', TextareaType::class, [
                 'label' => 'Description de la tâche',
+                'required' => false,
             ])
-            ->add('taskType', ChoiceType::class, [
-                'choices' => array_flip([
-                    'Bug' => Tasks::TASK_TYPE_BUG,
-                    'Feature' => Tasks::TASK_TYPE_FEATURE,
-                    'Hightest' => Tasks::TASK_TYPE_HIGHTEST,
-                ]),
-                'placeholder' => 'Sélectionnez un type',
-                'required' => true,
+            ->add('taskType', TextType::class, [
+                'label' => 'Type de tâche',
             ])
-            ->add('taskDateFrom', DateType::class, [
+            ->add('taskStartDate', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de début',
-            ])
-            ->add('taskDateTo', DateType::class, [
-                'widget' => 'single_text',
-                'label' => 'Date de fin',
-            ])
-            ->add('taskStatus', ChoiceType::class, [
-                'choices' => [
-                    'En cours' => 'InProgress',
-                    'Terminé' => 'Completed',
-                    'Annulé' => 'Cancelled',
-                ],
-                'placeholder' => 'Sélectionnez un statut',
-            ])
-            ->add('taskCategory', ChoiceType::class, [
-                'choices' => [
-                    'Développement' => 'Development',
-                    'Testing' => 'Testing',
-                    'Documentation' => 'Documentation',
-                ],
-                'placeholder' => 'Sélectionnez une catégorie',
-            ])
-            ->add('taskAttachments', FileType::class, [
-                'label' => 'Ajouter des fichiers',
-                'multiple' => true,
-                'mapped' => false,
                 'required' => false,
+            ])
+            ->add('taskTargetDate', DateType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date cible',
+                'required' => false,
+            ])
+            ->add('taskStatus', EnumType::class, [
+                'class' => TaskStatus::class,
+                'label' => 'Statut',
+                'choice_label' => function ($choice) {
+                    return match($choice) {
+                        TaskStatus::NEW => 'Nouvelle',
+                        TaskStatus::IN_PROGRESS => 'En cours',
+                        TaskStatus::REVIEW => 'En revue',
+                        TaskStatus::COMPLETED => 'Terminée',
+                        TaskStatus::BLOCKED => 'Bloquée',
+                        default => $choice->name,
+                    };
+                },
+            ])
+            ->add('taskPriority', EnumType::class, [
+                'class' => TaskPriority::class,
+                'label' => 'Priorité',
+                'choice_label' => function ($choice) {
+                    return match($choice) {
+                        TaskPriority::LOW => 'Basse',
+                        TaskPriority::MEDIUM => 'Moyenne',
+                        TaskPriority::HIGH => 'Haute',
+                        TaskPriority::URGENT => 'Urgente',
+                        default => $choice->name,
+                    };
+                },
+            ])
+            ->add('taskComplexity', EnumType::class, [
+                'class' => TaskComplexity::class,
+                'label' => 'Complexité',
+                'choice_label' => function ($choice) {
+                    return match($choice) {
+                        TaskComplexity::SIMPLE => 'Simple',
+                        TaskComplexity::MODERATE => 'Modérée',
+                        TaskComplexity::COMPLEX => 'Complexe',
+                        TaskComplexity::VERY_COMPLEX => 'Très complexe',
+                        default => $choice->name,
+                    };
+                },
             ]);
     }
 
