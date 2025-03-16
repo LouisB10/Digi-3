@@ -78,11 +78,13 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        // Limiter les tentatives de connexion
-        $limiter = $this->loginLimiter->create($request->getClientIp());
-        if (!$limiter->consume(1)->isAccepted()) {
-            $this->addFlash('error', 'Trop de tentatives de connexion. Veuillez réessayer dans 5 minutes.');
-            return $this->redirectToRoute('app_auth');
+        // Limiter les tentatives de connexion uniquement pour les requêtes POST
+        if ($request->isMethod('POST')) {
+            $limiter = $this->loginLimiter->create($request->getClientIp());
+            if (!$limiter->consume(1)->isAccepted()) {
+                $this->addFlash('error', 'Trop de tentatives de connexion. Veuillez réessayer dans 5 minutes.');
+                return $this->redirectToRoute('app_auth');
+            }
         }
 
         // Créer les formulaires

@@ -1,19 +1,38 @@
 {# templates/home/index.html.twig #} {% extends 'base.html.twig' %} {% block
 title %}Digi-3 - Page d'accueil{% endblock %} {% block body %}
-<header class="home-header" role="banner">
+<header role="banner">
   <nav class="flex" role="navigation" aria-label="Navigation principale">
     <div class="header-logo">
-      <a href="{{ path('home_index') }}" class="flex" aria-label="Accueil Digi-3">
-        <img src="{{ asset('images/header/home-logo.png') }}" alt="Logo Digi-3" />
+      <a
+        href="{{ path('home_index') }}"
+        class="flex"
+        aria-label="Accueil Digi-3"
+      >
+        <img
+          src="{{ asset('build/images/header/home-logo.png') }}"
+          alt="Logo Digi-3"
+        />
       </a>
     </div>
     {% if app.user %}
     <div class="header-buttons flex">
-      <a href="{{ path('app_dashboard') }}" role="button" class="cta-button" aria-label="Accéder au tableau de bord">Accéder au site</a>
+      <a
+        href="{{ path('app_dashboard') }}"
+        role="button"
+        class="cta-button"
+        aria-label="Accéder au tableau de bord"
+        >Accéder au site</a
+      >
     </div>
     {% else %}
     <div class="header-buttons flex">
-      <a href="{{ path('app_auth') }}" role="button" class="cta-button" aria-label="Se connecter ou s'inscrire">Se connecter ou s'inscrire</a>
+      <a
+        href="{{ path('app_auth') }}"
+        role="button"
+        class="cta-button"
+        aria-label="Se connecter ou s'inscrire"
+        >Se connecter ou s'inscrire</a
+      >
     </div>
     {% endif %}
   </nav>
@@ -31,9 +50,9 @@ title %}Digi-3 - Page d'accueil{% endblock %} {% block body %}
           réalisées par vos salariés
         </p>
       </div>
-      <img 
-        src="{{ asset('images/gestion.png') }}" 
-        alt="Illustration représentant la gestion de projets avec des personnes travaillant sur des tableaux de bord" 
+      <img
+        src="{{ asset('build/images/gestion.png') }}"
+        alt="Illustration représentant la gestion de projets avec des personnes travaillant sur des tableaux de bord"
         class="home-illustration"
       />
     </div>

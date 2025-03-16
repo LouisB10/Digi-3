@@ -1,34 +1,41 @@
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
 <div class="parameter_menu">
   <ul class="flex-col">
-    <li
-      class="{% if app.request.attributes.get('_route') == 'app_parameter_generaux' %}parameter_menu_active{% endif %}"
-    >
-      <a href="{{ path('app_parameter_generaux') }}">GENERAUX</a>
+    <li class="{% if app.request.attributes.get('_route') == 'app_parameter_general_index' %}parameter_menu_active{% endif %}">
+      <a href="{{ path('app_parameter_general_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_general_index' %}aria-current="page"{% endif %}>
+        <i class="fas fa-cog" aria-hidden="true"></i> <span>GÉNÉRAUX</span>
+      </a>
     </li>
-    <li
-      class="{% if app.request.attributes.get('_route') == 'app_parameter_users' %}parameter_menu_active{% endif %}"
-    >
-      <a href="{{ path('app_parameter_users') }}">GESTION USER</a>
+    
+    {% if is_granted('ROLE_PROJECT_MANAGER') %}
+    <li class="{% if app.request.attributes.get('_route') == 'app_parameter_users_index' %}parameter_menu_active{% endif %}">
+      <a href="{{ path('app_parameter_users_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_users_index' %}aria-current="page"{% endif %}>
+        <i class="fas fa-users" aria-hidden="true"></i> <span>GESTION USER</span>
+      </a>
     </li>
-    <li
-      class="{% if app.request.attributes.get('_route') == 'app_parameter_projects' %}parameter_menu_active{% endif %}"
-    >
-      <a href="{{ path('app_parameter_projects') }}">GESTION PROJET</a>
+    {% endif %}
+    
+    {% if is_granted('ROLE_PROJECT_MANAGER') %}
+    <li class="{% if app.request.attributes.get('_route') == 'app_parameter_customers_index' %}parameter_menu_active{% endif %}">
+      <a href="{{ path('app_parameter_customers_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_customers_index' %}aria-current="page"{% endif %}>
+        <i class="fas fa-building" aria-hidden="true"></i> <span>GESTION CLIENTS</span>
+      </a>
     </li>
-    <li
-      class="{% if app.request.attributes.get('_route') == 'app_parameter_customers' %}parameter_menu_active{% endif %}"
-    >
-      <a href="{{ path('app_parameter_customers') }}">GESTION CLIENTS</a>
+    {% endif %}
+    
+    {% if is_granted('ROLE_ADMIN') %}
+    <li class="{% if app.request.attributes.get('_route') == 'app_parameter_config_index' %}parameter_menu_active{% endif %}">
+      <a href="{{ path('app_parameter_config_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_config_index' %}aria-current="page"{% endif %}>
+        <i class="fas fa-tools" aria-hidden="true"></i> <span>CONFIGURATION</span>
+      </a>
     </li>
-    <li
-      class="{% if app.request.attributes.get('_route') == 'app_parameter_app_configuration' %}parameter_menu_active{% endif %}"
-    >
-      <a href="{{ path('app_parameter_app_configuration') }}">CONFIGURATION</a>
-    </li>
-    <li
-      class="{% if app.request.attributes.get('_route') == 'app_parameter_about' %}parameter_menu_active{% endif %}"
-    >
-      <a href="{{ path('app_parameter_about') }}">A PROPOS</a>
+    {% endif %}
+    
+    <li class="{% if app.request.attributes.get('_route') == 'app_parameter_about_index' %}parameter_menu_active{% endif %}">
+      <a href="{{ path('app_parameter_about_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_about_index' %}aria-current="page"{% endif %}>
+        <i class="fas fa-info-circle" aria-hidden="true"></i> <span>À PROPOS</span>
+      </a>
     </li>
   </ul>
 </div>
+{% endif %}

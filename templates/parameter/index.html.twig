@@ -17,7 +17,7 @@
           <div class="profile-pic flex">
             <label class="flex" for="file">
               <img
-                src="/img/account/account-change.png"
+                src="{{ asset('build/images/account/account-change.png') }}"
                 alt="Icone changement de photo de profil"
               />
             </label>
@@ -75,7 +75,7 @@
       const formData = new FormData();
       formData.append("profile_picture", file);
 
-      fetch("/parameter/generaux", {
+      fetch("{{ path('app_parameter_general_update_profile') }}", {
         method: "POST",
         body: formData, // Envoie les données du formulaire
       })

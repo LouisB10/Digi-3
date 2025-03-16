@@ -1,0 +1,575 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Digi-3 - Configuration{% endblock %}
+
+{% block body %}
+{% include 'includes/header.html.twig' %}
+
+<main id="main-content" role="main">
+    <section class="parameter_landing flex">
+        {% include 'parameter/_menu.html.twig' %}
+        
+        <div class="parameter_content">
+            <div class="config-page">
+                <h1>Configuration du système</h1>
+                
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                
+                <div class="config-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="general">Général</button>
+                        <button class="tab-btn" data-tab="email">Email</button>
+                        <button class="tab-btn" data-tab="security">Sécurité</button>
+                        <button class="tab-btn" data-tab="backup">Sauvegarde</button>
+                    </div>
+                    
+                    <div class="tabs-content">
+                        <!-- Onglet Général -->
+                        <div class="tab-content active" id="general-tab">
+                            <form id="generalForm" class="config-form">
+                                <div class="form-group">
+                                    <label for="siteName">Nom du site</label>
+                                    <input type="text" id="siteName" name="siteName" value="{{ config.siteName|default('Digi-3') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="siteDescription">Description du site</label>
+                                    <textarea id="siteDescription" name="siteDescription" rows="3">{{ config.siteDescription|default('') }}</textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="maintenanceMode">Mode maintenance</label>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="maintenanceMode" name="maintenanceMode" {% if config.maintenanceMode|default(false) %}checked{% endif %}>
+                                        <label for="maintenanceMode"></label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="defaultLanguage">Langue par défaut</label>
+                                    <select id="defaultLanguage" name="defaultLanguage">
+                                        <option value="fr" {% if config.defaultLanguage|default('fr') == 'fr' %}selected{% endif %}>Français</option>
+                                        <option value="en" {% if config.defaultLanguage|default('fr') == 'en' %}selected{% endif %}>English</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="dateFormat">Format de date</label>
+                                    <select id="dateFormat" name="dateFormat">
+                                        <option value="d/m/Y" {% if config.dateFormat|default('d/m/Y') == 'd/m/Y' %}selected{% endif %}>DD/MM/YYYY</option>
+                                        <option value="Y-m-d" {% if config.dateFormat|default('d/m/Y') == 'Y-m-d' %}selected{% endif %}>YYYY-MM-DD</option>
+                                        <option value="m/d/Y" {% if config.dateFormat|default('d/m/Y') == 'm/d/Y' %}selected{% endif %}>MM/DD/YYYY</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="timeFormat">Format d'heure</label>
+                                    <select id="timeFormat" name="timeFormat">
+                                        <option value="H:i" {% if config.timeFormat|default('H:i') == 'H:i' %}selected{% endif %}>24h (14:30)</option>
+                                        <option value="h:i A" {% if config.timeFormat|default('H:i') == 'h:i A' %}selected{% endif %}>12h (02:30 PM)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-submit">Enregistrer</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Onglet Email -->
+                        <div class="tab-content" id="email-tab">
+                            <form id="emailForm" class="config-form">
+                                <div class="form-group">
+                                    <label for="mailDriver">Service d'envoi d'emails</label>
+                                    <select id="mailDriver" name="mailDriver">
+                                        <option value="smtp" {% if config.mailDriver|default('smtp') == 'smtp' %}selected{% endif %}>SMTP</option>
+                                        <option value="sendmail" {% if config.mailDriver|default('smtp') == 'sendmail' %}selected{% endif %}>Sendmail</option>
+                                        <option value="mailgun" {% if config.mailDriver|default('smtp') == 'mailgun' %}selected{% endif %}>Mailgun</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailHost">Hôte SMTP</label>
+                                    <input type="text" id="mailHost" name="mailHost" value="{{ config.mailHost|default('') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailPort">Port SMTP</label>
+                                    <input type="number" id="mailPort" name="mailPort" value="{{ config.mailPort|default('587') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailEncryption">Chiffrement</label>
+                                    <select id="mailEncryption" name="mailEncryption">
+                                        <option value="tls" {% if config.mailEncryption|default('tls') == 'tls' %}selected{% endif %}>TLS</option>
+                                        <option value="ssl" {% if config.mailEncryption|default('tls') == 'ssl' %}selected{% endif %}>SSL</option>
+                                        <option value="none" {% if config.mailEncryption|default('tls') == 'none' %}selected{% endif %}>Aucun</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailUsername">Nom d'utilisateur</label>
+                                    <input type="text" id="mailUsername" name="mailUsername" value="{{ config.mailUsername|default('') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailPassword">Mot de passe</label>
+                                    <div class="password-container">
+                                        <input type="password" id="mailPassword" name="mailPassword" value="{{ config.mailPassword|default('') }}">
+                                        <span class="toggle-password" data-target="mailPassword" aria-label="Afficher/Masquer le mot de passe" role="button" tabindex="0">
+                                            <img src="{{ asset('build/images/icons/eye.png') }}" alt="" aria-hidden="true">
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailFromAddress">Adresse d'expédition</label>
+                                    <input type="email" id="mailFromAddress" name="mailFromAddress" value="{{ config.mailFromAddress|default('') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mailFromName">Nom d'expédition</label>
+                                    <input type="text" id="mailFromName" name="mailFromName" value="{{ config.mailFromName|default('Digi-3') }}">
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" onclick="testEmailConfig()">Tester la configuration</button>
+                                    <button type="submit" class="btn-submit">Enregistrer</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Onglet Sécurité -->
+                        <div class="tab-content" id="security-tab">
+                            <form id="securityForm" class="config-form">
+                                <div class="form-group">
+                                    <label for="sessionLifetime">Durée de session (minutes)</label>
+                                    <input type="number" id="sessionLifetime" name="sessionLifetime" value="{{ config.sessionLifetime|default('120') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="passwordPolicy">Politique de mot de passe</label>
+                                    <select id="passwordPolicy" name="passwordPolicy">
+                                        <option value="low" {% if config.passwordPolicy|default('medium') == 'low' %}selected{% endif %}>Basique (min. 6 caractères)</option>
+                                        <option value="medium" {% if config.passwordPolicy|default('medium') == 'medium' %}selected{% endif %}>Moyenne (min. 8 caractères, 1 majuscule, 1 chiffre)</option>
+                                        <option value="high" {% if config.passwordPolicy|default('medium') == 'high' %}selected{% endif %}>Élevée (min. 10 caractères, majuscules, chiffres, caractères spéciaux)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="maxLoginAttempts">Tentatives de connexion max</label>
+                                    <input type="number" id="maxLoginAttempts" name="maxLoginAttempts" value="{{ config.maxLoginAttempts|default('5') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="lockoutTime">Durée de verrouillage (minutes)</label>
+                                    <input type="number" id="lockoutTime" name="lockoutTime" value="{{ config.lockoutTime|default('15') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="twoFactorAuth">Authentification à deux facteurs</label>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="twoFactorAuth" name="twoFactorAuth" {% if config.twoFactorAuth|default(false) %}checked{% endif %}>
+                                        <label for="twoFactorAuth"></label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="forcePasswordChange">Forcer changement de mot de passe (jours)</label>
+                                    <input type="number" id="forcePasswordChange" name="forcePasswordChange" value="{{ config.forcePasswordChange|default('90') }}">
+                                    <small class="form-text">0 = désactivé</small>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-submit">Enregistrer</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Onglet Sauvegarde -->
+                        <div class="tab-content" id="backup-tab">
+                            <form id="backupForm" class="config-form">
+                                <div class="form-group">
+                                    <label for="autoBackup">Sauvegarde automatique</label>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="autoBackup" name="autoBackup" {% if config.autoBackup|default(false) %}checked{% endif %}>
+                                        <label for="autoBackup"></label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="backupFrequency">Fréquence de sauvegarde</label>
+                                    <select id="backupFrequency" name="backupFrequency">
+                                        <option value="daily" {% if config.backupFrequency|default('weekly') == 'daily' %}selected{% endif %}>Quotidienne</option>
+                                        <option value="weekly" {% if config.backupFrequency|default('weekly') == 'weekly' %}selected{% endif %}>Hebdomadaire</option>
+                                        <option value="monthly" {% if config.backupFrequency|default('weekly') == 'monthly' %}selected{% endif %}>Mensuelle</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="backupRetention">Conservation des sauvegardes (jours)</label>
+                                    <input type="number" id="backupRetention" name="backupRetention" value="{{ config.backupRetention|default('30') }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="backupStorage">Stockage des sauvegardes</label>
+                                    <select id="backupStorage" name="backupStorage">
+                                        <option value="local" {% if config.backupStorage|default('local') == 'local' %}selected{% endif %}>Local</option>
+                                        <option value="s3" {% if config.backupStorage|default('local') == 's3' %}selected{% endif %}>Amazon S3</option>
+                                        <option value="dropbox" {% if config.backupStorage|default('local') == 'dropbox' %}selected{% endif %}>Dropbox</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" onclick="createManualBackup()">Créer une sauvegarde maintenant</button>
+                                    <button type="submit" class="btn-submit">Enregistrer</button>
+                                </div>
+                            </form>
+                            
+                            <div class="backup-list">
+                                <h3>Sauvegardes disponibles</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Date</th>
+                                            <th>Taille</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if backups is defined and backups|length > 0 %}
+                                            {% for backup in backups %}
+                                                <tr>
+                                                    <td>{{ backup.name }}</td>
+                                                    <td>{{ backup.date|date('d/m/Y H:i') }}</td>
+                                                    <td>{{ backup.size }}</td>
+                                                    <td class="actions">
+                                                        <button class="download-btn" onclick="downloadBackup('{{ backup.id }}')" aria-label="Télécharger la sauvegarde">
+                                                            <img src="{{ asset('build/images/settings/download.png') }}" alt="Télécharger">
+                                                        </button>
+                                                        <button class="restore-btn" onclick="confirmRestoreBackup('{{ backup.id }}', '{{ backup.name }}')" aria-label="Restaurer la sauvegarde">
+                                                            <img src="{{ asset('build/images/settings/restore.png') }}" alt="Restaurer">
+                                                        </button>
+                                                        <button class="delete-btn" onclick="confirmDeleteBackup('{{ backup.id }}', '{{ backup.name }}')" aria-label="Supprimer la sauvegarde">
+                                                            <img src="{{ asset('build/images/settings/delete.png') }}" alt="Supprimer">
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-center">Aucune sauvegarde disponible</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{# Modales #}
+<div class="modal" id="restoreConfirmModal" tabindex="-1" role="dialog" aria-labelledby="restoreConfirmModalTitle" aria-modal="true" hidden>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="restoreConfirmModalTitle">Confirmer la restauration</h2>
+            <button type="button" class="close" onclick="closeRestoreModal()" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Êtes-vous sûr de vouloir restaurer la sauvegarde <span id="backupToRestoreName"></span> ?</p>
+            <p class="warning">Attention : Cette action remplacera toutes les données actuelles par celles de la sauvegarde. Cette opération est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeRestoreModal()">Annuler</button>
+            <button type="button" class="btn-danger" onclick="restoreBackup()">Restaurer</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="deleteBackupConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteBackupConfirmModalTitle" aria-modal="true" hidden>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="deleteBackupConfirmModalTitle">Confirmer la suppression</h2>
+            <button type="button" class="close" onclick="closeDeleteBackupModal()" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer la sauvegarde <span id="backupToDeleteName"></span> ?</p>
+            <p>Cette action est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeDeleteBackupModal()">Annuler</button>
+            <button type="button" class="btn-danger" onclick="deleteBackup()">Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="testEmailModal" tabindex="-1" role="dialog" aria-labelledby="testEmailModalTitle" aria-modal="true" hidden>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="testEmailModalTitle">Tester la configuration email</h2>
+            <button type="button" class="close" onclick="closeTestEmailModal()" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="testEmailForm">
+                <div class="form-group">
+                    <label for="testEmailAddress">Adresse email de test</label>
+                    <input type="email" id="testEmailAddress" name="testEmailAddress" required>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeTestEmailModal()">Annuler</button>
+            <button type="button" class="btn-submit" onclick="sendTestEmail()">Envoyer</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Gestion des onglets
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Retirer la classe active de tous les boutons et contenus
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Ajouter la classe active au bouton cliqué
+                this.classList.add('active');
+                
+                // Afficher le contenu correspondant
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // Soumission des formulaires
+        document.querySelectorAll('.config-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formId = this.id;
+                const formData = new FormData(this);
+                let endpoint;
+                
+                switch(formId) {
+                    case 'generalForm':
+                        endpoint = '/parameter/config/general';
+                        break;
+                    case 'emailForm':
+                        endpoint = '/parameter/config/email';
+                        break;
+                    case 'securityForm':
+                        endpoint = '/parameter/config/security';
+                        break;
+                    case 'backupForm':
+                        endpoint = '/parameter/config/backup';
+                        break;
+                }
+                
+                fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Afficher un message de succès
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success';
+                        alertDiv.setAttribute('role', 'alert');
+                        alertDiv.textContent = data.message || 'Configuration enregistrée avec succès';
+                        
+                        // Insérer le message avant le premier formulaire
+                        const configTabs = document.querySelector('.config-tabs');
+                        configTabs.parentNode.insertBefore(alertDiv, configTabs);
+                        
+                        // Faire disparaître le message après 3 secondes
+                        setTimeout(() => {
+                            alertDiv.remove();
+                        }, 3000);
+                    } else {
+                        alert(data.message || 'Une erreur est survenue');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue lors de l\'enregistrement');
+                });
+            });
+        });
+        
+        // Gestion de l'affichage/masquage du mot de passe
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    this.querySelector('img').src = '{{ asset('build/images/icons/eye-off.png') }}';
+                } else {
+                    passwordInput.type = 'password';
+                    this.querySelector('img').src = '{{ asset('build/images/icons/eye.png') }}';
+                }
+            });
+        });
+        
+        // Fonctions pour les sauvegardes
+        let backupIdToRestore = null;
+        let backupIdToDelete = null;
+        
+        function createManualBackup() {
+            fetch('/parameter/config/backup/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token('backup-create') }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Sauvegarde créée avec succès');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue lors de la création de la sauvegarde');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la création de la sauvegarde');
+            });
+        }
+        
+        function downloadBackup(backupId) {
+            window.location.href = `/parameter/config/backup/${backupId}/download`;
+        }
+        
+        function confirmRestoreBackup(backupId, backupName) {
+            backupIdToRestore = backupId;
+            document.getElementById('backupToRestoreName').textContent = backupName;
+            document.getElementById('restoreConfirmModal').hidden = false;
+        }
+        
+        function closeRestoreModal() {
+            document.getElementById('restoreConfirmModal').hidden = true;
+        }
+        
+        function restoreBackup() {
+            if (!backupIdToRestore) return;
+            
+            fetch(`/parameter/config/backup/${backupIdToRestore}/restore`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token('backup-restore') }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                closeRestoreModal();
+                if (data.success) {
+                    alert(data.message || 'Sauvegarde restaurée avec succès');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue lors de la restauration');
+                }
+            })
+            .catch(error => {
+                closeRestoreModal();
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la restauration');
+            });
+        }
+        
+        function confirmDeleteBackup(backupId, backupName) {
+            backupIdToDelete = backupId;
+            document.getElementById('backupToDeleteName').textContent = backupName;
+            document.getElementById('deleteBackupConfirmModal').hidden = false;
+        }
+        
+        function closeDeleteBackupModal() {
+            document.getElementById('deleteBackupConfirmModal').hidden = true;
+        }
+        
+        function deleteBackup() {
+            if (!backupIdToDelete) return;
+            
+            fetch(`/parameter/config/backup/${backupIdToDelete}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token('backup-delete') }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                closeDeleteBackupModal();
+                if (data.success) {
+                    alert(data.message || 'Sauvegarde supprimée avec succès');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue lors de la suppression');
+                }
+            })
+            .catch(error => {
+                closeDeleteBackupModal();
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la suppression');
+            });
+        }
+        
+        // Fonctions pour le test d'email
+        function testEmailConfig() {
+            document.getElementById('testEmailModal').hidden = false;
+        }
+        
+        function closeTestEmailModal() {
+            document.getElementById('testEmailModal').hidden = true;
+        }
+        
+        function sendTestEmail() {
+            const emailAddress = document.getElementById('testEmailAddress').value;
+            if (!emailAddress) {
+                alert('Veuillez saisir une adresse email');
+                return;
+            }
+            
+            // Récupérer les valeurs du formulaire email
+            const formData = new FormData(document.getElementById('emailForm'));
+            formData.append('testEmailAddress', emailAddress);
+            
+            fetch('/parameter/config/email/test', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                closeTestEmailModal();
+                if (data.success) {
+                    alert(data.message || 'Email de test envoyé avec succès');
+                } else {
+                    alert(data.message || 'Une erreur est survenue lors de l\'envoi de l\'email');
+                }
+            })
+            .catch(error => {
+                closeTestEmailModal();
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de l\'envoi de l\'email');
+            });
+        }
+    </script>
+{% endblock %} 

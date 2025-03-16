@@ -3,12 +3,15 @@
 namespace App\Form\Auth;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
@@ -72,13 +75,23 @@ class RegisterFormType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('password', PasswordType::class, [
-                'label' => 'Mot de passe',
-                'required' => true,
-                'attr' => [
-                    'placeholder' => 'Votre mot de passe',
-                    'autocomplete' => 'new-password',
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'first_options' => [
+                    'label' => 'Mot de passe',
+                    'attr' => [
+                        'placeholder' => 'Votre mot de passe',
+                        'autocomplete' => 'new-password',
+                    ],
                 ],
+                'second_options' => [
+                    'label' => 'Confirmer le mot de passe',
+                    'attr' => [
+                        'placeholder' => 'Répétez votre mot de passe',
+                        'autocomplete' => 'new-password',
+                    ],
+                ],
+                'invalid_message' => 'Les mots de passe ne correspondent pas.',
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Veuillez entrer un mot de passe',
@@ -102,6 +115,15 @@ class RegisterFormType extends AbstractType
                     new Regex([
                         'pattern' => '/[^A-Za-z0-9]/',
                         'message' => 'Votre mot de passe doit contenir au moins un caractère spécial',
+                    ]),
+                ],
+            ])
+            ->add('agreeTerms', CheckboxType::class, [
+                'label' => 'J\'accepte les conditions d\'utilisation',
+                'required' => true,
+                'constraints' => [
+                    new IsTrue([
+                        'message' => 'Vous devez accepter les conditions d\'utilisation',
                     ]),
                 ],
             ]);

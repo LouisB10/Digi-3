@@ -1,0 +1,78 @@
+{% extends 'parameter/_base_crud.html.twig' %}
+
+{% block title %}Digi-3 - Gestion des clients{% endblock %}
+
+{% block table_headers %}
+    <th>Nom</th>
+    <th>Adresse</th>
+    <th>Code postal</th>
+    <th>Ville</th>
+    <th>Pays</th>
+    <th>TVA</th>
+    <th>SIREN</th>
+{% endblock %}
+
+{% block table_body %}
+    {% for customer in entities %}
+        <tr>
+            <td>{{ customer.customerName }}</td>
+            <td>{{ customer.customerAddressStreet }}</td>
+            <td>{{ customer.customerAddressZipcode }}</td>
+            <td>{{ customer.customerAddressCity }}</td>
+            <td>{{ customer.customerAddressCountry }}</td>
+            <td>{{ customer.customerVAT }}</td>
+            <td>{{ customer.customerSIREN }}</td>
+            {% include 'parameter/components/_table_actions.html.twig' with {
+                'id': customer.id,
+                'edit_data': {
+                    'customer-id': customer.id,
+                    'customer-name': customer.customerName,
+                    'customer-street': customer.customerAddressStreet,
+                    'customer-zipcode': customer.customerAddressZipcode,
+                    'customer-city': customer.customerAddressCity,
+                    'customer-country': customer.customerAddressCountry,
+                    'customer-vat': customer.customerVAT,
+                    'customer-siren': customer.customerSIREN
+                }
+            } %}
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="8" class="no-data">Aucun client trouvé</td>
+        </tr>
+    {% endfor %}
+{% endblock %}
+
+{% block modals %}
+    {% if canEdit %}
+        <div class="modal fade" id="customerModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="customerModalTitle">Ajouter un client</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% include 'parameter/customers/_form.html.twig' %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-primary" id="saveCustomer">Enregistrer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'parameter/components/_modal_delete.html.twig' with {
+            'entity_name': 'customer',
+            'entity_label': 'client'
+        } %}
+    {% endif %}
+{% endblock %}
+
+{% block crud_scripts %}
+    <script type="module">
+        import { CustomerManager } from "{{ asset('build/js/parameter/customer-management.js') }}";
+        new CustomerManager();
+    </script>
+{% endblock %} 

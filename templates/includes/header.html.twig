@@ -1,79 +1,52 @@
-<header>
-    <nav class="flex">
+<header role="banner">
+    <nav class="flex" role="navigation" aria-label="Navigation principale">
         <div class="header-logo">
-            <a href="{{ path('home_index') }}" class="flex">
-                <img src="/images/header/home-logo.png" alt="Logo Digi-3">
+            <a href="{{ path('home_index') }}" class="flex" aria-label="Accueil Digi-3">
+                <img src="{{ asset('build/images/header/home-logo.png') }}" alt="Logo Digi-3">
             </a> 
         </div>
-        <ul class="flex">
-            <li class="{% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">
-                <a href="{{ path('app_dashboard') }}">Dashboard</a>
+        <ul class="flex" role="menubar">
+            <li class="{% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}" role="none">
+                <a href="{{ path('app_dashboard') }}" role="menuitem" {% if app.request.attributes.get('_route') == 'app_dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
             </li>
-            <li class="{% if app.request.attributes.get('_route') == 'app_management_project' %}active{% endif %}">
-                <a href="{{ path('app_management_project') }}">Gestion de projets</a>
-            </li>
-            <li class="{% if app.request.attributes.get('_route') == 'app_parameter_generaux' %}active{% endif %}">
-                <a href="{{ path('app_parameter_generaux') }}">Paramètres</a>
+            
+            {% if is_granted('ROLE_PROJECT_MANAGER') %}
+                <li class="{% if app.request.attributes.get('_route') == 'app_management_project' %}active{% endif %}" role="none">
+                    <a href="{{ path('app_management_project') }}" role="menuitem" {% if app.request.attributes.get('_route') == 'app_management_project' %}aria-current="page"{% endif %}>Gestion de projets</a>
+                </li>
+            {% endif %}
+            
+            <li class="{% if app.request.attributes.get('_route') == 'app_parameter_generaux' %}active{% endif %}" role="none">
+                <a href="{{ path('app_parameter_generaux') }}" role="menuitem" {% if app.request.attributes.get('_route') == 'app_parameter_generaux' %}aria-current="page"{% endif %}>Paramètres</a>
             </li>
         </ul>
         <form action="{{ path('app_logout') }}" method="post" class="logout-form flex" onsubmit="return showLogoutDialog(event);">
-            <button type="submit" class="logout-btn flex">
-                <img src="/images/header/deconnect.png" alt="Icône déconnexion">
+            <button type="submit" class="logout-btn flex" aria-label="Se déconnecter">
+                <img src="{{ asset('build/images/header/deconnect.png') }}" alt="Icône déconnexion" aria-hidden="true">
             </button>
         </form>
     </nav>
 
     <!-- Modale de déconnexion améliorée -->
-    <div id="logout-dialog" class="logout-dialog">
+    <div id="logout-dialog" class="logout-dialog" role="dialog" aria-labelledby="logout-title" aria-modal="true" hidden>
         <div class="logout-dialog-content">
             <div class="logout-dialog-header">
-                <h3>Déconnexion</h3>
-                <span class="close" onclick="closeLogoutDialog()">&times;</span>
+                <h3 id="logout-title">Déconnexion</h3>
+                <button type="button" class="close" aria-label="Fermer la boîte de dialogue">&times;</button>
             </div>
             <div class="logout-dialog-body">
                 <p>Êtes-vous sûr de vouloir vous déconnecter ?</p>
                 <p class="logout-subtitle">Vous devrez vous reconnecter pour accéder à votre compte.</p>
             </div>
             <div class="logout-dialog-buttons">
-                <button type="button" onclick="closeLogoutDialog()">Annuler</button>
-                <button type="button" onclick="confirmLogout()">Se déconnecter</button>
+                <button type="button">Annuler</button>
+                <button type="button">Se déconnecter</button>
             </div>
         </div>
     </div>
 </header>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const logoutDialog = document.getElementById('logout-dialog');
-        const logoutForm = document.querySelector('.logout-form');
-
-        // Fermeture avec la touche Echap
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && logoutDialog.style.display === 'block') {
-                closeLogoutDialog();
-            }
-        });
-
-        window.showLogoutDialog = function(event) {
-            event.preventDefault();
-            logoutDialog.style.display = 'block';
-            document.body.style.overflow = 'hidden'; // Empêche le scroll
-            return false;
-        };
-
-        window.closeLogoutDialog = function() {
-            logoutDialog.style.display = 'none';
-            document.body.style.overflow = ''; // Réactive le scroll
-        };
-
-        window.confirmLogout = function() {
-            const btnConfirm = document.querySelector('.logout-dialog-buttons button:last-child');
-            btnConfirm.disabled = true;
-            btnConfirm.textContent = 'Déconnexion...';
-            
-            setTimeout(() => {
-                logoutForm.submit();
-            }, 500);
-        };
-    });
-</script>
+{# Utiliser un bloc spécifique pour le header plutôt que javascripts #}
+{% block header_scripts %}
+    <script src="{{ asset('build/js/header.js') }}"></script>
+{% endblock %}

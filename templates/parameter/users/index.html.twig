@@ -1,0 +1,411 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Digi-3 - Gestion des utilisateurs{% endblock %}
+
+{% block body %}
+{% include 'includes/header.html.twig' %}
+
+<main id="main-content" role="main">
+    <section class="parameter_landing flex">
+        {% include 'parameter/_menu.html.twig' %}
+        
+        <div class="parameter_content">
+            <div class="crud-page users-page">
+                {# En-tête avec titre et bouton d'ajout #}
+                <div class="crud-header flex">
+                    <h1>Gestion des utilisateurs</h1>
+                    {% if is_granted('ROLE_RESPONSABLE') %}
+                        <button 
+                            class="btn-add" 
+                            type="button" 
+                            aria-label="Ajouter un nouvel utilisateur"
+                            onclick="openAddUserModal()"
+                        >
+                            Ajouter un utilisateur
+                        </button>
+                    {% endif %}
+                </div>
+
+                {# Barre de recherche #}
+                <div class="searchBar flex">
+                    <form id="searchForm" class="flex">
+                        <select name="searchType" id="searchType">
+                            <option value="name">Nom</option>
+                            <option value="email">Email</option>
+                            <option value="role">Rôle</option>
+                        </select>
+                        <input type="text" name="searchQuery" id="searchQuery" placeholder="Rechercher...">
+                        <button type="submit" class="search-btn">
+                            <img src="{{ asset('build/images/search.png') }}" alt="Rechercher">
+                        </button>
+                    </form>
+                </div>
+
+                {# Messages flash #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {# Table principale #}
+                <div class="crud-table" role="region" aria-label="Liste des utilisateurs">
+                    <table aria-describedby="table-description">
+                        <caption id="table-description">Liste des utilisateurs avec leurs informations</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Avatar</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Prénom</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Rôle</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="parameter_table">
+                            {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <img src="{{ asset(user.userAvatar) }}" alt="Avatar de {{ user.userFirstName }}" class="user-avatar">
+                                    </td>
+                                    <td>{{ user.userLastName }}</td>
+                                    <td>{{ user.userFirstName }}</td>
+                                    <td>{{ user.userEmail }}</td>
+                                    <td>
+                                        {% if 'ROLE_ADMIN' in user.roles %}
+                                            Administrateur
+                                        {% elseif 'ROLE_RESPONSABLE' in user.roles %}
+                                            Responsable
+                                        {% elseif 'ROLE_PROJECT_MANAGER' in user.roles %}
+                                            Chef de projet
+                                        {% elseif 'ROLE_LEAD_DEVELOPER' in user.roles %}
+                                            Lead développeur
+                                        {% elseif 'ROLE_DEVELOPER' in user.roles %}
+                                            Développeur
+                                        {% else %}
+                                            Utilisateur
+                                        {% endif %}
+                                    </td>
+                                    <td class="actions">
+                                        {% if is_granted('ROLE_RESPONSABLE') %}
+                                            <button class="edit-btn" onclick="openEditUserModal({{ user.id }})" aria-label="Modifier {{ user.userFirstName }} {{ user.userLastName }}">
+                                                <img src="{{ asset('build/images/settings/edit.png') }}" alt="Modifier">
+                                            </button>
+                                        {% endif %}
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <button class="delete-btn" onclick="confirmDeleteUser({{ user.id }}, '{{ user.userFirstName }} {{ user.userLastName }}')" aria-label="Supprimer {{ user.userFirstName }} {{ user.userLastName }}">
+                                                <img src="{{ asset('build/images/settings/delete.png') }}" alt="Supprimer">
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{# Modales #}
+{% if is_granted('ROLE_RESPONSABLE') %}
+    {# Modal d'ajout/édition d'utilisateur #}
+    <div class="modal" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalTitle" aria-modal="true" hidden>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="userModalTitle">Ajouter un utilisateur</h2>
+                <button type="button" class="close" onclick="closeUserModal()" aria-label="Fermer">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId" name="userId">
+                    <div class="form-group">
+                        <label for="firstName">Prénom</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Nom</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <div class="password-container">
+                            <input type="password" id="password" name="password" autocomplete="new-password">
+                            <span class="toggle-password" data-target="password" aria-label="Afficher/Masquer le mot de passe" role="button" tabindex="0">
+                                <img src="{{ asset('build/images/icons/eye.png') }}" alt="" aria-hidden="true">
+                            </span>
+                        </div>
+                        <small class="form-text">Laissez vide pour conserver le mot de passe actuel (en cas de modification)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Rôle</label>
+                        <select id="role" name="role" required>
+                            <option value="ROLE_USER">Utilisateur</option>
+                            <option value="ROLE_DEVELOPER">Développeur</option>
+                            <option value="ROLE_LEAD_DEVELOPER">Lead développeur</option>
+                            <option value="ROLE_PROJECT_MANAGER">Chef de projet</option>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <option value="ROLE_RESPONSABLE">Responsable</option>
+                                <option value="ROLE_ADMIN">Administrateur</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeUserModal()">Annuler</button>
+                <button type="button" class="btn-submit" onclick="saveUser()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    {# Modal de confirmation de suppression #}
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="modal" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalTitle" aria-modal="true" hidden>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="deleteConfirmModalTitle">Confirmer la suppression</h2>
+                    <button type="button" class="close" onclick="closeDeleteModal()" aria-label="Fermer">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <span id="userToDeleteName"></span> ?</p>
+                    <p>Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Annuler</button>
+                    <button type="button" class="btn-danger" onclick="deleteUser()">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        let userIdToDelete = null;
+        
+        // Fonctions pour la gestion des modales
+        function openAddUserModal() {
+            document.getElementById('userModalTitle').textContent = 'Ajouter un utilisateur';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userModal').hidden = false;
+        }
+        
+        function openEditUserModal(userId) {
+            document.getElementById('userModalTitle').textContent = 'Modifier un utilisateur';
+            document.getElementById('userId').value = userId;
+            
+            // Charger les données de l'utilisateur via AJAX
+            fetch(`/parameter/users/${userId}/edit`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('firstName').value = data.user.firstName;
+                    document.getElementById('lastName').value = data.user.lastName;
+                    document.getElementById('email').value = data.user.email;
+                    document.getElementById('password').value = '';
+                    document.getElementById('role').value = data.user.role;
+                    document.getElementById('userModal').hidden = false;
+                } else {
+                    alert('Erreur lors du chargement des données de l\'utilisateur');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors du chargement des données');
+            });
+        }
+        
+        function closeUserModal() {
+            document.getElementById('userModal').hidden = true;
+        }
+        
+        function saveUser() {
+            const form = document.getElementById('userForm');
+            const formData = new FormData(form);
+            const userId = document.getElementById('userId').value;
+            
+            const url = userId ? `/parameter/users/${userId}/update` : '/parameter/users/create';
+            
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeUserModal();
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de l\'enregistrement');
+            });
+        }
+        
+        function confirmDeleteUser(userId, userName) {
+            userIdToDelete = userId;
+            document.getElementById('userToDeleteName').textContent = userName;
+            document.getElementById('deleteConfirmModal').hidden = false;
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').hidden = true;
+        }
+        
+        function deleteUser() {
+            if (!userIdToDelete) return;
+            
+            fetch(`/parameter/users/${userIdToDelete}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token('delete-user') }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeDeleteModal();
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue lors de la suppression');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la suppression');
+            });
+        }
+        
+        // Gestion de la recherche
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchType = document.getElementById('searchType').value;
+            const searchQuery = document.getElementById('searchQuery').value;
+            
+            fetch(`/parameter/users/search?type=${searchType}&query=${encodeURIComponent(searchQuery)}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const tableBody = document.getElementById('parameter_table');
+                    tableBody.innerHTML = '';
+                    
+                    data.users.forEach(user => {
+                        const row = document.createElement('tr');
+                        
+                        // Avatar
+                        const avatarCell = document.createElement('td');
+                        const avatarImg = document.createElement('img');
+                        avatarImg.src = user.avatar;
+                        avatarImg.alt = `Avatar de ${user.firstName}`;
+                        avatarImg.className = 'user-avatar';
+                        avatarCell.appendChild(avatarImg);
+                        
+                        // Nom, prénom, email
+                        const lastNameCell = document.createElement('td');
+                        lastNameCell.textContent = user.lastName;
+                        
+                        const firstNameCell = document.createElement('td');
+                        firstNameCell.textContent = user.firstName;
+                        
+                        const emailCell = document.createElement('td');
+                        emailCell.textContent = user.email;
+                        
+                        // Rôle
+                        const roleCell = document.createElement('td');
+                        roleCell.textContent = user.roleLabel;
+                        
+                        // Actions
+                        const actionsCell = document.createElement('td');
+                        actionsCell.className = 'actions';
+                        
+                        {% if is_granted('ROLE_RESPONSABLE') %}
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'edit-btn';
+                        editBtn.setAttribute('aria-label', `Modifier ${user.firstName} ${user.lastName}`);
+                        editBtn.onclick = function() { openEditUserModal(user.id); };
+                        
+                        const editImg = document.createElement('img');
+                        editImg.src = '{{ asset('build/images/settings/edit.png') }}';
+                        editImg.alt = 'Modifier';
+                        
+                        editBtn.appendChild(editImg);
+                        actionsCell.appendChild(editBtn);
+                        {% endif %}
+                        
+                        {% if is_granted('ROLE_ADMIN') %}
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-btn';
+                        deleteBtn.setAttribute('aria-label', `Supprimer ${user.firstName} ${user.lastName}`);
+                        deleteBtn.onclick = function() { confirmDeleteUser(user.id, `${user.firstName} ${user.lastName}`); };
+                        
+                        const deleteImg = document.createElement('img');
+                        deleteImg.src = '{{ asset('build/images/settings/delete.png') }}';
+                        deleteImg.alt = 'Supprimer';
+                        
+                        deleteBtn.appendChild(deleteImg);
+                        actionsCell.appendChild(deleteBtn);
+                        {% endif %}
+                        
+                        // Ajouter les cellules à la ligne
+                        row.appendChild(avatarCell);
+                        row.appendChild(lastNameCell);
+                        row.appendChild(firstNameCell);
+                        row.appendChild(emailCell);
+                        row.appendChild(roleCell);
+                        row.appendChild(actionsCell);
+                        
+                        // Ajouter la ligne au tableau
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    alert('Erreur lors de la recherche');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la recherche');
+            });
+        });
+        
+        // Gestion de l'affichage/masquage du mot de passe
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    this.querySelector('img').src = '{{ asset('build/images/icons/eye-off.png') }}';
+                } else {
+                    passwordInput.type = 'password';
+                    this.querySelector('img').src = '{{ asset('build/images/icons/eye.png') }}';
+                }
+            });
+        });
+    </script>
+{% endblock %} 
