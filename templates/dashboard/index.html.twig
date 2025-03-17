@@ -2,8 +2,17 @@
 
 {% block title %}Digi-3 - Dashboard{% endblock %} 
 
-{% block body %} 
+{% block stylesheets %}
+    {{ parent() }}
+    {# Les styles sont maintenant dans style.scss #}
+{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('dashboard') }}
+{% endblock %}
+
+{% block body %} 
     {% include 'includes/header.html.twig' %}
 
     <div class="dashboard-container">
@@ -37,11 +46,23 @@
             <div class="user-stats card">
                 <div class="tasks">
                     <p>Tâches</p>
-                    <h3>85% <span class="up-arrow">↑</span></h3>
+                    <h3>
+                        {% if assignedTasks|length > 0 %}
+                            {{ assignedTasks|length }} <span class="up-arrow">↑</span>
+                        {% else %}
+                            0 <span class="down-arrow">↓</span>
+                        {% endif %}
+                    </h3>
                 </div>
                 <div class="projects">
                     <p>Projets</p>
-                    <h3>13 <span class="down-arrow">↓</span></h3>
+                    <h3>
+                        {% if projectStats.total > 0 %}
+                            {{ projectStats.total }} <span class="up-arrow">↑</span>
+                        {% else %}
+                            0 <span class="down-arrow">↓</span>
+                        {% endif %}
+                    </h3>
                 </div>
             </div>
 
@@ -50,15 +71,15 @@
                     <a href="{{ path('app_dashboard') }}" class="btn-link">Page d'accueil <i class="fas fa-home"></i></a>
                     
                     {% if permissions.canViewProjects %}
-                    <a href="#" class="btn-link">Projets</a>
+                    <a href="{{ path('app_projects_list') }}" class="btn-link">Projets</a>
                     {% endif %}
                     
                     {% if permissions.canViewCustomers %}
-                    <a href="#" class="btn-link">Clients</a>
+                    <a href="{{ path('app_parameter_customers') }}" class="btn-link">Clients</a>
                     {% endif %}
                     
                     {% if permissions.canViewUsers %}
-                    <a href="#" class="btn-link">Utilisateurs</a>
+                    <a href="{{ path('app_parameter_users') }}" class="btn-link">Utilisateurs</a>
                     {% endif %}
                     
                     {% if permissions.canViewParameters %}
@@ -73,206 +94,73 @@
             <div class="calendar card">
                 <h4>Calendrier</h4>
                 <iframe src="https://calendar.google.com/calendar/embed?src=your_calendar_id&ctz=Europe%2FParis" 
-                        style="border: 0" 
-                        width="100%" 
-                        height="400px" 
+                        class="calendar-iframe"
                         frameborder="0" 
                         scrolling="no"></iframe>
             </div>
 
             {% if permissions.canViewProjects %}
-            <div class="project-info card">
-                <h4>12 Projets Actifs</h4>
+            <div id="project-stats" class="project-info card">
+                <h4>{{ projectStats.total }} Projets</h4>
                 <div class="project-progress">
                     <div class="progress-bar">
-                        <span class="progress" style="width: 66%;"></span>
+                        {% set progressPercentage = projectStats.total > 0 ? (projectStats.inProgress / projectStats.total * 100)|round : 0 %}
+                        <span class="progress" data-percentage="{{ progressPercentage }}"></span>
                     </div>
-                    <p>8 en cours</p>
+                    <p>{{ projectStats.inProgress }} en cours</p>
                 </div>
-                <a href="#" class="more-info">En savoir plus</a>
-            </div>
-            {% endif %}
-
-            <div class="efficiency-box card">
-                <h4>Efficacité des tâches</h4>
-            </div>
-
-            <div class="productivity-box card">
-                <h4>Productivité individuelle</h4>
-                <p>Liste de tâches + un total</p>
-                <p>Comparaison entre effort prévisionnel et réel</p>
+                <p>{{ projectStats.completed }} terminés, {{ projectStats.onHold }} en attente</p>
+                <a href="{{ path('app_projects_list') }}" class="more-info">En savoir plus</a>
             </div>
             
-            {% if is_granted('ROLE_ADMIN') %}
-            <div class="admin-panel card">
-                <h4>Panneau d'administration</h4>
-                <p>Accès rapide aux fonctionnalités d'administration</p>
-                <div class="admin-links">
-                    <a href="#" class="admin-link">Gestion des utilisateurs</a>
-                    <a href="#" class="admin-link">Configuration de l'application</a>
-                    <a href="#" class="admin-link">Logs système</a>
+            <div class="recent-projects card">
+                <h4>Projets récents</h4>
+                <div class="projects-list">
+                    {% if projectStats.recent|length > 0 %}
+                        {% for project in projectStats.recent %}
+                            <div class="project-item clickable-card" data-target="{{ path('app_management_project', {'id': project.id}) }}">
+                                <div class="project-details">
+                                    <h5>{{ project.projectName }}</h5>
+                                    <p>Client: {{ project.projectCustomer ? project.projectCustomer.name : 'Non défini' }}</p>
+                                    <p>Statut: {{ project.projectStatus.value }}</p>
+                                </div>
+                                <div class="project-dates">
+                                    <p>Début: {{ project.projectStartDate|date('d/m/Y') }}</p>
+                                    {% if project.projectTargetDate %}
+                                        <p>Fin prévue: {{ project.projectTargetDate|date('d/m/Y') }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-data">Aucun projet récent</p>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
+
+            <div id="assigned-tasks" class="tasks-list card">
+                <h4>Tâches assignées</h4>
+                {% if assignedTasks|length > 0 %}
+                    <div class="tasks-container">
+                        {% for task in assignedTasks %}
+                            <div class="task-item status-{{ task.taskStatus|lower }}" data-task-id="{{ task.id }}">
+                                <div class="task-header">
+                                    <h5>{{ task.taskName }}</h5>
+                                    <span class="task-status">{{ task.taskStatus.value }}</span>
+                                </div>
+                                <div class="task-details">
+                                    <p>Projet: {{ task.taskProject ? task.taskProject.projectName : 'Non défini' }}</p>
+                                    <p>Date limite: {{ task.taskTargetDate ? task.taskTargetDate|date('d/m/Y') : 'Non définie' }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">Aucune tâche assignée</p>
+                {% endif %}
+            </div>
+
         </div>
     </div>
-
-{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    body {
-        color: #000; /* Texte global en noir */
-    }
-
-    .dashboard-container {
-        display: flex;
-        gap: 20px;
-        padding: 20px;
-    }
-
-    .parameter_menu {
-        flex: 1;
-        max-width: 300px;
-    }
-
-    .main-content {
-        flex: 2;
-    }
-
-    .card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-
-    .user-info img {
-        border-radius: 50%;
-        height: 80px;
-        width: 80px;
-        object-fit: cover;
-    }
-
-    .user-details h3, .user-details p {
-        margin: 5px 0;
-        color: #000; /* Texte des détails utilisateur en noir */
-    }
-
-    .user-stats {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .tasks, .projects {
-        text-align: center;
-    }
-
-    .tasks p, .tasks h3,
-    .projects p, .projects h3 {
-        color: #000; /* Texte et flèches des statistiques en noir */
-    }
-
-    .up-arrow {
-        color: green;
-    }
-
-    .down-arrow {
-        color: red;
-    }
-
-    .sidebar-nav ul {
-        list-style: none;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .sidebar-nav a {
-        display: inline-block;
-        text-decoration: none;
-        color: #fff;
-        font-weight: bold;
-        background-color: rgb(0, 0, 0);
-        border: 1px solid rgb(0, 0, 0);
-        padding: 10px 15px;
-        border-radius: 5px;
-        text-align: center;
-        transition: background-color 0.3s, color 0.3s;
-        width: 100%;
-    }
-
-    .sidebar-nav a:hover {
-        background-color: #1cdaff;
-        color: #fff;
-    }
-
-    .calendar iframe {
-        width: 100%;
-        border-radius: 8px;
-    }
-
-    .progress-bar {
-        background: #eaeaea;
-        border-radius: 8px;
-        position: relative;
-        height: 10px;
-        overflow: hidden;
-        margin: 10px 0;
-    }
-
-    .progress {
-        display: block;
-        height: 100%;
-        background: #4caf50;
-    }
-
-    .project-info h4, 
-    .project-info p,
-    .efficiency-box h4, 
-    .productivity-box h4, 
-    .productivity-box p {
-        color: #000; /* Texte des sections en noir */
-    }
-
-    .more-info {
-        display: inline-block;
-        margin-top: 10px;
-        color: #000; /* Lien en noir */
-        text-decoration: none;
-    }
-
-    .more-info:hover {
-        text-decoration: underline;
-    }
-    
-    .admin-panel {
-        background-color: #f8f9fa;
-        border-left: 4px solid #007bff;
-    }
-    
-    .admin-links {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 15px;
-    }
-    
-    .admin-link {
-        display: block;
-        padding: 8px 12px;
-        background-color: #007bff;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: background-color 0.2s;
-    }
-    
-    .admin-link:hover {
-        background-color: #0056b3;
-    }
-</style>
 {% endblock %}

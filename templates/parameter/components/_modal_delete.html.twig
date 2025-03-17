@@ -1,0 +1,19 @@
+{# templates/parameter/components/_modal_delete.html.twig #}
+{# Paramètres attendus : entity_name, entity_label #}
+
+<div class="modal" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalTitle" aria-modal="false" hidden>
+    <div class="modal-content" role="document">
+        <div class="modal-header">
+            <h2 class="modal-title" id="deleteConfirmModalTitle">Confirmer la suppression</h2>
+            <button type="button" class="close" aria-label="Fermer">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer {{ entity_label }} <span id="{{ entity_name }}ToDeleteName"></span> ?</p>
+            <p>Cette action est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel">Annuler</button>
+            <button type="button" class="btn-danger">Supprimer</button>
+        </div>
+    </div>
+</div> 

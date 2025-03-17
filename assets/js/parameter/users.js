@@ -4,260 +4,264 @@
  */
 
 let userIdToDelete = null;
+let lastFocusedElement = null;
 
-/**
- * Ouvre la modal d'ajout d'utilisateur
- */
-function openAddUserModal() {
-    document.getElementById('userModalTitle').textContent = 'Ajouter un utilisateur';
-    document.getElementById('userForm').reset();
-    document.getElementById('userId').value = '';
-    document.getElementById('userModal').hidden = false;
-}
-
-/**
- * Ouvre la modal d'édition d'utilisateur
- * @param {number} userId - ID de l'utilisateur à modifier
- */
-function openEditUserModal(userId) {
-    document.getElementById('userModalTitle').textContent = 'Modifier un utilisateur';
-    document.getElementById('userId').value = userId;
-    
-    // Charger les données de l'utilisateur via AJAX
-    fetch(`/parameter/users/${userId}/edit`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('firstName').value = data.user.firstName;
-            document.getElementById('lastName').value = data.user.lastName;
-            document.getElementById('email').value = data.user.email;
-            document.getElementById('password').value = '';
-            document.getElementById('role').value = data.user.role;
-            document.getElementById('userModal').hidden = false;
-        } else {
-            alert('Erreur lors du chargement des données de l\'utilisateur');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors du chargement des données');
-    });
-}
-
-/**
- * Ferme la modal d'utilisateur
- */
-function closeUserModal() {
-    document.getElementById('userModal').hidden = true;
-}
-
-/**
- * Enregistre les données de l'utilisateur
- */
-function saveUser() {
-    const form = document.getElementById('userForm');
-    const formData = new FormData(form);
-    const userId = document.getElementById('userId').value;
-    
-    const url = userId ? `/parameter/users/${userId}/update` : '/parameter/users/create';
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeUserModal();
-            window.location.reload();
-        } else {
-            alert(data.message || 'Une erreur est survenue');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de l\'enregistrement');
-    });
-}
-
-/**
- * Affiche la confirmation de suppression d'un utilisateur
- * @param {number} userId - ID de l'utilisateur à supprimer
- * @param {string} userName - Nom de l'utilisateur à supprimer
- */
-function confirmDeleteUser(userId, userName) {
-    userIdToDelete = userId;
-    document.getElementById('userToDeleteName').textContent = userName;
-    document.getElementById('deleteConfirmModal').hidden = false;
-}
-
-/**
- * Ferme la modal de confirmation de suppression
- */
-function closeDeleteModal() {
-    document.getElementById('deleteConfirmModal').hidden = true;
-}
-
-/**
- * Supprime l'utilisateur
- */
-function deleteUser() {
-    if (!userIdToDelete) return;
-    
-    fetch(`/parameter/users/${userIdToDelete}/delete`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeDeleteModal();
-            window.location.reload();
-        } else {
-            alert(data.message || 'Une erreur est survenue lors de la suppression');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de la suppression');
-    });
-}
-
-// Initialisation des événements
+// Initialisation
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion de la recherche
-    const searchForm = document.getElementById('searchForm');
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchType = document.getElementById('searchType').value;
-            const searchQuery = document.getElementById('searchQuery').value;
-            
-            fetch(`/parameter/users/search?type=${searchType}&query=${encodeURIComponent(searchQuery)}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateUserTable(data.users);
-                } else {
-                    alert('Erreur lors de la recherche');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la recherche');
+    // Variables globales
+    const userModal = document.getElementById('userModal');
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const userForm = document.getElementById('userForm');
+    const csrfToken = document.getElementById('csrf_token').value;
+    let currentUserId = null;
+
+    // Initialisation
+    initModals();
+    initAddButton();
+    initEditButtons();
+    initDeleteButtons();
+    initKeyboardNavigation();
+
+    // Initialisation des modales
+    function initModals() {
+        // S'assurer que les modales sont cachées au chargement
+        hideModal(userModal);
+        hideModal(deleteConfirmModal);
+
+        // Gestionnaires pour fermer les modales
+        document.querySelectorAll('.close, .btn-cancel').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                hideModal(modal);
+            });
+        });
+
+        // Gestionnaire pour soumettre le formulaire utilisateur
+        userModal.querySelector('.btn-submit').addEventListener('click', function() {
+            submitUserForm();
+        });
+
+        // Gestionnaire pour confirmer la suppression
+        deleteConfirmModal.querySelector('.btn-danger').addEventListener('click', function() {
+            deleteUser(currentUserId);
+        });
+    }
+
+    // Initialisation du bouton d'ajout
+    function initAddButton() {
+        const addUserBtn = document.querySelector('.btn-add');
+        if (addUserBtn) {
+            addUserBtn.addEventListener('click', function() {
+                openAddUserModal();
+            });
+        }
+    }
+
+    // Initialisation des boutons d'édition
+    function initEditButtons() {
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                openEditUserModal(userId);
             });
         });
     }
-    
-    // Gestion de l'affichage/masquage du mot de passe
-    document.querySelectorAll('.toggle-password').forEach(toggle => {
-        toggle.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const passwordInput = document.getElementById(targetId);
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                this.querySelector('img').src = '/build/images/icons/eye-off.png';
-            } else {
-                passwordInput.type = 'password';
-                this.querySelector('img').src = '/build/images/icons/eye.png';
+
+    // Initialisation des boutons de suppression
+    function initDeleteButtons() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                openDeleteConfirmModal(userId, userName);
+            });
+        });
+    }
+
+    // Initialisation de la navigation au clavier
+    function initKeyboardNavigation() {
+        // Fermer les modales avec Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                if (userModal && !userModal.hidden) {
+                    hideModal(userModal);
+                } else if (deleteConfirmModal && !deleteConfirmModal.hidden) {
+                    hideModal(deleteConfirmModal);
+                }
             }
         });
-    });
-});
 
-/**
- * Met à jour le tableau des utilisateurs avec les résultats de recherche
- * @param {Array} users - Liste des utilisateurs à afficher
- */
-function updateUserTable(users) {
-    const tableBody = document.getElementById('parameter_table');
-    if (!tableBody) return;
-    
-    tableBody.innerHTML = '';
-    
-    users.forEach(user => {
-        const row = document.createElement('tr');
-        
-        // Avatar
-        const avatarCell = document.createElement('td');
-        const avatarImg = document.createElement('img');
-        avatarImg.src = user.avatar;
-        avatarImg.alt = `Avatar de ${user.firstName}`;
-        avatarImg.className = 'user-avatar';
-        avatarCell.appendChild(avatarImg);
-        
-        // Nom, prénom, email
-        const lastNameCell = document.createElement('td');
-        lastNameCell.textContent = user.lastName;
-        
-        const firstNameCell = document.createElement('td');
-        firstNameCell.textContent = user.firstName;
-        
-        const emailCell = document.createElement('td');
-        emailCell.textContent = user.email;
-        
-        // Rôle
-        const roleCell = document.createElement('td');
-        roleCell.textContent = user.roleLabel;
-        
-        // Actions
-        const actionsCell = document.createElement('td');
-        actionsCell.className = 'actions';
-        
-        // Vérifier si l'utilisateur a le rôle ROLE_RESPONSABLE
-        if (document.body.dataset.userRole === 'ROLE_RESPONSABLE' || 
-            document.body.dataset.userRole === 'ROLE_ADMIN') {
-            const editBtn = document.createElement('button');
-            editBtn.className = 'edit-btn';
-            editBtn.setAttribute('aria-label', `Modifier ${user.firstName} ${user.lastName}`);
-            editBtn.onclick = function() { openEditUserModal(user.id); };
+        // Soumettre le formulaire avec Enter dans le formulaire
+        userForm.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') {
+                event.preventDefault();
+                submitUserForm();
+            }
+        });
+    }
+
+    // Afficher une modale
+    function showModal(modal) {
+        if (modal) {
+            lastFocusedElement = document.activeElement;
+            modal.hidden = false;
+            modal.setAttribute('aria-modal', 'true');
             
-            const editImg = document.createElement('img');
-            editImg.src = '/build/images/settings/edit.png';
-            editImg.alt = 'Modifier';
-            
-            editBtn.appendChild(editImg);
-            actionsCell.appendChild(editBtn);
+            // Focus sur le premier élément focusable
+            const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
         }
-        
-        // Vérifier si l'utilisateur a le rôle ROLE_ADMIN
-        if (document.body.dataset.userRole === 'ROLE_ADMIN') {
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.setAttribute('aria-label', `Supprimer ${user.firstName} ${user.lastName}`);
-            deleteBtn.onclick = function() { confirmDeleteUser(user.id, `${user.firstName} ${user.lastName}`); };
+    }
+
+    // Cacher une modale
+    function hideModal(modal) {
+        if (modal) {
+            modal.hidden = true;
+            modal.setAttribute('aria-modal', 'false');
             
-            const deleteImg = document.createElement('img');
-            deleteImg.src = '/build/images/settings/delete.png';
-            deleteImg.alt = 'Supprimer';
-            
-            deleteBtn.appendChild(deleteImg);
-            actionsCell.appendChild(deleteBtn);
+            // Restaurer le focus
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
         }
+    }
+
+    // Afficher une alerte
+    function showAlert(type, message) {
+        const alertContainer = document.createElement('div');
+        alertContainer.className = `alert alert-${type}`;
+        alertContainer.setAttribute('role', 'alert');
+        alertContainer.textContent = message;
         
-        // Ajouter les cellules à la ligne
-        row.appendChild(avatarCell);
-        row.appendChild(lastNameCell);
-        row.appendChild(firstNameCell);
-        row.appendChild(emailCell);
-        row.appendChild(roleCell);
-        row.appendChild(actionsCell);
+        document.querySelector('main').prepend(alertContainer);
         
-        // Ajouter la ligne au tableau
-        tableBody.appendChild(row);
-    });
-} 
+        // Supprimer l'alerte après 5 secondes
+        setTimeout(() => {
+            alertContainer.remove();
+        }, 5000);
+    }
+
+    // Ouvrir la modale d'ajout d'utilisateur
+    function openAddUserModal() {
+        lastFocusedElement = document.activeElement;
+        userForm.reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('userModalTitle').textContent = 'Ajouter un utilisateur';
+        document.querySelector('.password-hint').style.display = 'none';
+        showModal(userModal);
+    }
+
+    // Ouvrir la modale d'édition d'utilisateur
+    function openEditUserModal(userId) {
+        lastFocusedElement = document.activeElement;
+        document.getElementById('userModalTitle').textContent = 'Modifier un utilisateur';
+        document.querySelector('.password-hint').style.display = 'block';
+        
+        // Récupérer les données de l'utilisateur
+        fetch(`/parameter/users/${userId}/edit`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remplir le formulaire avec les données
+                document.getElementById('userId').value = data.user.id;
+                document.getElementById('firstName').value = data.user.firstName;
+                document.getElementById('lastName').value = data.user.lastName;
+                document.getElementById('email').value = data.user.email;
+                document.getElementById('role').value = data.user.role;
+                document.getElementById('password').value = '';
+                
+                showModal(userModal);
+            } else {
+                throw new Error(data.message || 'Erreur lors de la récupération des données');
+            }
+        })
+        .catch(error => {
+            showAlert('error', 'Erreur: ' + error.message);
+        });
+    }
+
+    // Ouvrir la modale de confirmation de suppression
+    function openDeleteConfirmModal(userId, userName) {
+        lastFocusedElement = document.activeElement;
+        currentUserId = userId;
+        document.getElementById('userToDeleteName').textContent = userName;
+        showModal(deleteConfirmModal);
+    }
+
+    // Soumettre le formulaire utilisateur
+    function submitUserForm() {
+        const formData = new FormData(userForm);
+        const userId = document.getElementById('userId').value;
+        const url = userId ? `/parameter/users/${userId}/update` : '/parameter/users/create';
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-Token': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideModal(userModal);
+            showAlert('success', data.message);
+            // Recharger la page pour afficher les changements
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            showAlert('error', 'Erreur: ' + error.message);
+        });
+    }
+
+    // Supprimer un utilisateur
+    function deleteUser(userId) {
+        fetch(`/parameter/users/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideModal(deleteConfirmModal);
+            showAlert('success', data.message);
+            // Recharger la page pour afficher les changements
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            hideModal(deleteConfirmModal);
+            showAlert('error', 'Erreur: ' + error.message);
+        });
+    }
+}); 

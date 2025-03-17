@@ -12,9 +12,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\PermissionService;
 
 class ProjectController extends AbstractController
 {
+    private PermissionService $permissionService;
+    
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+    
     #[Route('/management-project/{id}', name: 'app_management_project')]
     public function managementProject(
         ProjectRepository $projectRepository,
@@ -22,6 +30,11 @@ class ProjectController extends AbstractController
         EntityManagerInterface $entityManager,
         ?int $id = null
     ): Response {
+        // Vérifier si l'utilisateur peut éditer des projets
+        if (!$this->permissionService->canPerform('edit', 'project')) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à gérer les projets.');
+        }
+        
         // Création d'un nouveau projet
         $project = new Project();
         $form = $this->createForm(ProjectType::class, $project);
@@ -61,6 +74,10 @@ class ProjectController extends AbstractController
         }
     
         if ($taskForm->isSubmitted() && $taskForm->isValid()) {
+            if (!$this->permissionService->canPerform('create', 'task')) {
+                throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à créer des tâches.');
+            }
+            
             if (!$task->getTaskStartDate()) {
                 $task->setTaskStartDate(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
             }
@@ -85,14 +102,25 @@ class ProjectController extends AbstractController
             'form' => $form->createView(),
             'taskForm' => $taskForm->createView(),
             'tasks' => $currentProject ? $currentProject->getTasks() : [],
+            'permissions' => [
+                'canCreateTask' => $this->permissionService->canPerform('create', 'task'),
+                'canEditTask' => $this->permissionService->canPerform('edit', 'task'),
+                'canDeleteTask' => $this->permissionService->canPerform('delete', 'task'),
+                'canAssignTask' => $this->permissionService->canPerform('assign', 'task'),
+            ],
         ]);
     }
 
     #[Route('/management-project/delete/{id}', name: 'app_project_delete', methods: ['POST'])]
     public function deleteProject(Project $project, EntityManagerInterface $entityManager): Response
     {
+        // Vérifier si l'utilisateur peut supprimer des projets
+        if (!$this->permissionService->canPerform('delete', 'project')) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à supprimer des projets.');
+        }
+        
         // Vérifier si le projet appartient à l'utilisateur connecté
-        if ($project->getProjectManager() !== $this->getUser()) {
+        if ($project->getProjectManager() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à supprimer ce projet.');
         }
 
@@ -106,6 +134,11 @@ class ProjectController extends AbstractController
     #[Route('/management-project/update-task-status', name: 'app_update_task_status', methods: ['POST'])]
     public function updateTaskStatus(Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Vérifier si l'utilisateur peut modifier des tâches
+        if (!$this->permissionService->canPerform('edit', 'task')) {
+            return $this->json(['error' => 'Vous n\'êtes pas autorisé à modifier des tâches.'], Response::HTTP_FORBIDDEN);
+        }
+        
         $content = json_decode($request->getContent(), true);
 
         // Vérifier que les données nécessaires sont fournies
@@ -125,5 +158,71 @@ class ProjectController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['success' => 'Statut de la tâche mis à jour'], Response::HTTP_OK);
+    }
+
+    #[Route('/projects', name: 'app_projects_list')]
+    public function projectsList(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // Vérifier si l'utilisateur peut voir les projets
+        if (!$this->permissionService->canPerform('view', 'project')) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à voir les projets.');
+        }
+        
+        // Récupérer les filtres de la requête
+        $statusFilter = $request->query->get('status');
+        $customerFilter = $request->query->get('customer');
+        
+        // Créer une requête de base pour les projets
+        $queryBuilder = $entityManager->getRepository(Project::class)->createQueryBuilder('p')
+            ->leftJoin('p.projectCustomer', 'c')
+            ->leftJoin('p.projectManager', 'u');
+            
+        // Appliquer les filtres si nécessaire
+        if ($statusFilter) {
+            $queryBuilder->andWhere('p.projectStatus = :status')
+                ->setParameter('status', $statusFilter);
+        }
+        
+        if ($customerFilter) {
+            $queryBuilder->andWhere('c.id = :customerId')
+                ->setParameter('customerId', $customerFilter);
+        }
+        
+        // Limiter aux projets que l'utilisateur peut voir selon son rôle
+        $currentUser = $this->getUser();
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_RESPONSABLE')) {
+            // Les chefs de projet ne voient que leurs projets
+            if ($currentUser instanceof \App\Entity\User) {
+                $queryBuilder->andWhere('p.projectManager = :userId')
+                    ->setParameter('userId', $currentUser->getId());
+            }
+        }
+        
+        // Trier les projets par date de début (les plus récents d'abord)
+        $queryBuilder->orderBy('p.projectStartDate', 'DESC');
+        
+        // Exécuter la requête
+        $projects = $queryBuilder->getQuery()->getResult();
+        
+        // Récupérer la liste des clients pour le filtre
+        $customers = $entityManager->getRepository(\App\Entity\Customers::class)->findAll();
+        
+        // Récupérer la liste des statuts pour le filtre
+        $statuses = \App\Enum\ProjectStatus::cases();
+        
+        return $this->render('project/list.html.twig', [
+            'projects' => $projects,
+            'customers' => $customers,
+            'statuses' => $statuses,
+            'currentStatus' => $statusFilter,
+            'currentCustomer' => $customerFilter,
+            'permissions' => [
+                'canCreateProject' => $this->permissionService->canPerform('create', 'project'),
+                'canEditProject' => $this->permissionService->canPerform('edit', 'project'),
+                'canDeleteProject' => $this->permissionService->canPerform('delete', 'project'),
+            ],
+        ]);
     }
 }

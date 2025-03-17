@@ -1,5 +1,11 @@
 {% extends 'base.html.twig' %} 
 {% block title %}Digi-3 - Paramètres généraux{%endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('build/parameter/general.js') }}"></script>
+{% endblock %}
+
 {% block body %}
 {% include 'includes/header.html.twig' with {'user': user} %}
 <section class="parameter_landing flex">
@@ -21,7 +27,7 @@
                 alt="Icone changement de photo de profil"
               />
             </label>
-            <input id="file" type="file" name="profile_picture" />
+            <input id="file" type="file" name="profile_picture" data-url="{{ path('app_parameter_general_update_profile') }}" />
             <img
               id="output"
               src="{{ asset(user.userAvatar) }}"
@@ -33,68 +39,102 @@
       <div class="account-body flex">
         <div class="account-email flex-col">
           <h3>Modifier son adresse e-mail</h3>
-          {{ form_start(emailForm, { method: "POST" }) }}
+          {{ form_start(emailForm, { 'attr': {'id': 'email_form'}, 'action': path('app_parameter_general_update_email') }) }}
           {{ form_row(emailForm.email) }}
-          {{ form_row(emailForm.password) }}
-          <div class="">
+          
+          <div class="form-group">
+            {{ form_label(emailForm.password) }}
+            <div class="password-container">
+              {{ form_widget(emailForm.password) }}
+              <span class="toggle-password" data-target="email_form_password">
+                <img src="{{ asset('build/images/icons/eye.png') }}" 
+                     alt="Afficher/Masquer le mot de passe" 
+                     class="eye-icon"
+                     data-eye="{{ asset('build/images/icons/eye.png') }}"
+                     data-eye-off="{{ asset('build/images/icons/eye-off.png') }}" />
+              </span>
+            </div>
+            {{ form_errors(emailForm.password) }}
+          </div>
+          
+          <div class="form-actions">
             <button type="submit" class="btn-submit">
               Nouvelle adresse e-mail
             </button>
-            {% for message in app.flashes('error') %}
-            <div >{{ message }}</div>
-            {% endfor %}
-            {% for message in app.flashes('success') %}
-            <div >{{ message }}</div>
-            {% endfor %}
           </div>
 
           {{ form_end(emailForm) }}
+          
+          {# Les messages flash seront remplacés par des messages AJAX #}
+          {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">{{ message }}</div>
+          {% endfor %}
+          {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+          {% endfor %}
         </div>
         <div class="account-password flex-col">
           <h3>Modifier son mot de passe</h3>
-          {{ form_start(passwordForm, { method: "POST" }) }}
-          {{ form_row(passwordForm.actual_password) }}
-          {{ form_row(passwordForm.password) }}
+          {{ form_start(passwordForm, { 'attr': {'id': 'password_form'}, 'action': path('app_parameter_general_update_password') }) }}
+          
+          <div class="form-group">
+            {{ form_label(passwordForm.actual_password) }}
+            <div class="password-container">
+              {{ form_widget(passwordForm.actual_password) }}
+              <span class="toggle-password" data-target="password_form_actual_password">
+                <img src="{{ asset('build/images/icons/eye.png') }}" 
+                     alt="Afficher/Masquer le mot de passe" 
+                     class="eye-icon"
+                     data-eye="{{ asset('build/images/icons/eye.png') }}"
+                     data-eye-off="{{ asset('build/images/icons/eye-off.png') }}" />
+              </span>
+            </div>
+            {{ form_errors(passwordForm.actual_password) }}
+          </div>
+          
+          <div class="form-group">
+            {{ form_label(passwordForm.password) }}
+            <div class="password-container">
+              {{ form_widget(passwordForm.password) }}
+              <span class="toggle-password" data-target="password_form_password">
+                <img src="{{ asset('build/images/icons/eye.png') }}" 
+                     alt="Afficher/Masquer le mot de passe" 
+                     class="eye-icon"
+                     data-eye="{{ asset('build/images/icons/eye.png') }}"
+                     data-eye-off="{{ asset('build/images/icons/eye-off.png') }}" />
+              </span>
+            </div>
+            {{ form_errors(passwordForm.password) }}
+          </div>
+          
+          <div class="form-group">
+            {{ form_label(passwordForm.confirm_password) }}
+            <div class="password-container">
+              {{ form_widget(passwordForm.confirm_password) }}
+              <span class="toggle-password" data-target="password_form_confirm_password">
+                <img src="{{ asset('build/images/icons/eye.png') }}" 
+                     alt="Afficher/Masquer le mot de passe" 
+                     class="eye-icon"
+                     data-eye="{{ asset('build/images/icons/eye.png') }}"
+                     data-eye-off="{{ asset('build/images/icons/eye-off.png') }}" />
+              </span>
+            </div>
+            {{ form_errors(passwordForm.confirm_password) }}
+          </div>
+          
           <button type="submit" class="btn-submit">Nouveau mot de passe</button>
           {{ form_end(passwordForm) }}
+          
+          {# Les messages flash seront remplacés par des messages AJAX #}
           {% for message in app.flashes('error') %}
-          <div class="alert alert-danger">{{ message }}</div>
+            <div class="alert alert-danger">{{ message }}</div>
+          {% endfor %}
+          {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
           {% endfor %}
         </div>
       </div>
     </div>
   </div>
 </section>
-{% endblock %} {% block javascripts %}
-<script>
-  document.getElementById("file").addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      console.log("Fichier sélectionné:", file.name);
-
-      const formData = new FormData();
-      formData.append("profile_picture", file);
-
-      fetch("{{ path('app_parameter_general_update_profile') }}", {
-        method: "POST",
-        body: formData, // Envoie les données du formulaire
-      })
-        .then((response) => {
-          console.log("Réponse du serveur:", response);
-          return response.json(); // Essayez de parser la réponse en JSON
-        })
-        .then((data) => {
-          console.log("Données récupérées:", data);
-          if (data.success) {
-            document.getElementById("output").src = data.newProfilePictureUrl; // Mettez à jour l'image de profil
-          } else {
-            console.error("Erreur:", data.error);
-          }
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la requête:", error);
-        });
-    }
-  });
-</script>
 {% endblock %}

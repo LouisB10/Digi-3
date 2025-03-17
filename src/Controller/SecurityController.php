@@ -25,6 +25,7 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use App\Security\AppCustomAuthenticator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Mime\Address;
 
 class SecurityController extends AbstractController
 {
@@ -196,54 +197,62 @@ class SecurityController extends AbstractController
         EntityManagerInterface $entityManager,
         MailerInterface $mailer
     ): Response {
-        // Si l'utilisateur est déjà connecté, le rediriger vers le tableau de bord
-        if ($this->getUser()) {
-            return $this->redirectToRoute('app_dashboard');
-        }
-
         $form = $this->createForm(ResetPasswordRequestFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $email = $data['email'];
-            
             try {
+                $data = $form->getData();
+                $email = $data['email'];
+                
                 $user = $entityManager->getRepository(User::class)->findOneBy(['userEmail' => $email]);
-
-                // Même si l'utilisateur n'existe pas, on renvoie un message de succès pour des raisons de sécurité
+                
+                // Générer un token même si l'utilisateur n'existe pas (pour éviter l'énumération d'utilisateurs)
                 if ($user) {
-                    // Générer un token de réinitialisation
                     $token = $this->generateSecureToken();
-                    $user->setResetToken($token);
-                    $user->setResetTokenExpiresAt(new \DateTimeImmutable(self::TOKEN_EXPIRATION));
-                    $entityManager->flush();
-
-                    // Envoyer l'email de réinitialisation
-                    $resetLink = $this->generateUrl('app_reset_password_confirm', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+                    $expiresAt = new \DateTimeImmutable('+1 hour');
                     
+                    $user->setResetToken($token);
+                    $user->setResetTokenExpiresAt($expiresAt);
+                    
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                    
+                    // Créer l'URL de réinitialisation
+                    $resetUrl = $this->generateUrl('app_reset_password_confirm', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+                    
+                    // Envoyer l'email
                     $email = (new TemplatedEmail())
-                        ->from('noreply@digi-3.fr')
+                        ->from(new Address('no-reply@digi-3.com', 'Digi-3'))
                         ->to($user->getUserEmail())
-                        ->subject('Digi-3 - Réinitialisation de votre mot de passe')
-                        ->html(
-                            "<h1>Réinitialisation de votre mot de passe</h1>" .
-                            "<p>Bonjour,</p>" .
-                            "<p>Une demande de réinitialisation de mot de passe a été effectuée pour votre compte. " .
-                            "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>" .
-                            "<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>" .
-                            "<a href='" . $resetLink . "'>Réinitialiser mon mot de passe</a>" .
-                            "<p>Ce lien expirera dans 1 heure.</p>" .
-                            "<p>L'équipe Digi-3</p>"
-                        );
-
+                        ->subject('Réinitialisation de votre mot de passe')
+                        ->htmlTemplate('emails/reset_password.html.twig')
+                        ->context([
+                            'firstName' => $user->getUserFirstName(),
+                            'resetUrl' => $resetUrl
+                        ]);
+                    
                     $mailer->send($email);
+                    
+                    $this->logger->info('Email de réinitialisation envoyé à ' . $user->getUserEmail(), [
+                        'user_id' => $user->getId(),
+                        'reset_token' => $token,
+                        'expires_at' => $expiresAt->format('Y-m-d H:i:s'),
+                        'reset_url' => $resetUrl
+                    ]);
+                } else {
+                    $this->logger->info('Tentative de réinitialisation pour un email inexistant: ' . $email);
                 }
-
+                
+                // Toujours afficher le même message, que l'utilisateur existe ou non
                 $this->addFlash('success', 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.');
                 return $this->redirectToRoute('app_auth');
             } catch (\Exception $e) {
-                $this->logger->error('Erreur lors de la demande de réinitialisation: ' . $e->getMessage());
+                $this->logger->error('Erreur lors de la demande de réinitialisation: ' . $e->getMessage(), [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
                 $this->addFlash('error', 'Une erreur est survenue. Veuillez réessayer ultérieurement.');
                 return $this->redirectToRoute('app_auth');
             }

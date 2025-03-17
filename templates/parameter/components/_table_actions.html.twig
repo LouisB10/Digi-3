@@ -1,0 +1,30 @@
+{# templates/parameter/components/_table_actions.html.twig #}
+{# Paramètres attendus : id, entity_name, entity_label, item_name (optionnel), edit_data (optionnel) #}
+
+<td class="actions">
+    {% if can_edit %}
+        <button 
+            class="edit-btn" 
+            data-{{ entity_name }}-id="{{ id }}"
+            aria-label="Modifier {{ item_name|default('') }}"
+            {% if edit_data is defined %}
+                {% for key, value in edit_data %}
+                    data-{{ key }}="{{ value }}"
+                {% endfor %}
+            {% endif %}
+        >
+            <img src="{{ asset('build/images/icons/edit.png') }}" alt="Modifier">
+        </button>
+    {% endif %}
+    
+    {% if can_delete %}
+        <button 
+            class="delete-btn" 
+            data-{{ entity_name }}-id="{{ id }}"
+            data-{{ entity_name }}-name="{{ item_name|default('') }}"
+            aria-label="Supprimer {{ item_name|default('') }}"
+        >
+            <img src="{{ asset('build/images/icons/delete.png') }}" alt="Supprimer">
+        </button>
+    {% endif %}
+</td> 

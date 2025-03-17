@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const switchToRegister = document.getElementById("switchToRegister");
   const switchToLogin = document.getElementById("switchToLogin");
   const registerForm = document.getElementById("register_form");
-  const passwordInput = document.getElementById("register_form_password");
+  const passwordInput = document.getElementById("register_form_password_first");
   const passwordRequirements = document.getElementById("password-requirements");
   
   console.log("Éléments DOM récupérés:", {

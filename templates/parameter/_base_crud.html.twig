@@ -1,0 +1,68 @@
+{# templates/parameter/_base_crud.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Digi-3 - {{ page_title|default('Gestion') }}{% endblock %}
+
+{% block body %}
+{% include 'includes/header.html.twig' %}
+
+<main id="main-content" role="main">
+    <section class="parameter_landing flex">
+        {% include 'parameter/_menu.html.twig' %}
+        
+        <div class="parameter_content">
+            <div class="crud-page {{ entity_name }}-page">
+                {# En-tête avec titre et bouton d'ajout #}
+                <div class="crud-header flex">
+                    <h1>{{ page_title|default('Gestion') }}</h1>
+                    {% if can_create %}
+                        <button 
+                            class="btn-add" 
+                            type="button" 
+                            aria-label="Ajouter un nouveau {{ entity_label }}"
+                        >
+                            Ajouter {{ entity_label }}
+                        </button>
+                    {% endif %}
+                </div>
+
+                {# Messages flash #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {# Table principale #}
+                <div class="crud-table" role="region" aria-label="Liste des {{ entity_label_plural|default(entity_label ~ 's') }}">
+                    <table aria-describedby="table-description">
+                        <caption id="table-description">Liste des {{ entity_label_plural|default(entity_label ~ 's') }} avec leurs informations</caption>
+                        <thead>
+                            <tr>
+                                {% block table_headers %}{% endblock %}
+                                {% if can_edit or can_delete %}
+                                    <th scope="col">Actions</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody id="parameter_table">
+                            {% block table_body %}{% endblock %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{# Modales #}
+{% block modals %}{% endblock %}
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% block crud_scripts %}{% endblock %}
+{% endblock %} 

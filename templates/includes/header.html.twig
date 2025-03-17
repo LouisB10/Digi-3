@@ -16,8 +16,8 @@
                 </li>
             {% endif %}
             
-            <li class="{% if app.request.attributes.get('_route') == 'app_parameter_generaux' %}active{% endif %}" role="none">
-                <a href="{{ path('app_parameter_generaux') }}" role="menuitem" {% if app.request.attributes.get('_route') == 'app_parameter_generaux' %}aria-current="page"{% endif %}>Paramètres</a>
+            <li class="{% if app.request.attributes.get('_route') starts with 'app_parameter_' %}active{% endif %}" role="none">
+                <a href="{{ path('app_parameter_general_index') }}" role="menuitem" {% if app.request.attributes.get('_route') starts with 'app_parameter_' %}aria-current="page"{% endif %}>Paramètres</a>
             </li>
         </ul>
         <form action="{{ path('app_logout') }}" method="post" class="logout-form flex" onsubmit="return showLogoutDialog(event);">
@@ -48,5 +48,5 @@
 
 {# Utiliser un bloc spécifique pour le header plutôt que javascripts #}
 {% block header_scripts %}
-    <script src="{{ asset('build/js/header.js') }}"></script>
+    {{ encore_entry_script_tags('header') }}
 {% endblock %}

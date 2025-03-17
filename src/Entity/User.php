@@ -46,8 +46,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email(message: 'L\'email {{ value }} n\'est pas un email valide.')]
     private ?string $userEmail = null;
 
-    #[ORM\Column(name: 'user_avatar', length: 255)]
-    private string $userAvatar = '/build/images/account/default-avatar.jpg';
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $userAvatar = 'uploads/avatar/default.png';
 
     #[ORM\Column(name: 'user_role', type: 'string', length: 50)]
     private ?string $userRole = UserRole::USER->value;
@@ -261,7 +261,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             ->setUserEmail($email)
             ->setPassword($hashedPassword)
             ->setUserDateFrom(new \DateTime())
-            ->setUserAvatar('/build/images/account/default-avatar.jpg')
+            ->setUserAvatar('uploads/avatar/default.png')
             ->setUserRole(UserRole::USER)
             ->setResetToken(null)
             ->setResetTokenExpiresAt(null)
@@ -274,5 +274,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getFullName(): string
     {
         return $this->userFirstName . ' ' . $this->userLastName;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est administrateur
+     */
+    public function isAdmin(): bool
+    {
+        return $this->getUserRole() === UserRole::ADMIN;
+    }
+    
+    /**
+     * Vérifie si l'utilisateur a un rôle spécifique ou supérieur
+     */
+    public function hasRole(UserRole $role): bool
+    {
+        $userRole = $this->getUserRole();
+        if ($userRole === null) {
+            return false;
+        }
+        return UserRole::isGranted($userRole, $role);
     }
 }

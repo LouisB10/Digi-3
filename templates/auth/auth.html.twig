@@ -92,6 +92,10 @@ d'authentification{% endblock %} {% block stylesheets %}
         </div>
         {{ form_errors(registration_form.password.first) }}
       </div>
+      
+      <div id="password-requirements" class="password-requirements">
+        <!-- Les exigences de mot de passe seront ajoutées ici par JavaScript -->
+      </div>
 
       <div class="form-group">
         {{ form_label(registration_form.password.second) }}
@@ -102,12 +106,6 @@ d'authentification{% endblock %} {% block stylesheets %}
           </span>
         </div>
         {{ form_errors(registration_form.password.second) }}
-      </div>
-
-      <div class="form-group form-check">
-        {{ form_widget(registration_form.agreeTerms) }}
-        {{ form_label(registration_form.agreeTerms) }}
-        {{ form_errors(registration_form.agreeTerms) }}
       </div>
 
       {% if error %}
@@ -131,58 +129,5 @@ d'authentification{% endblock %} {% block stylesheets %}
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('build/auth.js') }}"></script>
-<script>
-  // Script inline pour tester si le JavaScript fonctionne
-  console.log("Script inline chargé");
-  
-  document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM chargé - Script inline");
-    
-    // Éléments DOM
-    const loginSection = document.getElementById("loginSection");
-    const registerSection = document.getElementById("registerSection");
-    const switchToRegister = document.getElementById("switchToRegister");
-    const switchToLogin = document.getElementById("switchToLogin");
-    
-    console.log("Éléments DOM récupérés:", {
-      loginSection: loginSection ? "trouvé" : "non trouvé",
-      registerSection: registerSection ? "trouvé" : "non trouvé",
-      switchToRegister: switchToRegister ? "trouvé" : "non trouvé",
-      switchToLogin: switchToLogin ? "trouvé" : "non trouvé"
-    });
-    
-    // Définition des fonctions de navigation entre les sections
-    function showRegisterSection() {
-      console.log("Affichage de la section d'inscription");
-      if (loginSection) loginSection.classList.add('hidden');
-      if (registerSection) registerSection.classList.remove('hidden');
-    }
-    
-    function showLoginSection() {
-      console.log("Affichage de la section de connexion");
-      if (registerSection) registerSection.classList.add('hidden');
-      if (loginSection) loginSection.classList.remove('hidden');
-    }
-    
-    // Gestion des événements de navigation
-    if (switchToRegister) {
-      console.log("Configuration du bouton pour passer à l'inscription");
-      switchToRegister.addEventListener("click", function(event) {
-        console.log("Clic sur le bouton pour passer à l'inscription");
-        event.preventDefault();
-        showRegisterSection();
-      });
-    }
-    
-    if (switchToLogin) {
-      console.log("Configuration du bouton pour passer à la connexion");
-      switchToLogin.addEventListener("click", function(event) {
-        console.log("Clic sur le bouton pour passer à la connexion");
-        event.preventDefault();
-        showLoginSection();
-      });
-    }
-  });
-</script>
+{{ encore_entry_script_tags('auth') }}
 {% endblock %}

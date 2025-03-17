@@ -12,23 +12,56 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\PermissionService;
 
 #[Route('/parameter/users')]
 #[IsGranted('ROLE_USER')]
 class UsersController extends AbstractController
 {
+    private PermissionService $permissionService;
+    
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+
     #[Route('/', name: 'app_parameter_users_index')]
     public function index(EntityManagerInterface $entityManager): Response
     {
+        // Vérifier si l'utilisateur peut voir les utilisateurs
+        if (!$this->permissionService->canPerform('view', 'user')) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à voir les utilisateurs.');
+        }
+        
         // Récupérer l'utilisateur courant
         $currentUser = $this->getUser();
         
         // Récupérer tous les utilisateurs
         $users = $entityManager->getRepository(User::class)->findAll();
 
+        // Récupérer les rôles disponibles pour le formulaire
+        $availableRoles = [];
+        foreach (UserRole::cases() as $role) {
+            $availableRoles[$role->getLabel()] = $role->value;
+        }
+        
+        // Récupérer les permissions de l'utilisateur
+        $permissions = [
+            'canViewUsers' => $this->permissionService->canPerform('view', 'user'),
+            'canEditUsers' => $this->permissionService->canPerform('edit', 'user'),
+            'canViewProjects' => $this->permissionService->canPerform('view', 'project'),
+            'canEditProjects' => $this->permissionService->canPerform('edit', 'project'),
+            'canViewCustomers' => $this->permissionService->canPerform('view', 'customer'),
+            'canEditCustomers' => $this->permissionService->canPerform('edit', 'customer'),
+            'canViewParameters' => $this->permissionService->canPerform('view', 'parameter'),
+            'canEditParameters' => $this->permissionService->canPerform('edit', 'parameter'),
+        ];
+
         return $this->render('parameter/users/index.html.twig', [
-            'user' => $currentUser,  // Pour le template header
-            'users' => $users        // Pour la liste des utilisateurs
+            'user' => $currentUser,       // Pour le template header
+            'users' => $users,            // Pour la liste des utilisateurs
+            'available_roles' => $availableRoles, // Pour le formulaire
+            'permissions' => $permissions,
         ]);
     }
 
@@ -36,6 +69,14 @@ class UsersController extends AbstractController
     #[IsGranted('ROLE_RESPONSABLE')]
     public function create(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
+        // Vérifier si l'utilisateur peut créer des utilisateurs
+        if (!$this->permissionService->canPerform('create', 'user')) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à créer des utilisateurs.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+        
         // Récupérer les données du formulaire
         $data = $request->request->all();
         
@@ -48,42 +89,46 @@ class UsersController extends AbstractController
             ]);
         }
         
-        // Créer un nouvel utilisateur
-        $user = new User();
-        $user->setUserFirstName($data['firstName']);
-        $user->setUserLastName($data['lastName']);
-        $user->setUserEmail($data['email']);
-        
-        // Définir le mot de passe
-        if (!empty($data['password'])) {
+        try {
+            // Créer le nouvel utilisateur
+            $user = new User();
+            $user->setUserFirstName($data['firstName']);
+            $user->setUserLastName($data['lastName']);
+            $user->setUserEmail($data['email']);
+            
+            // Hasher le mot de passe
             $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
             $user->setPassword($hashedPassword);
-        } else {
-            return $this->json([
-                'success' => false,
-                'message' => 'Le mot de passe est requis pour un nouvel utilisateur.'
-            ]);
-        }
-        
-        // Définir le rôle
-        $user->setUserRole(UserRole::from($data['role']));
-        
-        // Définir l'avatar par défaut
-        $user->setUserAvatar('build/images/avatar/default.png');
-        
-        try {
+            
+            // Définir le rôle
+            try {
+                $role = UserRole::from($data['role']);
+                $user->setUserRole($role);
+            } catch (\ValueError $e) {
+                // Si le rôle n'est pas valide, utiliser le rôle utilisateur par défaut
+                $user->setUserRole(UserRole::USER);
+            }
+            
+            // Enregistrer l'utilisateur
             $entityManager->persist($user);
             $entityManager->flush();
             
             return $this->json([
                 'success' => true,
-                'message' => 'Utilisateur créé avec succès.'
+                'message' => 'Utilisateur créé avec succès.',
+                'user' => [
+                    'id' => $user->getId(),
+                    'firstName' => $user->getUserFirstName(),
+                    'lastName' => $user->getUserLastName(),
+                    'email' => $user->getUserEmail(),
+                    'role' => $user->getUserRole() ? $user->getUserRole()->getLabel() : 'Utilisateur'
+                ]
             ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la création de l\'utilisateur: ' . $e->getMessage()
-            ]);
+                'message' => 'Une erreur est survenue lors de la création de l\'utilisateur.'
+            ], 500);
         }
     }
 
@@ -91,6 +136,7 @@ class UsersController extends AbstractController
     #[IsGranted('ROLE_RESPONSABLE')]
     public function edit(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Récupérer l'utilisateur à modifier
         $user = $entityManager->getRepository(User::class)->find($id);
         
         if (!$user) {
@@ -100,8 +146,20 @@ class UsersController extends AbstractController
             ], 404);
         }
         
-        // Récupérer le rôle principal
-        $role = $user->getUserRole() ? $user->getUserRole()->value : 'ROLE_USER';
+        // Vérifier les permissions basées sur les rôles
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            // Seuls les administrateurs peuvent modifier tous les utilisateurs
+            // Les autres utilisateurs ne peuvent modifier que les utilisateurs avec un rôle inférieur
+            $currentUser = $this->getUser();
+            if ($currentUser instanceof User && $currentUser->getId() !== $user->getId()) {
+                if (!$this->isGranted('ROLE_RESPONSABLE')) {
+                    return $this->json([
+                        'success' => false,
+                        'message' => 'Vous n\'avez pas les droits pour modifier cet utilisateur.'
+                    ], 403);
+                }
+            }
+        }
         
         return $this->json([
             'success' => true,
@@ -110,7 +168,7 @@ class UsersController extends AbstractController
                 'firstName' => $user->getUserFirstName(),
                 'lastName' => $user->getUserLastName(),
                 'email' => $user->getUserEmail(),
-                'role' => $role
+                'role' => $user->getUserRole() ? $user->getUserRole()->value : UserRole::USER->value
             ]
         ]);
     }
@@ -119,6 +177,7 @@ class UsersController extends AbstractController
     #[IsGranted('ROLE_RESPONSABLE')]
     public function update(int $id, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
+        // Récupérer l'utilisateur à modifier
         $user = $entityManager->getRepository(User::class)->find($id);
         
         if (!$user) {
@@ -126,6 +185,21 @@ class UsersController extends AbstractController
                 'success' => false,
                 'message' => 'Utilisateur non trouvé.'
             ], 404);
+        }
+        
+        // Vérifier les permissions basées sur les rôles
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            // Seuls les administrateurs peuvent modifier tous les utilisateurs
+            // Les autres utilisateurs ne peuvent modifier que les utilisateurs avec un rôle inférieur
+            $currentUser = $this->getUser();
+            if ($currentUser instanceof User && $currentUser->getId() !== $user->getId()) {
+                if (!$this->isGranted('ROLE_RESPONSABLE')) {
+                    return $this->json([
+                        'success' => false,
+                        'message' => 'Vous n\'avez pas les droits pour modifier cet utilisateur.'
+                    ], 403);
+                }
+            }
         }
         
         // Récupérer les données du formulaire
@@ -140,34 +214,46 @@ class UsersController extends AbstractController
             ]);
         }
         
-        // Mettre à jour les informations de l'utilisateur
-        $user->setUserFirstName($data['firstName']);
-        $user->setUserLastName($data['lastName']);
-        $user->setUserEmail($data['email']);
-        
-        // Mettre à jour le mot de passe si fourni
-        if (!empty($data['password'])) {
-            $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
-            $user->setPassword($hashedPassword);
-        }
-        
-        // Mettre à jour le rôle si l'utilisateur courant est admin
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $user->setUserRole(UserRole::from($data['role']));
-        }
-        
         try {
+            // Mettre à jour les données de l'utilisateur
+            $user->setUserFirstName($data['firstName']);
+            $user->setUserLastName($data['lastName']);
+            $user->setUserEmail($data['email']);
+            
+            // Mettre à jour le mot de passe si fourni
+            if (!empty($data['password'])) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
+                $user->setPassword($hashedPassword);
+            }
+            
+            // Mettre à jour le rôle si l'utilisateur courant est admin
+            if ($this->isGranted('ROLE_ADMIN')) {
+                try {
+                    $role = UserRole::from($data['role']);
+                    $user->setUserRole($role);
+                } catch (\ValueError $e) {
+                    // Si le rôle n'est pas valide, ne pas le modifier
+                }
+            }
+            
             $entityManager->flush();
             
             return $this->json([
                 'success' => true,
-                'message' => 'Utilisateur mis à jour avec succès.'
+                'message' => 'Utilisateur mis à jour avec succès.',
+                'user' => [
+                    'id' => $user->getId(),
+                    'firstName' => $user->getUserFirstName(),
+                    'lastName' => $user->getUserLastName(),
+                    'email' => $user->getUserEmail(),
+                    'role' => $user->getUserRole() ? $user->getUserRole()->getLabel() : 'Utilisateur'
+                ]
             ]);
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur: ' . $e->getMessage()
-            ]);
+                'message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.'
+            ], 500);
         }
     }
 
@@ -175,6 +261,7 @@ class UsersController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Récupérer l'utilisateur à supprimer
         $user = $entityManager->getRepository(User::class)->find($id);
         
         if (!$user) {
@@ -184,9 +271,9 @@ class UsersController extends AbstractController
             ], 404);
         }
         
-        // Vérifier que l'utilisateur n'est pas en train de se supprimer lui-même
+        // Vérifier que l'utilisateur n'essaie pas de se supprimer lui-même
         $currentUser = $this->getUser();
-        if ($currentUser instanceof User && $user->getId() === $currentUser->getId()) {
+        if ($currentUser instanceof User && $currentUser->getId() === $user->getId()) {
             return $this->json([
                 'success' => false,
                 'message' => 'Vous ne pouvez pas supprimer votre propre compte.'
@@ -204,8 +291,8 @@ class UsersController extends AbstractController
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la suppression de l\'utilisateur: ' . $e->getMessage()
-            ]);
+                'message' => 'Une erreur est survenue lors de la suppression de l\'utilisateur.'
+            ], 500);
         }
     }
 

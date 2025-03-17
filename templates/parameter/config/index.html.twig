@@ -280,8 +280,8 @@
 </main>
 
 {# Modales #}
-<div class="modal" id="restoreConfirmModal" tabindex="-1" role="dialog" aria-labelledby="restoreConfirmModalTitle" aria-modal="true" hidden>
-    <div class="modal-content">
+<div class="modal" id="restoreConfirmModal" tabindex="-1" role="dialog" aria-labelledby="restoreConfirmModalTitle" aria-modal="false" hidden>
+    <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="restoreConfirmModalTitle">Confirmer la restauration</h2>
             <button type="button" class="close" onclick="closeRestoreModal()" aria-label="Fermer">&times;</button>
@@ -297,8 +297,8 @@
     </div>
 </div>
 
-<div class="modal" id="deleteBackupConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteBackupConfirmModalTitle" aria-modal="true" hidden>
-    <div class="modal-content">
+<div class="modal" id="deleteBackupConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteBackupConfirmModalTitle" aria-modal="false" hidden>
+    <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="deleteBackupConfirmModalTitle">Confirmer la suppression</h2>
             <button type="button" class="close" onclick="closeDeleteBackupModal()" aria-label="Fermer">&times;</button>
@@ -314,8 +314,8 @@
     </div>
 </div>
 
-<div class="modal" id="testEmailModal" tabindex="-1" role="dialog" aria-labelledby="testEmailModalTitle" aria-modal="true" hidden>
-    <div class="modal-content">
+<div class="modal" id="testEmailModal" tabindex="-1" role="dialog" aria-labelledby="testEmailModalTitle" aria-modal="false" hidden>
+    <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="testEmailModalTitle">Tester la configuration email</h2>
             <button type="button" class="close" onclick="closeTestEmailModal()" aria-label="Fermer">&times;</button>
@@ -419,10 +419,10 @@
                 
                 if (passwordInput.type === 'password') {
                     passwordInput.type = 'text';
-                    this.querySelector('img').src = '{{ asset('build/images/icons/eye-off.png') }}';
+                    this.querySelector('img').src = "{{ asset('build/images/icons/eye-off.png') }}";
                 } else {
                     passwordInput.type = 'password';
-                    this.querySelector('img').src = '{{ asset('build/images/icons/eye.png') }}';
+                    this.querySelector('img').src = "{{ asset('build/images/icons/eye.png') }}";
                 }
             });
         });
@@ -436,7 +436,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token('backup-create') }}'
+                    'X-CSRF-TOKEN': "{{ csrf_token('backup-create') }}"
                 }
             })
             .then(response => response.json())
@@ -475,7 +475,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token('backup-restore') }}'
+                    'X-CSRF-TOKEN': "{{ csrf_token('backup-restore') }}"
                 }
             })
             .then(response => response.json())
@@ -512,7 +512,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token('backup-delete') }}'
+                    'X-CSRF-TOKEN': "{{ csrf_token('backup-delete') }}"
                 }
             })
             .then(response => response.json())

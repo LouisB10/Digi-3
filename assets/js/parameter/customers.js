@@ -3,280 +3,265 @@
  * Gestion des clients dans les paramètres
  */
 
-let customerIdToDelete = null;
+let lastFocusedElement = null;
 
-/**
- * Ouvre la modal d'ajout de client
- */
-function openAddCustomerModal() {
-    document.getElementById('customerModalTitle').textContent = 'Ajouter un client';
-    document.getElementById('customerForm').reset();
-    document.getElementById('customerId').value = '';
-    document.getElementById('logo-preview').innerHTML = '';
-    document.getElementById('customerModal').hidden = false;
-}
-
-/**
- * Ouvre la modal d'édition de client
- * @param {number} customerId - ID du client à modifier
- */
-function openEditCustomerModal(customerId) {
-    document.getElementById('customerModalTitle').textContent = 'Modifier un client';
-    document.getElementById('customerId').value = customerId;
-    
-    // Charger les données du client via AJAX
-    fetch(`/parameter/customers/${customerId}/edit`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('name').value = data.customer.name;
-            document.getElementById('email').value = data.customer.email;
-            document.getElementById('phone').value = data.customer.phone;
-            document.getElementById('address').value = data.customer.address;
-            document.getElementById('sector').value = data.customer.sector;
-            document.getElementById('website').value = data.customer.website;
-            document.getElementById('notes').value = data.customer.notes;
-            
-            // Afficher l'aperçu du logo
-            if (data.customer.logo) {
-                const logoPreview = document.getElementById('logo-preview');
-                logoPreview.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = data.customer.logo;
-                img.alt = 'Logo actuel';
-                logoPreview.appendChild(img);
-            }
-            
-            document.getElementById('customerModal').hidden = false;
-        } else {
-            alert('Erreur lors du chargement des données du client');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors du chargement des données');
-    });
-}
-
-/**
- * Ferme la modal de client
- */
-function closeCustomerModal() {
-    document.getElementById('customerModal').hidden = true;
-}
-
-/**
- * Enregistre les données du client
- */
-function saveCustomer() {
-    const form = document.getElementById('customerForm');
-    const formData = new FormData(form);
-    const customerId = document.getElementById('customerId').value;
-    
-    const url = customerId ? `/parameter/customers/${customerId}/update` : '/parameter/customers/create';
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeCustomerModal();
-            window.location.reload();
-        } else {
-            alert(data.message || 'Une erreur est survenue');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de l\'enregistrement');
-    });
-}
-
-/**
- * Affiche la confirmation de suppression d'un client
- * @param {number} customerId - ID du client à supprimer
- * @param {string} customerName - Nom du client à supprimer
- */
-function confirmDeleteCustomer(customerId, customerName) {
-    customerIdToDelete = customerId;
-    document.getElementById('customerToDeleteName').textContent = customerName;
-    document.getElementById('deleteConfirmModal').hidden = false;
-}
-
-/**
- * Ferme la modal de confirmation de suppression
- */
-function closeDeleteModal() {
-    document.getElementById('deleteConfirmModal').hidden = true;
-}
-
-/**
- * Supprime le client
- */
-function deleteCustomer() {
-    if (!customerIdToDelete) return;
-    
-    fetch(`/parameter/customers/${customerIdToDelete}/delete`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeDeleteModal();
-            window.location.reload();
-        } else {
-            alert(data.message || 'Une erreur est survenue lors de la suppression');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de la suppression');
-    });
-}
-
-// Initialisation des événements
+// Initialisation
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion de la recherche
-    const searchForm = document.getElementById('searchForm');
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchType = document.getElementById('searchType').value;
-            const searchQuery = document.getElementById('searchQuery').value;
-            
-            fetch(`/parameter/customers/search?type=${searchType}&query=${encodeURIComponent(searchQuery)}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateCustomerTable(data.customers);
-                } else {
-                    alert('Erreur lors de la recherche');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la recherche');
+    // Variables globales
+    const customerModal = document.getElementById('customerModal');
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const customerForm = document.getElementById('customerForm');
+    const csrfToken = document.getElementById('csrf_token').value;
+    let currentCustomerId = null;
+
+    // Initialisation
+    initModals();
+    initAddButton();
+    initEditButtons();
+    initDeleteButtons();
+    initKeyboardNavigation();
+
+    // Initialisation des modales
+    function initModals() {
+        // S'assurer que les modales sont cachées au chargement
+        hideModal(customerModal);
+        hideModal(deleteConfirmModal);
+
+        // Gestionnaires pour fermer les modales
+        document.querySelectorAll('.close, .btn-cancel').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                hideModal(modal);
+            });
+        });
+
+        // Gestionnaire pour soumettre le formulaire client
+        customerModal.querySelector('.btn-submit').addEventListener('click', function() {
+            submitCustomerForm();
+        });
+
+        // Gestionnaire pour confirmer la suppression
+        deleteConfirmModal.querySelector('.btn-danger').addEventListener('click', function() {
+            deleteCustomer(currentCustomerId);
+        });
+    }
+
+    // Initialisation du bouton d'ajout
+    function initAddButton() {
+        const addCustomerBtn = document.querySelector('.btn-add');
+        if (addCustomerBtn) {
+            addCustomerBtn.addEventListener('click', function() {
+                openAddCustomerModal();
+            });
+        }
+    }
+
+    // Initialisation des boutons d'édition
+    function initEditButtons() {
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const customerId = this.getAttribute('data-customer-id');
+                openEditCustomerModal(customerId);
             });
         });
     }
-    
-    // Prévisualisation du logo lors de l'upload
-    const logoInput = document.getElementById('logo');
-    if (logoInput) {
-        logoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const logoPreview = document.getElementById('logo-preview');
-                logoPreview.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Aperçu du logo';
-                logoPreview.appendChild(img);
-            };
-            reader.readAsDataURL(file);
+
+    // Initialisation des boutons de suppression
+    function initDeleteButtons() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const customerId = this.getAttribute('data-customer-id');
+                const customerName = this.getAttribute('data-customer-name');
+                openDeleteConfirmModal(customerId, customerName);
+            });
         });
     }
-});
 
-/**
- * Met à jour le tableau des clients avec les résultats de recherche
- * @param {Array} customers - Liste des clients à afficher
- */
-function updateCustomerTable(customers) {
-    const tableBody = document.getElementById('parameter_table');
-    if (!tableBody) return;
-    
-    tableBody.innerHTML = '';
-    
-    customers.forEach(customer => {
-        const row = document.createElement('tr');
-        
-        // Logo
-        const logoCell = document.createElement('td');
-        const logoImg = document.createElement('img');
-        logoImg.src = customer.logo;
-        logoImg.alt = `Logo de ${customer.name}`;
-        logoImg.className = 'customer-logo';
-        logoCell.appendChild(logoImg);
-        
-        // Nom, email, téléphone, secteur
-        const nameCell = document.createElement('td');
-        nameCell.textContent = customer.name;
-        
-        const emailCell = document.createElement('td');
-        emailCell.textContent = customer.email;
-        
-        const phoneCell = document.createElement('td');
-        phoneCell.textContent = customer.phone;
-        
-        const sectorCell = document.createElement('td');
-        sectorCell.textContent = customer.sector;
-        
-        // Actions
-        const actionsCell = document.createElement('td');
-        actionsCell.className = 'actions';
-        
-        // Vérifier si l'utilisateur a le rôle ROLE_PROJECT_MANAGER
-        if (document.body.dataset.userRole === 'ROLE_PROJECT_MANAGER' || 
-            document.body.dataset.userRole === 'ROLE_RESPONSABLE' || 
-            document.body.dataset.userRole === 'ROLE_ADMIN') {
-            const editBtn = document.createElement('button');
-            editBtn.className = 'edit-btn';
-            editBtn.setAttribute('aria-label', `Modifier ${customer.name}`);
-            editBtn.onclick = function() { openEditCustomerModal(customer.id); };
+    // Initialisation de la navigation au clavier
+    function initKeyboardNavigation() {
+        // Fermer les modales avec Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                if (customerModal && !customerModal.hidden) {
+                    hideModal(customerModal);
+                } else if (deleteConfirmModal && !deleteConfirmModal.hidden) {
+                    hideModal(deleteConfirmModal);
+                }
+            }
+        });
+
+        // Soumettre le formulaire avec Enter dans le formulaire
+        customerForm.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') {
+                event.preventDefault();
+                submitCustomerForm();
+            }
+        });
+    }
+
+    // Afficher une modale
+    function showModal(modal) {
+        if (modal) {
+            lastFocusedElement = document.activeElement;
+            modal.hidden = false;
+            modal.setAttribute('aria-modal', 'true');
             
-            const editImg = document.createElement('img');
-            editImg.src = '/build/images/settings/edit.png';
-            editImg.alt = 'Modifier';
-            
-            editBtn.appendChild(editImg);
-            actionsCell.appendChild(editBtn);
+            // Focus sur le premier élément focusable
+            const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
         }
-        
-        // Vérifier si l'utilisateur a le rôle ROLE_RESPONSABLE
-        if (document.body.dataset.userRole === 'ROLE_RESPONSABLE' || 
-            document.body.dataset.userRole === 'ROLE_ADMIN') {
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.setAttribute('aria-label', `Supprimer ${customer.name}`);
-            deleteBtn.onclick = function() { confirmDeleteCustomer(customer.id, customer.name); };
+    }
+
+    // Cacher une modale
+    function hideModal(modal) {
+        if (modal) {
+            modal.hidden = true;
+            modal.setAttribute('aria-modal', 'false');
             
-            const deleteImg = document.createElement('img');
-            deleteImg.src = '/build/images/settings/delete.png';
-            deleteImg.alt = 'Supprimer';
-            
-            deleteBtn.appendChild(deleteImg);
-            actionsCell.appendChild(deleteBtn);
+            // Restaurer le focus
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+            }
         }
+    }
+
+    // Afficher une alerte
+    function showAlert(type, message) {
+        const alertContainer = document.createElement('div');
+        alertContainer.className = `alert alert-${type}`;
+        alertContainer.setAttribute('role', 'alert');
+        alertContainer.textContent = message;
         
-        // Ajouter les cellules à la ligne
-        row.appendChild(logoCell);
-        row.appendChild(nameCell);
-        row.appendChild(emailCell);
-        row.appendChild(phoneCell);
-        row.appendChild(sectorCell);
-        row.appendChild(actionsCell);
+        document.querySelector('main').prepend(alertContainer);
         
-        // Ajouter la ligne au tableau
-        tableBody.appendChild(row);
-    });
-} 
+        // Supprimer l'alerte après 5 secondes
+        setTimeout(() => {
+            alertContainer.remove();
+        }, 5000);
+    }
+
+    // Ouvrir la modale d'ajout de client
+    function openAddCustomerModal() {
+        lastFocusedElement = document.activeElement;
+        customerForm.reset();
+        document.getElementById('customerId').value = '';
+        document.getElementById('customerModalTitle').textContent = 'Ajouter un client';
+        showModal(customerModal);
+    }
+
+    // Ouvrir la modale d'édition de client
+    function openEditCustomerModal(customerId) {
+        lastFocusedElement = document.activeElement;
+        document.getElementById('customerModalTitle').textContent = 'Modifier un client';
+        
+        // Récupérer les données du client
+        fetch(`/parameter/customers/${customerId}/edit`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur lors de la récupération des données');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remplir le formulaire avec les données
+                document.getElementById('customerId').value = data.customer.id;
+                document.getElementById('customerName').value = data.customer.name;
+                document.getElementById('customerReference').value = data.customer.reference;
+                document.getElementById('customerAddressStreet').value = data.customer.address;
+                document.getElementById('customerAddressZipcode').value = data.customer.zipcode;
+                document.getElementById('customerAddressCity').value = data.customer.city;
+                document.getElementById('customerAddressCountry').value = data.customer.country;
+                document.getElementById('customerVat').value = data.customer.vat || '';
+                document.getElementById('customerSiren').value = data.customer.siren || '';
+                
+                showModal(customerModal);
+            } else {
+                throw new Error(data.message || 'Erreur lors de la récupération des données');
+            }
+        })
+        .catch(error => {
+            showAlert('error', 'Erreur: ' + error.message);
+        });
+    }
+
+    // Ouvrir la modale de confirmation de suppression
+    function openDeleteConfirmModal(customerId, customerName) {
+        lastFocusedElement = document.activeElement;
+        currentCustomerId = customerId;
+        document.getElementById('customerToDeleteName').textContent = customerName;
+        showModal(deleteConfirmModal);
+    }
+
+    // Soumettre le formulaire client
+    function submitCustomerForm() {
+        const formData = new FormData(customerForm);
+        const customerId = document.getElementById('customerId').value;
+        const url = customerId ? `/parameter/customers/${customerId}/update` : '/parameter/customers/create';
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-Token': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideModal(customerModal);
+            showAlert('success', data.message);
+            // Recharger la page pour afficher les changements
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            showAlert('error', 'Erreur: ' + error.message);
+        });
+    }
+
+    // Supprimer un client
+    function deleteCustomer(customerId) {
+        fetch(`/parameter/customers/${customerId}/delete`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            hideModal(deleteConfirmModal);
+            showAlert('success', data.message);
+            // Recharger la page pour afficher les changements
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        })
+        .catch(error => {
+            hideModal(deleteConfirmModal);
+            showAlert('error', 'Erreur: ' + error.message);
+        });
+    }
+}); 

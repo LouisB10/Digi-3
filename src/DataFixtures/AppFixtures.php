@@ -132,8 +132,9 @@ class AppFixtures extends Fixture
              ->setUserLastName($lastName)
              ->setUserEmail($email)
              ->setPassword($hashedPassword)
-             ->setUserRole($role)
-             ->setUserAvatar('/build/images/account/default-avatar.jpg');
+             ->setUserDateFrom(new \DateTime())
+             ->setUserAvatar('build/images/account/default-avatar.jpg')
+             ->setUserRole($role);
 
         return $user;
     }

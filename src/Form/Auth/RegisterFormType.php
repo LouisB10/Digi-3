@@ -117,15 +117,6 @@ class RegisterFormType extends AbstractType
                         'message' => 'Votre mot de passe doit contenir au moins un caractère spécial',
                     ]),
                 ],
-            ])
-            ->add('agreeTerms', CheckboxType::class, [
-                'label' => 'J\'accepte les conditions d\'utilisation',
-                'required' => true,
-                'constraints' => [
-                    new IsTrue([
-                        'message' => 'Vous devez accepter les conditions d\'utilisation',
-                    ]),
-                ],
             ]);
     }
 

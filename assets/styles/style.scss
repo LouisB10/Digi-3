@@ -1,6 +1,78 @@
-// Importer les styles de base, variables et utilitaires
-@use 'app' as *;
-@use 'sass:color';
+@use "app" as *;
+@use "sass:color";
+// ======================================
+// PAGE D'ACCUEIL
+// ======================================
+.home-section {
+  width: 100vw;
+  background-image: url("../images/bg.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  padding-top: 6rem;
+  gap: 4rem;
+
+  @include tablet {
+    padding-top: 4rem;
+    gap: 3rem;
+  }
+
+  @include mobile {
+    padding-top: 2rem;
+    gap: 2rem;
+  }
+
+  .home-content {
+    gap: 2rem;
+  }
+
+  .home-illustration {
+    border-radius: 20px;
+  }
+
+  h1 {
+    font-size: 5rem;
+
+    @include desktop {
+      font-size: 4rem;
+    }
+
+    @include tablet {
+      font-size: 3rem;
+    }
+
+    @include mobile {
+      font-size: 2.5rem;
+    }
+  }
+
+  p {
+    font-size: 2rem;
+    background: $primary-gradient;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    @include desktop {
+      font-size: 1.8rem;
+    }
+
+    @include tablet {
+      font-size: 1.5rem;
+    }
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.cta-button {
+  padding: 0.75rem 1.5rem;
+  background: $primary-gradient;
+  border-radius: 10px;
+  color: $dark;
+}
 
 // ======================================
 // HEADER & NAVIGATION - Version simplifiée
@@ -8,57 +80,27 @@
 header {
   width: 100%;
   background-color: $dark;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+
   nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 2rem;
-    height: 70px;
-    
+    padding: 0.5rem 2rem;
+    justify-content: space-between !important;
+
     .header-logo img {
       height: 40px;
-      transition: transform 0.2s ease;
-      
-      &:hover {
-        transform: scale(1.05);
-      }
     }
-    
+
     ul {
-      display: flex;
       gap: 2rem;
-      margin: 0 auto 0 3rem;
-      
-      @include tablet {
-        gap: 1.5rem;
-        margin-left: 2rem;
-      }
-      
-      @include mobile {
-        gap: 1rem;
-        margin-left: 1rem;
-      }
-      
+
       li a {
-        color: $white;
-        font-weight: 500;
-        font-size: 1rem;
-        padding: 0.5rem 0;
-        transition: color 0.2s ease;
-        
-        &:hover {
-          color: $blue;
-        }
+        font-size: 1.3rem;
       }
-      
+
       li.active a {
-        color: $blue;
         position: relative;
-        
+
         &::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -5px;
           left: 0;
@@ -69,21 +111,11 @@ header {
         }
       }
     }
-    
+
     .logout-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 50%;
-      
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-      }
-      
       img {
-        width: 24px;
-        height: 24px;
+        width: 40px;
+        height: 40px;
       }
     }
   }
@@ -101,11 +133,11 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  
+
   &[hidden] {
     display: none;
   }
-  
+
   &-content {
     background-color: $dark;
     border-radius: 8px;
@@ -113,71 +145,71 @@ header {
     max-width: 400px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
-  
+
   &-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
     border-bottom: 1px solid $dark-alpha-15;
-    
+
     h3 {
       margin: 0;
       font-size: 1.25rem;
     }
-    
+
     .close {
       background: none;
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
       color: $white-alpha-50;
-      
+
       &:hover {
         color: $white;
       }
     }
   }
-  
+
   &-body {
     padding: 1.5rem;
-    
+
     p.logout-subtitle {
       color: $white-alpha-50;
       font-size: 0.875rem;
     }
   }
-  
+
   &-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
     padding: 1rem 1.5rem;
     border-top: 1px solid $dark-alpha-15;
-    
+
     button {
       padding: 0.5rem 1rem;
       border-radius: 4px;
       font-weight: 500;
       cursor: pointer;
-      
+
       &:first-child {
         background-color: transparent;
         border: 1px solid $white-alpha-15;
-        
+
         &:hover {
           background-color: $dark-alpha-50;
         }
       }
-      
+
       &:last-child {
         background-color: #df6666;
         border: 1px solid #df6666;
-        
+
         &:hover {
           background-color: color.adjust(#df6666, $lightness: -10%);
         }
-        
+
         &:disabled {
           opacity: 0.7;
           cursor: not-allowed;
@@ -186,114 +218,6 @@ header {
     }
   }
 }
-
-
-// ======================================
-// PAGE D'ACCUEIL
-// ======================================
-.home-section {
-  width: 100vw;
-  background-image: url('../images/bg.png');
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  padding-top: 6rem;
-  gap: 4rem;
-  
-  @include tablet {
-    padding-top: 4rem;
-    gap: 3rem;
-  }
-  
-  @include mobile {
-    padding-top: 2rem;
-    gap: 2rem;
-  }
-
-  .home-content {
-    gap: 2rem;
-    width: 85%;
-    
-    @include mobile {
-      width: 90%;
-      gap: 1rem;
-    }
-  }
-
-  .home-illustration {
-    width: 85%;
-    border-radius: 20px;
-    
-    @include tablet {
-      width: 90%;
-    }
-    
-    @include mobile {
-      width: 95%;
-    }
-  }
-
-  h1 {
-    font-size: 5rem;
-    
-    @include desktop {
-      font-size: 4rem;
-    }
-    
-    @include tablet {
-      font-size: 3rem;
-    }
-    
-    @include mobile {
-      font-size: 2.5rem;
-      text-align: center;
-    }
-  }
-
-  p {
-    width: 85%;
-    font-size: 2rem;
-    background: $primary-gradient;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    
-    @include desktop {
-      font-size: 1.8rem;
-    }
-    
-    @include tablet {
-      font-size: 1.5rem;
-      width: 90%;
-    }
-    
-    @include mobile {
-      font-size: 1.2rem;
-      width: 95%;
-      text-align: center;
-    }
-  }
-}
-
-.cta-button {
-  padding: 0.75rem 1.5rem;
-  background: $primary-gradient;
-  border-radius: 25px;
-  color: $dark;
-  
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  @include mobile {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-}
-
 // ======================================
 // AUTHENTIFICATION
 // ======================================
@@ -315,13 +239,13 @@ body.auth-page {
   background: $dark;
   position: relative;
   z-index: 1;
-  
+
   @include tablet {
     flex-direction: column;
     overflow-y: auto;
     height: 100vh;
   }
-  
+
   @include mobile {
     flex-direction: column;
     padding: 1rem;
@@ -331,25 +255,25 @@ body.auth-page {
 
 .auth-section {
   overflow: hidden;
-  background-image: url('../images/bg.png');
+  background-image: url("../images/bg.png");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
   display: flex;
   height: 100vh;
   z-index: 2;
-  
+
   &.hidden {
     display: none !important;
   }
-  
+
   @include tablet {
     width: 100%;
     padding: 2rem 0;
     height: auto;
     min-height: 50vh;
   }
-  
+
   @include mobile {
     flex-direction: column-reverse;
     width: 100%;
@@ -360,18 +284,18 @@ body.auth-page {
   form {
     width: 50vw;
     gap: 2rem;
-    display: flex;      
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 2rem;
-    
+
     @include tablet {
       width: 90vw;
       gap: 1.5rem;
       padding: 1.5rem;
     }
-    
+
     @include mobile {
       gap: 1rem;
       padding: 1rem;
@@ -383,11 +307,11 @@ body.auth-page {
     h2 {
       font-size: 2.5rem;
       margin-bottom: 1rem;
-      
+
       @include tablet {
         font-size: 2rem;
       }
-      
+
       @include mobile {
         font-size: 1.8rem;
       }
@@ -399,7 +323,7 @@ body.auth-page {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-      
+
       @include mobile {
         max-width: 100%;
       }
@@ -409,7 +333,7 @@ body.auth-page {
       font-size: 1.2rem;
       color: $white;
       text-align: left;
-      
+
       @include mobile {
         font-size: 1rem;
       }
@@ -427,17 +351,17 @@ body.auth-page {
       &::placeholder {
         color: rgba(255, 255, 255, 0.7);
       }
-      
+
       &:focus {
         outline: 2px solid $blue;
         border-color: $blue;
       }
-      
+
       @include mobile {
         padding: 0.75rem 0.5rem;
       }
     }
-    
+
     .error {
       color: #ff6b6b;
       background-color: rgba(255, 107, 107, 0.1);
@@ -447,7 +371,7 @@ body.auth-page {
       max-width: 400px;
       text-align: left;
       margin-top: -1rem;
-      
+
       @include mobile {
         padding: 0.5rem;
         font-size: 0.9rem;
@@ -467,14 +391,14 @@ body.auth-page {
   height: 100vh;
   width: 50vw;
   background-image: linear-gradient($green, $blue);
-  
+
   @include tablet {
     width: 100vw;
     height: auto;
     min-height: 50vh;
     padding: 3rem 1rem;
   }
-  
+
   @include mobile {
     width: 100%;
     max-width: 100%;
@@ -486,11 +410,11 @@ body.auth-page {
   h3 {
     font-size: 3rem;
     color: $dark;
-    
+
     @include tablet {
       font-size: 2.5rem;
     }
-    
+
     @include mobile {
       font-size: 2rem;
     }
@@ -501,12 +425,12 @@ body.auth-page {
     font-size: 1.5rem;
     line-height: 1.6;
     width: 75%;
-    
+
     @include tablet {
       font-size: 1.3rem;
       width: 90%;
     }
-    
+
     @include mobile {
       font-size: 1.1rem;
       width: 95%;
@@ -518,19 +442,19 @@ body.auth-page {
     border-radius: 15px;
     border: 2px solid $dark;
     color: $dark;
-    
+
     transition: all 0.3s ease;
 
     &:hover {
       background: $dark;
       color: $white;
     }
-    
+
     &:focus {
       outline: 3px solid $dark;
       outline-offset: 2px;
     }
-    
+
     @include mobile {
       padding: 0.5rem 1rem;
       font-size: 0.9rem;
@@ -546,7 +470,7 @@ body.auth-page {
   color: $dark;
   font-size: 1.5rem;
   font-family: "Varela Round", sans-serif !important;
-  
+
   cursor: pointer;
   transition: all 0.3s ease;
 
@@ -554,24 +478,24 @@ body.auth-page {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   }
-  
+
   &:focus {
     outline: 3px solid $blue;
     outline-offset: 2px;
   }
-  
+
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
   }
-  
+
   @include tablet {
     padding: 0.75rem 2rem;
     font-size: 1.3rem;
   }
-  
+
   @include mobile {
     padding: 0.75rem 1.5rem;
     font-size: 1.1rem;
@@ -588,12 +512,12 @@ body.auth-page {
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    
+
     &:focus {
       outline: 2px solid $blue;
       border-radius: 50%;
     }
-    
+
     img {
       width: 20px;
       height: 20px;
@@ -603,7 +527,7 @@ body.auth-page {
       &:hover {
         opacity: 1;
       }
-      
+
       @include mobile {
         width: 16px;
         height: 16px;
@@ -616,24 +540,24 @@ body.auth-page {
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: $white-alpha-85;
-  
+
   @include mobile {
     font-size: 0.8rem;
   }
-  
+
   ul {
     list-style-type: disc;
     padding-left: 1.5rem;
     margin-top: 0.5rem;
-    
+
     li {
       margin-bottom: 0.25rem;
       text-align: left;
-      
+
       &.valid {
         color: $green;
       }
-      
+
       &.invalid {
         color: #ff6b6b;
       }
@@ -647,17 +571,17 @@ body.auth-page {
   text-decoration: underline;
   margin-top: -1rem;
   align-self: flex-end;
-  
+
   &:hover {
     color: $white;
   }
-  
+
   &:focus {
     outline: 2px solid $blue;
     color: $white;
     padding: 0.2rem;
   }
-  
+
   @include mobile {
     font-size: 0.8rem;
     margin-top: -0.5rem;
@@ -671,99 +595,112 @@ body.auth-page {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow-y: auto;
-}
+  z-index: 1000;
 
-.modal-content {
-  background-color: $dark-alpha-85;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 500px;
-  position: relative;
-  margin: auto;
-  
-  @include mobile {
-    padding: 1.5rem;
-    width: 95%;
-    margin: 10% auto;
+  &[hidden] {
+    display: none !important;
   }
-  
-  h2 {
-    margin-bottom: 2rem;
-    color: $white;
-    
-    @include mobile {
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
-    }
+
+  &-content {
+    background-color: $dark;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
-  
-  .close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
-    color: $white;
-    cursor: pointer;
-    
-    &:hover {
-      color: $blue;
-    }
-    
-    &:focus {
-      outline: 2px solid $blue;
-      color: $blue;
-    }
-  }
-  
-  form {
+
+  &-header {
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    
-    @include mobile {
-      gap: 1rem;
-    }
-    
-    label {
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid $dark-alpha-15;
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
       color: $white;
     }
-    
-    input {
-      padding: 0.75rem;
-      border-radius: 5px;
-      border: 1px solid $white-alpha-50;
-      background-color: transparent;
-      color: $white;
-      
-      &:focus {
-        outline: 2px solid $blue;
-        border-color: $blue;
-      }
-      
-      @include mobile {
-        padding: 0.5rem;
+
+    .close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: $white-alpha-50;
+
+      &:hover {
+        color: $white;
       }
     }
   }
-  
-  .success-message {
-    color: $green;
-    background-color: rgba(46, 213, 115, 0.1);
-    padding: 1rem;
-    border-radius: 5px;
-    text-align: center;
-    margin: 1rem 0;
-    
-    @include mobile {
-      padding: 0.75rem;
-      font-size: 0.9rem;
+
+  &-body {
+    padding: 1.5rem;
+    color: $white;
+
+    p {
+      margin-bottom: 1rem;
+
+      &.warning {
+        color: #ff6b6b;
+        background-color: rgba(255, 107, 107, 0.1);
+        padding: 0.75rem;
+        border-radius: 5px;
+      }
+    }
+
+    form {
+      width: 100%;
+    }
+  }
+
+  &-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid $dark-alpha-15;
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+
+      &.btn-cancel {
+        background-color: transparent;
+        border: 1px solid $white-alpha-15;
+        color: $white;
+
+        &:hover {
+          background-color: $dark-alpha-50;
+        }
+      }
+
+      &.btn-submit {
+        background-color: $blue;
+        border: 1px solid $blue;
+        color: $dark;
+
+        &:hover {
+          background-color: #243e5a;
+        }
+      }
+
+      &.btn-danger {
+        background-color: #df6666;
+        border: 1px solid #df6666;
+        color: $white;
+
+        &:hover {
+          background-color: #813c3c;
+        }
+      }
     }
   }
 }
@@ -773,226 +710,58 @@ body.auth-page {
 // ======================================
 .parameter_landing {
   width: 100%;
+  height: 90vh;
   padding: 2rem;
   gap: 2rem;
-  
-  @include tablet {
-    flex-direction: column;
-    padding: 1.5rem;
-  }
-  
-  @include mobile {
-    padding: 1rem;
-    gap: 1rem;
-  }
 }
 
 .parameter_menu {
-  width: 20%;
-  background-color: $dark-alpha-85;
-  border-radius: 10px;
-  
-  @include tablet {
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-  
+  padding: 2rem 1rem;
+  height: 100%;
+  width: 18%;
+  border-radius: 2rem;
+  background: linear-gradient(-130deg, $blue, $green);
+
   ul {
-    width: 100%;
-    padding: 1rem;
-    
-    @include tablet {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    
+    height: 100%;
+    gap: 1rem;
+    justify-content: flex-start;
+
     li {
       padding: 1rem;
-      border-radius: 5px;
-      margin-bottom: 0.5rem;
-      
-      @include tablet {
-        margin-bottom: 0;
-      }
-      
-      @include mobile {
-        padding: 0.75rem;
-        font-size: 0.9rem;
-      }
-      
+      width: 90%;
+      border-radius: 1.5rem;
+      border: 2px solid rgba(41, 41, 41, 0.15);
+      background-color: rgba(41, 41, 41, 0.15);
+      cursor: pointer;
+
       a {
-        color: $white;
-        
+        font-size: 1.5rem;
+        text-align: start;
+        color: $dark;
       }
     }
   }
 }
 
 .parameter_menu_active {
-  background-color: $blue;
-  
+  background-color: $dark;
+
   a {
-    color: $dark !important;
+    color: $white;
   }
 }
 
 .parameter_content {
-  width: 75%;
-  background-color: $dark-alpha-85;
-  border-radius: 10px;
   padding: 2rem;
-  
-  @include tablet {
-    width: 100%;
-    padding: 1.5rem;
-  }
-  
-  @include mobile {
-    padding: 1rem;
-  }
-  
+  height: 100%;
+  width: 75%;
+  border-radius: 2rem;
+  border: 2px solid $white-alpha-15;
+  background-color: $white-alpha-15;
+
   h2 {
-    color: $white;
-    margin-bottom: 1.5rem;
-    
-    @include mobile {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-  }
-}
-
-// Config section
-.config {
-  width: 100%;
-  
-  h3 {
-    color: $white;
-    margin-bottom: 1.5rem;
-    
-    @include mobile {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-  }
-}
-
-.searchBar {
-  margin-bottom: 2rem;
-  
-  @include mobile {
-    margin-bottom: 1.5rem;
-  }
-  
-  select {
-    margin-right: 1rem;
-    
-    @include mobile {
-      margin-right: 0.5rem;
-      font-size: 0.9rem;
-    }
-  }
-}
-
-#searchForm {
-  gap: 1rem;
-  
-  @include mobile {
-    gap: 0.5rem;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  input {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    border: none;
-    
-    @include mobile {
-      padding: 0.5rem;
-      width: 100%;
-    }
-  }
-  
-  button {
-    img {
-      width: 20px;
-      
-      @include mobile {
-        width: 16px;
-      }
-    }
-  }
-}
-
-.config table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 2rem;
-  
-  @include mobile {
-    margin-bottom: 1.5rem;
-  }
-  
-  thead {
-    background-color: $blue;
-    
-    tr {
-      border-radius: 10px;
-      
-      th {
-        padding: 1rem;
-        text-align: left;
-        color: $dark;
-        
-        
-        @include mobile {
-          padding: 0.75rem 0.5rem;
-          font-size: 0.9rem;
-        }
-      }
-    }
-  }
-}
-
-#parameter_table {
-  background-color: $dark-alpha-15;
-  border-radius: 10px;
-  
-  tr {
-    border-bottom: 1px solid $dark-alpha-50;
-    transition: all 0.3s ease;
-  }
-  
-  td {
-    padding: 1rem;
-    color: $white;
-    
-    @include mobile {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.9rem;
-    }
-    
-    &:nth-child(5) {
-      display: flex;
-      gap: 1rem;
-      
-      @include mobile {
-        gap: 0.5rem;
-      }
-    }
-  }
-}
-
-#deleteBtn {
-  img {
-    width: 20px;
-    
-    @include mobile {
-      width: 16px;
-    }
+    font-size: 2.5rem;
   }
 }
 
@@ -1000,88 +769,68 @@ body.auth-page {
 // COMPTE UTILISATEUR
 // ======================================
 .account-page {
-  padding: 2rem;
-  color: $white;
-  
-  @include tablet {
-    padding: 1.5rem;
-  }
-  
-  @include mobile {
-    padding: 1rem;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .account-header {
-  width: 100%;
-  margin-bottom: 2rem;
-  
-  @include mobile {
-    margin-bottom: 1.5rem;
-  }
+  justify-content: space-between;
+  padding: 1rem;
+  border: 2px solid rgba(41, 41, 41, 0.15);
+  background: rgba(41, 41, 41, 0.15);
+  border-radius: 2rem;
 }
-
-.account-info {
-  text-align: center;
-  
-  div {
-    margin-bottom: 1rem;
-  }
-  
-  p:nth-child(1) {
-    font-size: 1.5rem;
-    
-    margin-bottom: 0.5rem;
-    
-    @include mobile {
-      font-size: 1.2rem;
-    }
-  }
+.account-info,
+.account-info div {
+  gap: 1rem;
+}
+.account-info div {
+  height: 5rem;
+  justify-content: flex-start;
+}
+.account-info p:nth-child(1) {
+  width: 100%;
+  font-size: 1.5rem;
+  text-align: end;
 }
 
 #output {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
+  position: absolute;
   object-fit: cover;
-  
-  @include mobile {
-    width: 120px;
-    height: 120px;
-  }
+  border-radius: 10px;
+  height: 5rem;
+  width: 5rem;
+  z-index: 0;
 }
 
 .profile-pic {
   position: relative;
-  
+  color: transparent;
+  transition: all 0.3s ease;
+
   input {
     display: none;
   }
-  
+
   label {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    
-    img {
-      width: 40px;
-      
-      @include mobile {
-        width: 30px;
-      }
-    }
-    
+    cursor: pointer;
+    height: 5rem;
+    width: 5rem;
+    z-index: 1;
     &:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      color: rgb(250, 250, 250);
+      margin-bottom: 0;
+      transition: height .2s ease-in-out;
+      border-radius: 10px;
+
       img {
-        transform: scale(1.1);
-      }
-      
-      background-color: $blue;
-      border-radius: 50%;
-      padding: 0.5rem;
-      
-      @include mobile {
-        padding: 0.3rem;
+        height: 0rem;
+        &:hover {
+          height: 2rem;
+        }
       }
     }
   }
@@ -1089,77 +838,68 @@ body.auth-page {
 
 .account-body {
   width: 100%;
-  max-width: 800px;
-  
+  justify-content: space-between;
+  align-self: flex-start;
+  gap: 1rem;
+
   h3 {
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    
-    @include mobile {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
+    font-size: 1.75rem;
+    width: 100%;
+    text-align: start;
+
   }
 }
 
 .account-email,
 .account-password {
-  width: 100%;
-  background-color: $dark-alpha-85;
-  border-radius: 10px;
+  align-self: flex-start;
+  width: 50%;
   padding: 2rem;
-  margin-bottom: 2rem;
-  
-  @include tablet {
-    padding: 1.5rem;
-  }
-  
-  @include mobile {
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-  }
+  border: 2px solid rgba(41,41,41, 0.15);
+  background: rgba(41,41,41, 0.15);
+  border-radius: 2rem;
+  gap: 2rem;
 }
 
 .account-body form {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 1.5rem;
-  
-  @include mobile {
-    gap: 1rem;
-  }
-  
+
   div {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: center;
+    gap: 0.5rem;
   }
-  
+
   input {
-    width: 100%;
-    padding: 0.75rem;
+    width: 50%;
+    padding: 0.5rem;
+    border: 2px solid rgba(41,41,41, 0.15);
+    background: rgba(41,41,41, 0.15);
     border-radius: 5px;
-    border: none;
-    background-color: $dark-alpha-50;
     color: $white;
-    
-    @include mobile {
-      padding: 0.5rem;
-    }
+
   }
 }
 
 .btn-submit {
-  background-color: $blue;
-  color: $dark;
-  padding: 0.75rem 2rem;
-  border-radius: 5px;
-  
-  
+  font-size: 1rem;
+  width: 50%;
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(-130deg, var(--b), var(--g));
+
   &:active {
     transform: scale(0.98);
   }
-  
+
   @include mobile {
     padding: 0.5rem 1.5rem;
     font-size: 0.9rem;
@@ -1171,29 +911,31 @@ body.auth-page {
 // ======================================
 .about-page {
   padding: 2rem;
-  
+
   @include tablet {
     padding: 1.5rem;
   }
-  
+
   @include mobile {
     padding: 1rem;
   }
-  
-  p, h2, h3 {
+
+  p,
+  h2,
+  h3 {
     color: $white;
-    
+
     @include mobile {
       font-size: 0.9rem;
     }
   }
-  
+
   h2 {
     @include mobile {
       font-size: 1.5rem;
     }
   }
-  
+
   h3 {
     @include mobile {
       font-size: 1.2rem;
@@ -1205,12 +947,12 @@ body.auth-page {
   max-height: 70vh;
   overflow-y: auto;
   padding: 2rem;
-  
+
   @include tablet {
     padding: 1.5rem;
     max-height: 60vh;
   }
-  
+
   @include mobile {
     padding: 1rem;
     max-height: 50vh;
@@ -1227,395 +969,374 @@ button[type="submit"] {
   font-family: "Varela Round", sans-serif !important;
 }
 
-/* Styles pour les pages de paramètres */
-.parameter {
-    &-container {
-        padding: 1.5rem;
-        background-color: #fff;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        margin-bottom: 1.5rem;
-    }
+// ======================================
+// DASHBOARD
+// ======================================
+.dashboard-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
 
-    &-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e9ecef;
+  @include tablet {
+    flex-direction: column;
+  }
 
-        h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #343a40;
-        }
-    }
-
-    &-tabs {
-        display: flex;
-        border-bottom: 1px solid #dee2e6;
-        margin-bottom: 1.5rem;
-
-        .tab {
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            color: #6c757d;
-            font-weight: 500;
-            transition: all 0.2s ease;
-
-            &:hover {
-                color: #495057;
-            }
-
-            &.active {
-                color: #007bff;
-                border-bottom-color: #007bff;
-            }
-        }
-    }
-
-    &-tab-content {
-        .tab-pane {
-            display: none;
-
-            &.active {
-                display: block;
-            }
-        }
-    }
-
-    &-form {
-        margin-bottom: 1.5rem;
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #495057;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-            transition: border-color 0.15s ease-in-out;
-
-            &:focus {
-                border-color: #80bdff;
-                outline: 0;
-                box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-            }
-        }
-
-        .btn-submit {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: background-color 0.15s ease-in-out;
-
-            &:hover {
-                background-color: #0069d9;
-            }
-        }
-    }
-
-    &-table {
-        width: 100%;
-        border-collapse: collapse;
-
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            color: #495057;
-            font-weight: 600;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-
-            button {
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: #6c757d;
-                transition: color 0.15s ease-in-out;
-
-                &:hover {
-                    color: #343a40;
-                }
-
-                &.edit:hover {
-                    color: #007bff;
-                }
-
-                &.delete:hover {
-                    color: #dc3545;
-                }
-            }
-        }
-    }
-
-    &-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-
-        &.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        &-content {
-            background-color: #fff;
-            border-radius: 0.5rem;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-
-        &-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #dee2e6;
-
-            h3 {
-                margin: 0;
-                font-size: 1.25rem;
-                color: #343a40;
-            }
-
-            .close {
-                background: none;
-                border: none;
-                font-size: 1.5rem;
-                cursor: pointer;
-                color: #6c757d;
-                transition: color 0.15s ease-in-out;
-
-                &:hover {
-                    color: #343a40;
-                }
-            }
-        }
-
-        &-body {
-            padding: 1.5rem;
-        }
-
-        &-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #dee2e6;
-
-            button {
-                padding: 0.5rem 1rem;
-                border-radius: 0.25rem;
-                cursor: pointer;
-                transition: all 0.15s ease-in-out;
-
-                &.cancel {
-                    background-color: #f8f9fa;
-                    border: 1px solid #ced4da;
-                    color: #6c757d;
-
-                    &:hover {
-                        background-color: #e9ecef;
-                    }
-                }
-
-                &.confirm {
-                    background-color: #007bff;
-                    border: 1px solid #007bff;
-                    color: white;
-
-                    &:hover {
-                        background-color: #0069d9;
-                    }
-
-                    &.delete {
-                        background-color: #dc3545;
-                        border-color: #dc3545;
-
-                        &:hover {
-                            background-color: #c82333;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    &-search {
-        margin-bottom: 1.5rem;
-        display: flex;
-        gap: 0.5rem;
-
-        input {
-            flex: 1;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 0.25rem;
-            transition: border-color 0.15s ease-in-out;
-
-            &:focus {
-                border-color: #80bdff;
-                outline: 0;
-                box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-            }
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: background-color 0.15s ease-in-out;
-
-            &:hover {
-                background-color: #0069d9;
-            }
-        }
-    }
-
-    &-about {
-        &-version {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background-color: #f8f9fa;
-            border-radius: 0.5rem;
-            border-left: 4px solid #007bff;
-
-            h3 {
-                margin-top: 0;
-                color: #343a40;
-            }
-
-            p {
-                margin-bottom: 0;
-                color: #6c757d;
-            }
-        }
-
-        &-changelog {
-            h3 {
-                margin-bottom: 1rem;
-                color: #343a40;
-            }
-
-            .version {
-                margin-bottom: 1.5rem;
-                padding-bottom: 1.5rem;
-                border-bottom: 1px solid #dee2e6;
-
-                &:last-child {
-                    border-bottom: none;
-                }
-
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 0.75rem;
-
-                    h4 {
-                        margin: 0;
-                        color: #495057;
-                    }
-
-                    .date {
-                        color: #6c757d;
-                        font-size: 0.875rem;
-                    }
-                }
-
-                ul {
-                    margin: 0;
-                    padding-left: 1.5rem;
-                    color: #495057;
-
-                    li {
-                        margin-bottom: 0.5rem;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-                    }
-                }
-            }
-        }
-    }
+  @include mobile {
+    padding: 10px;
+    gap: 15px;
+  }
 }
 
-/* Styles pour les pages de paramètres sur mobile */
-@media (max-width: 768px) {
-    .parameter {
-        &-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        &-tabs {
-            overflow-x: auto;
-            white-space: nowrap;
-            width: 100%;
-            padding-bottom: 0.5rem;
-
-            .tab {
-                padding: 0.5rem 0.75rem;
-            }
-        }
-
-        &-table {
-            display: block;
-            overflow-x: auto;
-        }
-
-        &-modal-content {
-            width: 95%;
-        }
-
-        &-search {
-            flex-direction: column;
-        }
-    }
+.main-content {
+  flex: 2;
 }
 
+.card {
+  background: $white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+
+  @include mobile {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  img {
+    border-radius: 50%;
+    height: 80px;
+    width: 80px;
+    object-fit: cover;
+    margin-bottom: 10px;
+
+    @include mobile {
+      height: 60px;
+      width: 60px;
+    }
+  }
+}
+
+.user-details {
+  text-align: center;
+
+  h3,
+  p {
+    margin: 5px 0;
+    color: $dark;
+  }
+
+  h3 {
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+
+  p {
+    @include mobile {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.user-stats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tasks,
+.projects {
+  text-align: center;
+
+  p,
+  h3 {
+    color: $dark;
+  }
+
+  p {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+
+    @include mobile {
+      font-size: 0.8rem;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.up-arrow {
+  color: $green;
+}
+
+.down-arrow {
+  color: #ff6b6b;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-nav a {
+  display: inline-block;
+  text-decoration: none;
+  color: $white;
+  font-weight: bold;
+  background-color: $dark;
+  border: 1px solid $dark;
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-align: center;
+  transition: background-color 0.3s, color 0.3s;
+  width: 100%;
+
+  @include mobile {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    background-color: $blue;
+    color: $white;
+  }
+}
+
+.calendar-iframe {
+  width: 100%;
+  height: 400px;
+  border: 0;
+  border-radius: 8px;
+
+  @include tablet {
+    height: 350px;
+  }
+
+  @include mobile {
+    height: 250px;
+  }
+}
+
+.progress-bar {
+  background: #eaeaea;
+  border-radius: 8px;
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress {
+  display: block;
+  height: 100%;
+  background: $green;
+}
+
+.project-info {
+  h4,
+  p {
+    color: $dark;
+    margin: 5px 0;
+  }
+
+  h4 {
+    margin-bottom: 15px;
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.more-info {
+  display: inline-block;
+  margin-top: 10px;
+  color: $blue;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.recent-projects {
+  h4 {
+    color: $dark;
+    margin-bottom: 15px;
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  @include mobile {
+    gap: 10px;
+  }
+}
+
+.project-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+
+  @include mobile {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+.project-details {
+  h5 {
+    margin: 0 0 5px 0;
+    color: $dark;
+
+    @include mobile {
+      font-size: 1rem;
+    }
+  }
+
+  p {
+    margin: 2px 0;
+    color: $dark;
+    font-size: 0.9rem;
+
+    @include mobile {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.project-dates {
+  text-align: right;
+
+  p {
+    margin: 2px 0;
+    color: $dark;
+    font-size: 0.9rem;
+
+    @include mobile {
+      font-size: 0.8rem;
+      text-align: left;
+    }
+  }
+}
+
+.tasks-list {
+  h4 {
+    color: $dark;
+    margin-bottom: 15px;
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  @include mobile {
+    gap: 10px;
+  }
+}
+
+.task-item {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e9ecef;
+  }
+
+  &.status-in_progress {
+    border-left-color: $blue;
+  }
+
+  &.status-completed {
+    border-left-color: $green;
+  }
+
+  &.status-on_hold {
+    border-left-color: #ffc107;
+  }
+
+  &.status-cancelled {
+    border-left-color: #dc3545;
+  }
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+
+  h5 {
+    margin: 0;
+    color: $dark;
+
+    @include mobile {
+      font-size: 1rem;
+    }
+  }
+
+  .task-status {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background-color: #6c757d;
+    color: $white;
+
+    @include mobile {
+      font-size: 0.7rem;
+    }
+  }
+}
+
+.task-details {
+  p {
+    margin: 2px 0;
+    color: $dark;
+    font-size: 0.9rem;
+
+    @include mobile {
+      font-size: 0.8rem;
+    }
+  }
+}

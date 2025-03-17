@@ -1,421 +1,111 @@
-{% extends 'base.html.twig' %}
+{% extends 'parameter/_base_crud.html.twig' %}
 
-{% block title %}Digi-3 - Gestion des clients{% endblock %}
+{% set entity_name = 'customer' %}
+{% set entity_label = 'client' %}
+{% set entity_label_plural = 'clients' %}
+{% set page_title = 'Gestion des clients' %}
+{% set can_create = permissions.canPerform('create', 'customer') %}
+{% set can_edit = permissions.canPerform('edit', 'customer') %}
+{% set can_delete = permissions.canPerform('delete', 'customer') %}
 
-{% block body %}
-{% include 'includes/header.html.twig' %}
+{% block title %}{{ page_title }}{% endblock %}
 
-<main id="main-content" role="main">
-    <section class="parameter_landing flex">
-        {% include 'parameter/_menu.html.twig' %}
-        
-        <div class="parameter_content">
-            <div class="crud-page customers-page">
-                {# En-tête avec titre et bouton d'ajout #}
-                <div class="crud-header flex">
-                    <h1>Gestion des clients</h1>
-                    {% if is_granted('ROLE_PROJECT_MANAGER') %}
-                        <button 
-                            class="btn-add" 
-                            type="button" 
-                            aria-label="Ajouter un nouveau client"
-                            onclick="openAddCustomerModal()"
-                        >
-                            Ajouter un client
-                        </button>
-                    {% endif %}
-                </div>
+{% block table_headers %}
+    <th scope="col">Nom</th>
+    <th scope="col">Référence</th>
+    <th scope="col">Adresse</th>
+    <th scope="col">SIREN</th>
+{% endblock %}
 
-                {# Barre de recherche #}
-                <div class="searchBar flex">
-                    <form id="searchForm" class="flex">
-                        <select name="searchType" id="searchType">
-                            <option value="name">Nom</option>
-                            <option value="email">Email</option>
-                            <option value="sector">Secteur</option>
-                        </select>
-                        <input type="text" name="searchQuery" id="searchQuery" placeholder="Rechercher...">
-                        <button type="submit" class="search-btn">
-                            <img src="{{ asset('build/images/search.png') }}" alt="Rechercher">
-                        </button>
-                    </form>
-                </div>
+{% block table_body %}
+    {% for customer in customers %}
+        <tr data-id="{{ customer.id }}">
+            <td>{{ customer.customerName }}</td>
+            <td>{{ customer.customerReference }}</td>
+            <td>{{ customer.customerAddressStreet }}, {{ customer.customerAddressZipcode }} {{ customer.customerAddressCity }}</td>
+            <td>{{ customer.customerSiren }}</td>
+            {% include 'parameter/components/_table_actions.html.twig' with {
+                'id': customer.id,
+                'entity_name': 'customer',
+                'entity_label': 'client',
+                'item_name': customer.customerName,
+                'can_edit': permissions.canPerform('edit', 'customer'),
+                'can_delete': permissions.canPerform('delete', 'customer')
+            } %}
+        </tr>
+    {% endfor %}
+{% endblock %}
 
-                {# Messages flash #}
-                {% for label, messages in app.flashes %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ label }}" role="alert">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endfor %}
-
-                {# Table principale #}
-                <div class="crud-table" role="region" aria-label="Liste des clients">
-                    <table aria-describedby="table-description">
-                        <caption id="table-description">Liste des clients avec leurs informations</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col">Logo</th>
-                                <th scope="col">Nom</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Téléphone</th>
-                                <th scope="col">Secteur</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="parameter_table">
-                            {% for customer in customers %}
-                                <tr>
-                                    <td>
-                                        <img src="{{ asset(customer.logo) }}" alt="Logo de {{ customer.name }}" class="customer-logo">
-                                    </td>
-                                    <td>{{ customer.name }}</td>
-                                    <td>{{ customer.email }}</td>
-                                    <td>{{ customer.phone }}</td>
-                                    <td>{{ customer.sector }}</td>
-                                    <td class="actions">
-                                        {% if is_granted('ROLE_PROJECT_MANAGER') %}
-                                            <button class="edit-btn" onclick="openEditCustomerModal({{ customer.id }})" aria-label="Modifier {{ customer.name }}">
-                                                <img src="{{ asset('build/images/settings/edit.png') }}" alt="Modifier">
-                                            </button>
-                                        {% endif %}
-                                        {% if is_granted('ROLE_RESPONSABLE') %}
-                                            <button class="delete-btn" onclick="confirmDeleteCustomer({{ customer.id }}, '{{ customer.name }}')" aria-label="Supprimer {{ customer.name }}">
-                                                <img src="{{ asset('build/images/settings/delete.png') }}" alt="Supprimer">
-                                            </button>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
-
-{# Modales #}
-{% if is_granted('ROLE_PROJECT_MANAGER') %}
-    {# Modal d'ajout/édition de client #}
-    <div class="modal" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalTitle" aria-modal="true" hidden>
-        <div class="modal-content">
+{% block modals %}
+    {# Modal pour ajouter/modifier un client #}
+    <div class="modal" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalTitle" aria-modal="false" aria-hidden="true">
+        <div class="modal-content" role="document">
             <div class="modal-header">
                 <h2 class="modal-title" id="customerModalTitle">Ajouter un client</h2>
-                <button type="button" class="close" onclick="closeCustomerModal()" aria-label="Fermer">&times;</button>
+                <button type="button" class="close" aria-label="Fermer">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="customerForm" enctype="multipart/form-data">
-                    <input type="hidden" id="customerId" name="customerId">
+                <form id="customerForm">
+                    <input type="hidden" id="customerId" name="id">
+                    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token('customer_form') }}">
+                    
                     <div class="form-group">
-                        <label for="name">Nom de l'entreprise</label>
-                        <input type="text" id="name" name="name" required>
+                        <label for="customerName">Nom</label>
+                        <input type="text" id="customerName" name="customerName" required>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
+                        <label for="customerReference">Référence</label>
+                        <input type="text" id="customerReference" name="customerReference" required>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="phone">Téléphone</label>
-                        <input type="tel" id="phone" name="phone" required>
+                        <label for="customerAddressStreet">Adresse</label>
+                        <input type="text" id="customerAddressStreet" name="customerAddressStreet" required>
                     </div>
-                    <div class="form-group">
-                        <label for="address">Adresse</label>
-                        <textarea id="address" name="address" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="sector">Secteur d'activité</label>
-                        <select id="sector" name="sector" required>
-                            <option value="">Sélectionnez un secteur</option>
-                            <option value="Technologie">Technologie</option>
-                            <option value="Santé">Santé</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Éducation">Éducation</option>
-                            <option value="Commerce">Commerce</option>
-                            <option value="Industrie">Industrie</option>
-                            <option value="Services">Services</option>
-                            <option value="Autre">Autre</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="website">Site web</label>
-                        <input type="url" id="website" name="website">
-                    </div>
-                    <div class="form-group">
-                        <label for="logo">Logo</label>
-                        <div class="file-upload-container">
-                            <input type="file" id="logo" name="logo" accept="image/*">
-                            <div id="logo-preview" class="image-preview"></div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerAddressZipcode">Code postal</label>
+                            <input type="text" id="customerAddressZipcode" name="customerAddressZipcode" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="customerAddressCity">Ville</label>
+                            <input type="text" id="customerAddressCity" name="customerAddressCity" required>
                         </div>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="notes">Notes</label>
-                        <textarea id="notes" name="notes" rows="3"></textarea>
+                        <label for="customerAddressCountry">Pays</label>
+                        <input type="text" id="customerAddressCountry" name="customerAddressCountry" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerVat">TVA</label>
+                        <input type="text" id="customerVat" name="customerVat">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customerSiren">SIREN</label>
+                        <input type="text" id="customerSiren" name="customerSiren">
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeCustomerModal()">Annuler</button>
-                <button type="button" class="btn-submit" onclick="saveCustomer()">Enregistrer</button>
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" class="btn-submit">Enregistrer</button>
             </div>
         </div>
     </div>
 
     {# Modal de confirmation de suppression #}
-    {% if is_granted('ROLE_RESPONSABLE') %}
-        <div class="modal" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalTitle" aria-modal="true" hidden>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title" id="deleteConfirmModalTitle">Confirmer la suppression</h2>
-                    <button type="button" class="close" onclick="closeDeleteModal()" aria-label="Fermer">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir supprimer le client <span id="customerToDeleteName"></span> ?</p>
-                    <p>Cette action est irréversible.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Annuler</button>
-                    <button type="button" class="btn-danger" onclick="deleteCustomer()">Supprimer</button>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-{% endif %}
+    {% include 'parameter/components/_modal_delete.html.twig' with {
+        'entity_name': 'customer',
+        'entity_label': 'client'
+    } %}
 {% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        let customerIdToDelete = null;
-        
-        // Fonctions pour la gestion des modales
-        function openAddCustomerModal() {
-            document.getElementById('customerModalTitle').textContent = 'Ajouter un client';
-            document.getElementById('customerForm').reset();
-            document.getElementById('customerId').value = '';
-            document.getElementById('logo-preview').innerHTML = '';
-            document.getElementById('customerModal').hidden = false;
-        }
-        
-        function openEditCustomerModal(customerId) {
-            document.getElementById('customerModalTitle').textContent = 'Modifier un client';
-            document.getElementById('customerId').value = customerId;
-            
-            // Charger les données du client via AJAX
-            fetch(`/parameter/customers/${customerId}/edit`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('name').value = data.customer.name;
-                    document.getElementById('email').value = data.customer.email;
-                    document.getElementById('phone').value = data.customer.phone;
-                    document.getElementById('address').value = data.customer.address;
-                    document.getElementById('sector').value = data.customer.sector;
-                    document.getElementById('website').value = data.customer.website;
-                    document.getElementById('notes').value = data.customer.notes;
-                    
-                    // Afficher l'aperçu du logo
-                    if (data.customer.logo) {
-                        const logoPreview = document.getElementById('logo-preview');
-                        logoPreview.innerHTML = '';
-                        const img = document.createElement('img');
-                        img.src = data.customer.logo;
-                        img.alt = 'Logo actuel';
-                        logoPreview.appendChild(img);
-                    }
-                    
-                    document.getElementById('customerModal').hidden = false;
-                } else {
-                    alert('Erreur lors du chargement des données du client');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors du chargement des données');
-            });
-        }
-        
-        function closeCustomerModal() {
-            document.getElementById('customerModal').hidden = true;
-        }
-        
-        function saveCustomer() {
-            const form = document.getElementById('customerForm');
-            const formData = new FormData(form);
-            const customerId = document.getElementById('customerId').value;
-            
-            const url = customerId ? `/parameter/customers/${customerId}/update` : '/parameter/customers/create';
-            
-            fetch(url, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeCustomerModal();
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Une erreur est survenue');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de l\'enregistrement');
-            });
-        }
-        
-        function confirmDeleteCustomer(customerId, customerName) {
-            customerIdToDelete = customerId;
-            document.getElementById('customerToDeleteName').textContent = customerName;
-            document.getElementById('deleteConfirmModal').hidden = false;
-        }
-        
-        function closeDeleteModal() {
-            document.getElementById('deleteConfirmModal').hidden = true;
-        }
-        
-        function deleteCustomer() {
-            if (!customerIdToDelete) return;
-            
-            fetch(`/parameter/customers/${customerIdToDelete}/delete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token('delete-customer') }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    closeDeleteModal();
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Une erreur est survenue lors de la suppression');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la suppression');
-            });
-        }
-        
-        // Gestion de la recherche
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const searchType = document.getElementById('searchType').value;
-            const searchQuery = document.getElementById('searchQuery').value;
-            
-            fetch(`/parameter/customers/search?type=${searchType}&query=${encodeURIComponent(searchQuery)}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const tableBody = document.getElementById('parameter_table');
-                    tableBody.innerHTML = '';
-                    
-                    data.customers.forEach(customer => {
-                        const row = document.createElement('tr');
-                        
-                        // Logo
-                        const logoCell = document.createElement('td');
-                        const logoImg = document.createElement('img');
-                        logoImg.src = customer.logo;
-                        logoImg.alt = `Logo de ${customer.name}`;
-                        logoImg.className = 'customer-logo';
-                        logoCell.appendChild(logoImg);
-                        
-                        // Nom, email, téléphone, secteur
-                        const nameCell = document.createElement('td');
-                        nameCell.textContent = customer.name;
-                        
-                        const emailCell = document.createElement('td');
-                        emailCell.textContent = customer.email;
-                        
-                        const phoneCell = document.createElement('td');
-                        phoneCell.textContent = customer.phone;
-                        
-                        const sectorCell = document.createElement('td');
-                        sectorCell.textContent = customer.sector;
-                        
-                        // Actions
-                        const actionsCell = document.createElement('td');
-                        actionsCell.className = 'actions';
-                        
-                        {% if is_granted('ROLE_PROJECT_MANAGER') %}
-                        const editBtn = document.createElement('button');
-                        editBtn.className = 'edit-btn';
-                        editBtn.setAttribute('aria-label', `Modifier ${customer.name}`);
-                        editBtn.onclick = function() { openEditCustomerModal(customer.id); };
-                        
-                        const editImg = document.createElement('img');
-                        editImg.src = '{{ asset('build/images/settings/edit.png') }}';
-                        editImg.alt = 'Modifier';
-                        
-                        editBtn.appendChild(editImg);
-                        actionsCell.appendChild(editBtn);
-                        {% endif %}
-                        
-                        {% if is_granted('ROLE_RESPONSABLE') %}
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.className = 'delete-btn';
-                        deleteBtn.setAttribute('aria-label', `Supprimer ${customer.name}`);
-                        deleteBtn.onclick = function() { confirmDeleteCustomer(customer.id, customer.name); };
-                        
-                        const deleteImg = document.createElement('img');
-                        deleteImg.src = '{{ asset('build/images/settings/delete.png') }}';
-                        deleteImg.alt = 'Supprimer';
-                        
-                        deleteBtn.appendChild(deleteImg);
-                        actionsCell.appendChild(deleteBtn);
-                        {% endif %}
-                        
-                        // Ajouter les cellules à la ligne
-                        row.appendChild(logoCell);
-                        row.appendChild(nameCell);
-                        row.appendChild(emailCell);
-                        row.appendChild(phoneCell);
-                        row.appendChild(sectorCell);
-                        row.appendChild(actionsCell);
-                        
-                        // Ajouter la ligne au tableau
-                        tableBody.appendChild(row);
-                    });
-                } else {
-                    alert('Erreur lors de la recherche');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la recherche');
-            });
-        });
-        
-        // Prévisualisation du logo lors de l'upload
-        document.getElementById('logo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const logoPreview = document.getElementById('logo-preview');
-                logoPreview.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Aperçu du logo';
-                logoPreview.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        });
-    </script>
+{% block crud_scripts %}
+    {{ encore_entry_script_tags('parameter_customers') }}
 {% endblock %} 

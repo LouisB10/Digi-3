@@ -40,6 +40,7 @@ class PermissionService
             'project' => $this->canPerformOnProject($action),
             'customer' => $this->canPerformOnCustomer($action),
             'parameter' => $this->canPerformOnParameter($action),
+            'task' => $this->canPerformOnTask($action),
             default => false,
         };
         
@@ -106,6 +107,22 @@ class PermissionService
         return match ($action) {
             'view' => true, // Tout utilisateur authentifié peut voir les paramètres
             'edit' => $this->security->isGranted('ROLE_ADMIN'),
+            default => false,
+        };
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut effectuer une action sur les tâches
+     */
+    private function canPerformOnTask(string $action): bool
+    {
+        return match ($action) {
+            'view' => true, // Tout utilisateur authentifié peut voir les tâches
+            'list' => true, // Tout utilisateur authentifié peut voir la liste des tâches
+            'edit' => true, // Tout utilisateur authentifié peut modifier les tâches
+            'create' => $this->security->isGranted('ROLE_DEVELOPER'), // À partir de développeur
+            'delete' => $this->security->isGranted('ROLE_PROJECT_MANAGER'), // À partir de chef de projet
+            'assign' => $this->security->isGranted('ROLE_PROJECT_MANAGER'), // À partir de chef de projet
             default => false,
         };
     }

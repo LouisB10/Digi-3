@@ -10,23 +10,49 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\PermissionService;
 
 #[Route('/parameter/customers')]
 #[IsGranted('ROLE_USER')]
 class CustomersController extends AbstractController
 {
+    private PermissionService $permissionService;
+    
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+
     #[Route('/', name: 'app_parameter_customers_index')]
     public function index(EntityManagerInterface $entityManager): Response
     {
+        // Vérifier si l'utilisateur peut voir les clients
+        if (!$this->permissionService->canPerform('view', 'customer')) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à voir les clients.');
+        }
+        
         // Récupérer l'utilisateur courant
         $currentUser = $this->getUser();
         
         // Récupérer tous les clients
         $customers = $entityManager->getRepository(Customers::class)->findAll();
+        
+        // Récupérer les permissions de l'utilisateur
+        $permissions = [
+            'canViewUsers' => $this->permissionService->canPerform('view', 'user'),
+            'canEditUsers' => $this->permissionService->canPerform('edit', 'user'),
+            'canViewProjects' => $this->permissionService->canPerform('view', 'project'),
+            'canEditProjects' => $this->permissionService->canPerform('edit', 'project'),
+            'canViewCustomers' => $this->permissionService->canPerform('view', 'customer'),
+            'canEditCustomers' => $this->permissionService->canPerform('edit', 'customer'),
+            'canViewParameters' => $this->permissionService->canPerform('view', 'parameter'),
+            'canEditParameters' => $this->permissionService->canPerform('edit', 'parameter'),
+        ];
 
         return $this->render('parameter/customers/index.html.twig', [
             'user' => $currentUser,     // Pour le template header
-            'customers' => $customers   // Pour la liste des clients
+            'customers' => $customers,  // Pour la liste des clients
+            'permissions' => $permissions,
         ]);
     }
 
@@ -34,6 +60,14 @@ class CustomersController extends AbstractController
     #[IsGranted('ROLE_PROJECT_MANAGER')]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
+        // Vérifier si l'utilisateur peut créer des clients
+        if (!$this->permissionService->canPerform('create', 'customer')) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à créer des clients.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+        
         // Récupérer les données du formulaire
         $data = $request->request->all();
         
@@ -49,7 +83,7 @@ class CustomersController extends AbstractController
         // Créer un nouveau client
         $customer = new Customers();
         $customer->setCustomerName($data['name']);
-        $customer->setCustomerAddressStreet($data['street'] ?? null);
+        $customer->setCustomerAddressStreet($data['address'] ?? null);
         $customer->setCustomerAddressZipcode($data['zipcode'] ?? null);
         $customer->setCustomerAddressCity($data['city'] ?? null);
         $customer->setCustomerAddressCountry($data['country'] ?? null);
@@ -95,7 +129,7 @@ class CustomersController extends AbstractController
             'customer' => [
                 'id' => $customer->getId(),
                 'name' => $customer->getCustomerName(),
-                'street' => $customer->getCustomerAddressStreet(),
+                'address' => $customer->getCustomerAddressStreet(),
                 'zipcode' => $customer->getCustomerAddressZipcode(),
                 'city' => $customer->getCustomerAddressCity(),
                 'country' => $customer->getCustomerAddressCountry(),
@@ -133,7 +167,7 @@ class CustomersController extends AbstractController
         
         // Mettre à jour les informations du client
         $customer->setCustomerName($data['name']);
-        $customer->setCustomerAddressStreet($data['street'] ?? null);
+        $customer->setCustomerAddressStreet($data['address'] ?? null);
         $customer->setCustomerAddressZipcode($data['zipcode'] ?? null);
         $customer->setCustomerAddressCity($data['city'] ?? null);
         $customer->setCustomerAddressCountry($data['country'] ?? null);
@@ -174,12 +208,6 @@ class CustomersController extends AbstractController
         }
         
         try {
-            // Supprimer le logo s'il ne s'agit pas du logo par défaut
-            $logo = $customer->getCustomerLogo();
-            if ($logo && $logo !== 'build/images/logos/default.png' && file_exists($this->getParameter('kernel.project_dir').'/public/'.$logo)) {
-                unlink($this->getParameter('kernel.project_dir').'/public/'.$logo);
-            }
-            
             $entityManager->remove($customer);
             $entityManager->flush();
             

@@ -7,7 +7,7 @@
       </a>
     </li>
     
-    {% if is_granted('ROLE_PROJECT_MANAGER') %}
+    {% if permissions.canViewUsers %}
     <li class="{% if app.request.attributes.get('_route') == 'app_parameter_users_index' %}parameter_menu_active{% endif %}">
       <a href="{{ path('app_parameter_users_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_users_index' %}aria-current="page"{% endif %}>
         <i class="fas fa-users" aria-hidden="true"></i> <span>GESTION USER</span>
@@ -15,7 +15,7 @@
     </li>
     {% endif %}
     
-    {% if is_granted('ROLE_PROJECT_MANAGER') %}
+    {% if permissions.canViewCustomers %}
     <li class="{% if app.request.attributes.get('_route') == 'app_parameter_customers_index' %}parameter_menu_active{% endif %}">
       <a href="{{ path('app_parameter_customers_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_customers_index' %}aria-current="page"{% endif %}>
         <i class="fas fa-building" aria-hidden="true"></i> <span>GESTION CLIENTS</span>
@@ -23,7 +23,7 @@
     </li>
     {% endif %}
     
-    {% if is_granted('ROLE_ADMIN') %}
+    {% if permissions.canEditParameters %}
     <li class="{% if app.request.attributes.get('_route') == 'app_parameter_config_index' %}parameter_menu_active{% endif %}">
       <a href="{{ path('app_parameter_config_index') }}" {% if app.request.attributes.get('_route') == 'app_parameter_config_index' %}aria-current="page"{% endif %}>
         <i class="fas fa-tools" aria-hidden="true"></i> <span>CONFIGURATION</span>
