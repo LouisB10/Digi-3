@@ -34,6 +34,11 @@ class PermissionService
             return false;
         }
         
+        // Si l'utilisateur est admin, autoriser toutes les actions
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            return true;
+        }
+        
         // Vérifier les permissions selon l'action et la ressource
         $result = match ($resource) {
             'user' => $this->canPerformOnUser($action),

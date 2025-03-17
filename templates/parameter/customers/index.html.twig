@@ -4,9 +4,9 @@
 {% set entity_label = 'client' %}
 {% set entity_label_plural = 'clients' %}
 {% set page_title = 'Gestion des clients' %}
-{% set can_create = permissions.canPerform('create', 'customer') %}
-{% set can_edit = permissions.canPerform('edit', 'customer') %}
-{% set can_delete = permissions.canPerform('delete', 'customer') %}
+{% set can_create = permissions.canEditCustomers %}
+{% set can_edit = permissions.canEditCustomers %}
+{% set can_delete = permissions.canEditCustomers %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -29,8 +29,8 @@
                 'entity_name': 'customer',
                 'entity_label': 'client',
                 'item_name': customer.customerName,
-                'can_edit': permissions.canPerform('edit', 'customer'),
-                'can_delete': permissions.canPerform('delete', 'customer')
+                'can_edit': permissions.canEditCustomers,
+                'can_delete': permissions.canEditCustomers
             } %}
         </tr>
     {% endfor %}

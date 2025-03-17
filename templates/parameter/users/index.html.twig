@@ -6,7 +6,7 @@
 {% set page_title = 'Gestion des utilisateurs' %}
 {% set can_create = permissions.canEditUsers %}
 {% set can_edit = permissions.canEditUsers %}
-{% set can_delete = permissions.canPerform('delete', 'user') %}
+{% set can_delete = permissions.canEditUsers %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -30,7 +30,7 @@
                 'entity_label': 'utilisateur',
                 'item_name': user.userFirstName ~ ' ' ~ user.userLastName,
                 'can_edit': permissions.canEditUsers,
-                'can_delete': permissions.canPerform('delete', 'user') and app.user.id != user.id
+                'can_delete': permissions.canEditUsers and app.user.id != user.id
             } %}
         </tr>
     {% endfor %}
