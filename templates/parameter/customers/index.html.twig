@@ -29,8 +29,8 @@
                 'entity_name': 'customer',
                 'entity_label': 'client',
                 'item_name': customer.customerName,
-                'can_edit': permissions.canEditCustomers,
-                'can_delete': permissions.canEditCustomers
+                'can_edit': customerPermissions[customer.id].canEdit,
+                'can_delete': customerPermissions[customer.id].canDelete
             } %}
         </tr>
     {% endfor %}

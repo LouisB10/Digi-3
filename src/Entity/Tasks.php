@@ -71,6 +71,12 @@ class Tasks
     #[ORM\OneToMany(mappedBy: 'task', targetEntity: TasksAttachments::class, orphanRemoval: true)]
     private Collection $attachments;
 
+    #[ORM\Column(type: Types::INTEGER, nullable: false, options: ['default' => 1])]
+    private int $taskRank = 1;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: false, options: ['default' => 1])]
+    private int $taskColumnRank = 1;
+
     public function __construct()
     {
         $this->taskUpdatedAt = new \DateTime();
@@ -289,5 +295,27 @@ class Tasks
             self::TASK_TYPE_FEATURE,
             self::TASK_TYPE_HIGHTEST,
         ];
+    }
+
+    public function getTaskRank(): int
+    {
+        return $this->taskRank;
+    }
+
+    public function setTaskRank(int $taskRank): static
+    {
+        $this->taskRank = $taskRank;
+        return $this;
+    }
+
+    public function getTaskColumnRank(): int
+    {
+        return $this->taskColumnRank;
+    }
+
+    public function setTaskColumnRank(int $taskColumnRank): static
+    {
+        $this->taskColumnRank = $taskColumnRank;
+        return $this;
     }
 }

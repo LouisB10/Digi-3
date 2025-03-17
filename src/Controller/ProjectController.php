@@ -23,17 +23,19 @@ class ProjectController extends AbstractController
         $this->permissionService = $permissionService;
     }
     
-    #[Route('/management-project/{id}', name: 'app_management_project')]
+    #[Route('/management-project/{id<\d+>?}', name: 'app_management_project')]
     public function managementProject(
         ProjectRepository $projectRepository,
         Request $request,
         EntityManagerInterface $entityManager,
-        ?int $id = null
+        ?string $id = null
     ): Response {
         // Vérifier si l'utilisateur peut éditer des projets
         if (!$this->permissionService->canPerform('edit', 'project')) {
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à gérer les projets.');
         }
+        
+        $id = $id !== null ? (int) $id : null;
         
         // Création d'un nouveau projet
         $project = new Project();
@@ -41,6 +43,7 @@ class ProjectController extends AbstractController
     
         // Création d'une nouvelle tâche
         $task = new Tasks();
+        $task->setTaskRank(1); // Définir la valeur par défaut du taskRank
         $taskForm = $this->createForm(TaskType::class, $task);
     
         // Traiter la soumission des formulaires
@@ -84,13 +87,15 @@ class ProjectController extends AbstractController
     
             if ($currentProject) {
                 $task->setTaskProject($currentProject);
+                
+                $entityManager->persist($task);
+                $entityManager->flush();
+                
+                $this->updateTaskRank($entityManager, $currentProject);
             } else {
                 $this->addFlash('error', 'Aucun projet sélectionné pour cette tâche.');
                 return $this->redirectToRoute('app_management_project');
             }
-    
-            $entityManager->persist($task);
-            $entityManager->flush();
     
             $this->addFlash('success', 'Tâche ajoutée avec succès !');
             return $this->redirectToRoute('app_management_project', ['id' => $currentProject->getId()]);
@@ -109,6 +114,16 @@ class ProjectController extends AbstractController
                 'canAssignTask' => $this->permissionService->canPerform('assign', 'task'),
             ],
         ]);
+    }
+
+    private function updateTaskRank(EntityManagerInterface $entityManager, Project $project): void
+    {
+        $tasks = $project->getTasks();
+        $rank = 1;
+        foreach ($tasks as $task) {
+            $task->setTaskRank($rank);
+        }
+        $entityManager->flush();
     }
 
     #[Route('/management-project/delete/{id}', name: 'app_project_delete', methods: ['POST'])]
@@ -158,6 +173,51 @@ class ProjectController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['success' => 'Statut de la tâche mis à jour'], Response::HTTP_OK);
+    }
+    
+    #[Route('/management-project/update-task-position', name: 'app_update_task_position', methods: ['POST'])]
+    public function updateTaskPosition(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier si l'utilisateur peut modifier des tâches
+        if (!$this->permissionService->canPerform('edit', 'task')) {
+            return $this->json(['error' => 'Vous n\'êtes pas autorisé à modifier des tâches.'], Response::HTTP_FORBIDDEN);
+        }
+        
+        $content = json_decode($request->getContent(), true);
+    
+        if (!isset($content['taskId'], $content['newColumn'], $content['taskOrder'])) {
+            return $this->json(['error' => 'Données invalides'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        $columnRanks = [
+            'a-faire' => 1,
+            'bloque' => 2,
+            'en-cours' => 3,
+            'terminee' => 4,
+        ];
+    
+        if (!isset($columnRanks[$content['newColumn']])) {
+            return $this->json(['error' => 'Colonne invalide'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        $task = $entityManager->getRepository(Tasks::class)->find($content['taskId']);
+        if (!$task) {
+            return $this->json(['error' => 'Tâche introuvable'], Response::HTTP_NOT_FOUND);
+        }
+    
+        $task->setTaskColumnRank($columnRanks[$content['newColumn']]);
+        
+        foreach ($content['taskOrder'] as $taskData) {
+            $taskToUpdate = $entityManager->getRepository(Tasks::class)->find($taskData['id']);
+            if ($taskToUpdate) {
+                $taskToUpdate->setTaskRank($taskData['rank']);
+                $entityManager->persist($taskToUpdate);
+            }
+        }
+    
+        $entityManager->flush();
+    
+        return $this->json(['success' => 'Position et colonne des tâches mises à jour'], Response::HTTP_OK);
     }
 
     #[Route('/projects', name: 'app_projects_list')]

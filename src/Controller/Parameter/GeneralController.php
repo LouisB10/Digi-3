@@ -280,11 +280,16 @@ class GeneralController extends AbstractController
                 if (!mkdir($uploadDir, 0777, true) && !is_dir($uploadDir)) {
                     throw new FileException(sprintf('Le répertoire "%s" n\'a pas pu être créé', $uploadDir));
                 }
+                // S'assurer que les permissions sont correctes
+                chmod($uploadDir, 0777);
             }
             
             // Vérifier les permissions du dossier
             if (!is_writable($uploadDir)) {
-                throw new FileException(sprintf('Le répertoire "%s" n\'est pas accessible en écriture', $uploadDir));
+                chmod($uploadDir, 0777); // Essayer de rendre le dossier accessible en écriture
+                if (!is_writable($uploadDir)) {
+                    throw new FileException(sprintf('Le répertoire "%s" n\'est pas accessible en écriture', $uploadDir));
+                }
             }
             
             // Déplacer le fichier
@@ -295,7 +300,8 @@ class GeneralController extends AbstractController
             
             // Supprimer l'ancien avatar s'il ne s'agit pas de l'avatar par défaut
             $oldAvatar = $user->getUserAvatar();
-            if ($oldAvatar && $oldAvatar !== 'uploads/avatar/default.png' && file_exists($this->getParameter('kernel.project_dir').'/public/'.$oldAvatar)) {
+            $defaultAvatars = ['uploads/avatar/default.png', 'build/images/account/default-avatar.jpg'];
+            if ($oldAvatar && !in_array($oldAvatar, $defaultAvatars) && file_exists($this->getParameter('kernel.project_dir').'/public/'.$oldAvatar)) {
                 unlink($this->getParameter('kernel.project_dir').'/public/'.$oldAvatar);
             }
             

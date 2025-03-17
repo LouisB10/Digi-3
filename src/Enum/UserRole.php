@@ -62,7 +62,7 @@ enum UserRole: string
     /**
      * Obtient le poids hiérarchique d'un rôle (plus le nombre est élevé, plus le rôle est important)
      */
-    private static function getRoleWeight(UserRole $role): int
+    public static function getRoleWeight(UserRole $role): int
     {
         return match($role) {
             self::ADMIN => 50,

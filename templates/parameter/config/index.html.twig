@@ -4,6 +4,7 @@
 
 {% block body %}
 {% include 'includes/header.html.twig' %}
+{% set permissions = getUserPermissions() %}
 
 <main id="main-content" role="main">
     <section class="parameter_landing flex">

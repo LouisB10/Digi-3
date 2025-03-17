@@ -37,6 +37,15 @@ class CustomersController extends AbstractController
         // Récupérer tous les clients
         $customers = $entityManager->getRepository(Customers::class)->findAll();
         
+        // Préparer les permissions pour chaque client
+        $customerPermissions = [];
+        foreach ($customers as $customer) {
+            $customerPermissions[$customer->getId()] = [
+                'canEdit' => $this->permissionService->canEditCustomer($customer),
+                'canDelete' => $this->permissionService->canDeleteCustomer($customer)
+            ];
+        }
+        
         // Récupérer les permissions de l'utilisateur
         $permissions = [
             'canViewUsers' => $this->permissionService->canPerform('view', 'user'),
@@ -53,6 +62,7 @@ class CustomersController extends AbstractController
             'user' => $currentUser,     // Pour le template header
             'customers' => $customers,  // Pour la liste des clients
             'permissions' => $permissions,
+            'customerPermissions' => $customerPermissions // Permissions spécifiques à chaque client
         ]);
     }
 

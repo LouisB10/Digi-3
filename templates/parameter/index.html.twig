@@ -8,6 +8,7 @@
 
 {% block body %}
 {% include 'includes/header.html.twig' with {'user': user} %}
+{% set permissions = getUserPermissions() %}
 <section class="parameter_landing flex">
   {% include 'parameter/_menu.html.twig' %}
   <div class="parameter_content">
@@ -27,7 +28,7 @@
                 alt="Icone changement de photo de profil"
               />
             </label>
-            <input id="file" type="file" name="profile_picture" data-url="{{ path('app_parameter_general_update_profile') }}" />
+            <input id="file" type="file" name="profile_picture" accept="image/jpeg,image/png,image/gif,image/webp" data-url="{{ path('app_parameter_general_update_profile') }}" />
             <img
               id="output"
               src="{{ asset(user.userAvatar) }}"

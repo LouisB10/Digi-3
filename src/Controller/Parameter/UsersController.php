@@ -39,6 +39,15 @@ class UsersController extends AbstractController
         // Récupérer tous les utilisateurs
         $users = $entityManager->getRepository(User::class)->findAll();
 
+        // Préparer les permissions pour chaque utilisateur
+        $userPermissions = [];
+        foreach ($users as $user) {
+            $userPermissions[$user->getId()] = [
+                'canEdit' => $this->permissionService->canEditUser($user),
+                'canDelete' => $this->permissionService->canDeleteUser($user)
+            ];
+        }
+
         // Récupérer les rôles disponibles pour le formulaire
         $availableRoles = [];
         foreach (UserRole::cases() as $role) {
@@ -62,6 +71,7 @@ class UsersController extends AbstractController
             'users' => $users,            // Pour la liste des utilisateurs
             'available_roles' => $availableRoles, // Pour le formulaire
             'permissions' => $permissions,
+            'userPermissions' => $userPermissions // Permissions spécifiques à chaque utilisateur
         ]);
     }
 
@@ -187,18 +197,23 @@ class UsersController extends AbstractController
             ], 404);
         }
         
-        // Vérifier les permissions basées sur les rôles
-        if (!$this->isGranted('ROLE_ADMIN')) {
-            // Seuls les administrateurs peuvent modifier tous les utilisateurs
-            // Les autres utilisateurs ne peuvent modifier que les utilisateurs avec un rôle inférieur
-            $currentUser = $this->getUser();
-            if ($currentUser instanceof User && $currentUser->getId() !== $user->getId()) {
-                if (!$this->isGranted('ROLE_RESPONSABLE')) {
-                    return $this->json([
-                        'success' => false,
-                        'message' => 'Vous n\'avez pas les droits pour modifier cet utilisateur.'
-                    ], 403);
-                }
+        // Vérifier si l'utilisateur a les droits pour modifier cet utilisateur
+        $currentUser = $this->getUser();
+        if ($currentUser instanceof User && $user->getUserRole() && $currentUser->getUserRole()) {
+            // Si l'utilisateur à modifier est un admin et que l'utilisateur courant n'est pas admin
+            if ($user->getUserRole() === UserRole::ADMIN && $currentUser->getUserRole() !== UserRole::ADMIN) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Vous n\'avez pas les droits nécessaires pour modifier un administrateur.'
+                ], 403);
+            }
+            
+            // Vérifier la hiérarchie des rôles
+            if (UserRole::getRoleWeight($user->getUserRole()) > UserRole::getRoleWeight($currentUser->getUserRole())) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas modifier un utilisateur avec un rôle supérieur au vôtre.'
+                ], 403);
             }
         }
         
@@ -226,13 +241,37 @@ class UsersController extends AbstractController
                 $user->setPassword($hashedPassword);
             }
             
-            // Mettre à jour le rôle si l'utilisateur courant est admin
-            if ($this->isGranted('ROLE_ADMIN')) {
+            // Mettre à jour le rôle si l'utilisateur courant a les droits nécessaires
+            if (isset($data['role'])) {
                 try {
-                    $role = UserRole::from($data['role']);
-                    $user->setUserRole($role);
+                    $newRole = UserRole::from($data['role']);
+                    
+                    // Vérifier que l'utilisateur courant peut attribuer ce rôle
+                    if ($currentUser instanceof User && $currentUser->getUserRole()) {
+                        // Un utilisateur ne peut pas attribuer un rôle supérieur au sien
+                        if (UserRole::getRoleWeight($newRole) > UserRole::getRoleWeight($currentUser->getUserRole())) {
+                            return $this->json([
+                                'success' => false,
+                                'message' => 'Vous ne pouvez pas attribuer un rôle supérieur au vôtre.'
+                            ], 403);
+                        }
+                        
+                        // Seul un admin peut modifier le rôle d'un autre admin
+                        if ($user->getUserRole() === UserRole::ADMIN && $currentUser->getUserRole() !== UserRole::ADMIN) {
+                            return $this->json([
+                                'success' => false,
+                                'message' => 'Seul un administrateur peut modifier le rôle d\'un autre administrateur.'
+                            ], 403);
+                        }
+                        
+                        $user->setUserRole($newRole);
+                    }
                 } catch (\ValueError $e) {
                     // Si le rôle n'est pas valide, ne pas le modifier
+                    return $this->json([
+                        'success' => false,
+                        'message' => 'Le rôle spécifié n\'est pas valide.'
+                    ], 400);
                 }
             }
             
@@ -252,13 +291,13 @@ class UsersController extends AbstractController
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.'
+                'message' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur: ' . $e->getMessage()
             ], 500);
         }
     }
 
     #[Route('/{id}/delete', name: 'app_parameter_users_delete', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_RESPONSABLE')]
     public function delete(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
         // Récupérer l'utilisateur à supprimer
@@ -278,6 +317,25 @@ class UsersController extends AbstractController
                 'success' => false,
                 'message' => 'Vous ne pouvez pas supprimer votre propre compte.'
             ], 403);
+        }
+        
+        // Vérifier que l'utilisateur courant a un rôle supérieur ou égal à celui de l'utilisateur à supprimer
+        if ($currentUser instanceof User && $user->getUserRole() && $currentUser->getUserRole()) {
+            // Si l'utilisateur à supprimer est un admin et que l'utilisateur courant n'est pas admin
+            if ($user->getUserRole() === UserRole::ADMIN && $currentUser->getUserRole() !== UserRole::ADMIN) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Vous n\'avez pas les droits nécessaires pour supprimer un administrateur.'
+                ], 403);
+            }
+            
+            // Vérifier la hiérarchie des rôles
+            if (UserRole::getRoleWeight($user->getUserRole()) > UserRole::getRoleWeight($currentUser->getUserRole())) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez pas supprimer un utilisateur avec un rôle supérieur au vôtre.'
+                ], 403);
+            }
         }
         
         try {

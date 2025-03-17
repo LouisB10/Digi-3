@@ -35,6 +35,16 @@ class DashboardController extends AbstractController
             'roles' => $user->getRoles(),
         ]);
 
+        // Vérifier si l'utilisateur a accès au dashboard avec des droits d'édition
+        $canEditDashboard = $this->permissionService->canPerform('edit', 'dashboard');
+        
+        // Si l'utilisateur est un développeur ou lead développeur, il ne peut que voir le dashboard
+        if (!$canEditDashboard && !$this->isGranted('ROLE_PROJECT_MANAGER') && !$this->isGranted('ROLE_RESPONSABLE') && !$this->isGranted('ROLE_ADMIN')) {
+            $this->logger->info('Accès au dashboard en lecture seule', [
+                'user_email' => $user->getUserIdentifier(),
+            ]);
+        }
+
         // Récupérer les permissions de l'utilisateur pour les afficher dans le dashboard
         $userPermissions = [
             'canViewUsers' => $this->permissionService->canPerform('view', 'user'),
@@ -45,6 +55,7 @@ class DashboardController extends AbstractController
             'canEditCustomers' => $this->permissionService->canPerform('edit', 'customer'),
             'canViewParameters' => $this->permissionService->canPerform('view', 'parameter'),
             'canEditParameters' => $this->permissionService->canPerform('edit', 'parameter'),
+            'canEditDashboard' => $canEditDashboard,
         ];
         
         // Récupérer les statistiques des projets

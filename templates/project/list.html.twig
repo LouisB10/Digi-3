@@ -4,68 +4,24 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        .project-card {
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
-        
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .project-header {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .project-body {
-            padding: 15px;
-        }
-        
-        .project-footer {
-            padding: 15px;
-            border-top: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .status-new { background-color: #3498db; }
-        .status-in-progress { background-color: #2ecc71; }
-        .status-on-hold { background-color: #f39c12; }
-        .status-completed { background-color: #9b59b6; }
-        .status-cancelled { background-color: #e74c3c; }
-        
-        .filter-section {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-    </style>
+    {{ encore_entry_link_tags('project_list') }}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('project') }}
+    {{ encore_entry_script_tags('project_list') }}
 {% endblock %}
 
 {% block body %}
     {% include 'includes/header.html.twig' %}
+    {% set permissions = getUserPermissions() %}
     
-    <main class="container mt-4">
-        <h1 class="mb-4">Gestion des projets</h1>
+    <main class="container mt-4" role="main">
+        <h1 class="mb-4" id="page-title">Gestion des projets</h1>
         
-        <div class="filter-section">
+        <div class="filter-section" role="search" aria-labelledby="filter-heading">
+            <h2 id="filter-heading" class="visually-hidden">Filtres de recherche</h2>
             <form method="get" class="row g-3">
                 <div class="col-md-4">
                     <label for="status" class="form-label">Statut</label>
@@ -93,60 +49,64 @@
                 
                 <div class="col-md-4 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary me-2">Filtrer</button>
-                    <a href="{{ path('app_projects_list') }}" class="btn btn-secondary">Réinitialiser</a>
+                    <a href="{{ path('app_projects_list') }}" class="btn btn-secondary" role="button">Réinitialiser</a>
                 </div>
             </form>
         </div>
         
         {% if permissions.canCreateProject %}
             <div class="mb-4 text-end">
-                <a href="{{ path('app_management_project') }}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Nouveau projet
+                <a href="{{ path('app_management_project') }}" class="btn btn-success" role="button" aria-label="Créer un nouveau projet">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Nouveau projet
                 </a>
             </div>
         {% endif %}
         
         {% if projects|length > 0 %}
-            <div class="row">
+            <div class="row" role="list" aria-label="Liste des projets">
                 {% for project in projects %}
-                    <div class="col-md-6 col-lg-4">
+                    <div class="col-md-6 col-lg-4" role="listitem">
                         <div class="project-card">
                             <div class="project-header">
-                                <h5 class="mb-0">{{ project.projectName }}</h5>
-                                <span class="status-badge status-{{ project.projectStatus|replace({'_': '-'}) }}">
+                                <h5 class="mb-0" id="project-title-{{ project.id }}">{{ project.projectName }}</h5>
+                                <span class="status-badge status-{{ project.projectStatus|replace({'_': '-'}) }}" aria-label="Statut: {{ project.projectStatus ? project.projectStatus.getLabel() : 'Nouveau' }}">
                                     {{ project.projectStatus ? project.projectStatus.getLabel() : 'Nouveau' }}
                                 </span>
                             </div>
                             <div class="project-body">
                                 <p class="mb-2">
-                                    <strong>Client:</strong> {{ project.projectCustomer.customerName }}
+                                    <strong id="client-label-{{ project.id }}">Client:</strong> <span aria-labelledby="client-label-{{ project.id }}">{{ project.projectCustomer.customerName }}</span>
                                 </p>
                                 <p class="mb-2">
-                                    <strong>Chef de projet:</strong> {{ project.projectManager.userFirstName }} {{ project.projectManager.userLastName }}
+                                    <strong id="manager-label-{{ project.id }}">Chef de projet:</strong> <span aria-labelledby="manager-label-{{ project.id }}">{{ project.projectManager.userFirstName }} {{ project.projectManager.userLastName }}</span>
                                 </p>
                                 <p class="mb-2">
-                                    <strong>Date de début:</strong> 
+                                    <strong id="start-date-label-{{ project.id }}">Date de début:</strong> 
+                                    <span aria-labelledby="start-date-label-{{ project.id }}">
                                     {% if project.projectStartDate %}
                                         {{ project.projectStartDate|date('d/m/Y') }}
                                     {% else %}
                                         Non définie
                                     {% endif %}
+                                    </span>
                                 </p>
                                 <p class="mb-0">
-                                    <strong>Date cible:</strong> 
+                                    <strong id="target-date-label-{{ project.id }}">Date cible:</strong> 
+                                    <span aria-labelledby="target-date-label-{{ project.id }}">
                                     {% if project.projectTargetDate %}
                                         {{ project.projectTargetDate|date('d/m/Y') }}
                                     {% else %}
                                         Non définie
                                     {% endif %}
+                                    </span>
                                 </p>
                             </div>
                             <div class="project-footer">
                                 <div>
-                                    <span class="badge bg-info">{{ project.tasks|length }} tâches</span>
+                                    <span class="badge bg-info" aria-label="{{ project.tasks|length }} tâches associées">{{ project.tasks|length }} tâches</span>
                                 </div>
                                 <div>
-                                    <a href="{{ path('app_management_project', {'id': project.id}) }}" class="btn btn-sm btn-primary">
+                                    <a href="{{ path('app_management_project', {'id': project.id}) }}" class="btn btn-sm btn-primary" role="button" aria-label="Gérer le projet {{ project.projectName }}">
                                         Gérer
                                     </a>
                                 </div>
@@ -156,23 +116,9 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="alert alert-info">
+            <div class="alert alert-info" role="alert">
                 Aucun projet ne correspond à vos critères de recherche.
             </div>
         {% endif %}
     </main>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Soumettre le formulaire automatiquement lorsqu'un filtre change
-            document.querySelectorAll('#status, #customer').forEach(function(select) {
-                select.addEventListener('change', function() {
-                    this.form.submit();
-                });
-            });
-        });
-    </script>
 {% endblock %} 

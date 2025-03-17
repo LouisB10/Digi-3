@@ -46,8 +46,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email(message: 'L\'email {{ value }} n\'est pas un email valide.')]
     private ?string $userEmail = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $userAvatar = 'uploads/avatar/default.png';
+    #[ORM\Column(length: 255)]
+    private ?string $userAvatar = 'build/images/account/default-avatar.jpg';
 
     #[ORM\Column(name: 'user_role', type: 'string', length: 50)]
     private ?string $userRole = UserRole::USER->value;

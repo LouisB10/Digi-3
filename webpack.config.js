@@ -31,7 +31,9 @@ Encore
     .addEntry('parameter_users', './assets/js/parameter/users.js')
     .addEntry('parameter_customers', './assets/js/parameter/customers.js')
     .addEntry('dashboard', './assets/js/dashboard.js')
-    .addEntry('project', './assets/js/project.js')
+    .addEntry('project', './assets/js/project/project.js')
+    .addEntry('project_list', './assets/js/project/list.js')
+    .addEntry('project_management', './assets/js/project/management.js')
     .addStyleEntry('styles', './assets/styles/style.scss')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)

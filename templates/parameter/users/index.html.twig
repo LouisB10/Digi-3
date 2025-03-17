@@ -24,13 +24,14 @@
             <td>{{ user.userFirstName }}</td>
             <td>{{ user.userEmail }}</td>
             <td>{{ user.userRole ? user.userRole.getLabel() : 'Utilisateur' }}</td>
+            
             {% include 'parameter/components/_table_actions.html.twig' with {
                 'id': user.id,
                 'entity_name': 'user',
                 'entity_label': 'utilisateur',
                 'item_name': user.userFirstName ~ ' ' ~ user.userLastName,
-                'can_edit': permissions.canEditUsers,
-                'can_delete': permissions.canEditUsers and app.user.id != user.id
+                'can_edit': userPermissions[user.id].canEdit,
+                'can_delete': userPermissions[user.id].canDelete
             } %}
         </tr>
     {% endfor %}

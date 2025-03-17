@@ -24,6 +24,21 @@ $primary: $blue;
 $primary-gradient: linear-gradient(90deg, $blue, $green);
 $header-gradient: linear-gradient(-130deg, $blue, $green);
 
+// Variables CSS pour le dashboard
+:root {
+  --primary-color: #{$blue};
+  --secondary-color: #{$green};
+  --accent-color: #{$blue};
+  --text-primary: #{$dark};
+  --text-secondary: #{rgba($dark, 0.7)};
+  --card-bg: #{$white};
+  --border-radius: 12px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --transition: all 0.3s ease;
+  --success-color: #{$green};
+  --danger-color: #ff6b6b;
+}
+
 // Breakpoints pour le responsive
 $mobile: 576px;
 $tablet: 768px;

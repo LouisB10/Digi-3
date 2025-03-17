@@ -2,103 +2,30 @@
 
 {% block title %}Digi 3 - Détails de la tâche{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('styles') }}
+{% endblock %}
+
 {% block body %}
     {% include 'includes/header.html.twig' %}
     
-    <style>
-        /* Global Styles */
-        body {
-            background-color: #3C3C3C;
-            color: #fff;
-            font-family: Arial, sans-serif;
-        }
-
-        .task-card {
-            background-color: #3C3C3C;
-            border: 2px solid #fff; /* White border */
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            padding: 30px;
-            margin: 30px auto;
-            max-width: 800px;
-            font-family: 'Arial', sans-serif;
-            color: #fff;
-        }
-
-        .task-card h1 {
-            font-size: 26px;
-            color: #00FFCC; /* Greenish color for the title */
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .task-info p {
-            font-size: 18px;
-            margin: 12px 0;
-            color: #fff; /* White color for text */
-        }
-
-        .task-info strong {
-            color: #00FFCC; /* Greenish color for strong labels */
-        }
-
-        .task-info p span {
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .task-info p:last-child {
-            margin-bottom: 0;
-        }
-
-        .back-to-project {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 24px;
-            background-color: #00FFCC;
-            color: #3C3C3C; /* Dark text for the button */
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .back-to-project:hover {
-            background-color: #3C3C3C;
-            color: #fff;
-        }
-
-        /* Responsiveness */
-        @media (max-width: 768px) {
-            .task-card {
-                padding: 20px;
-                margin: 15px;
-            }
-
-            .task-card h1 {
-                font-size: 22px;
-            }
-
-            .task-info p {
-                font-size: 16px;
-            }
-
-            .back-to-project {
-                padding: 10px 20px;
-            }
-        }
-    </style>
-
-    <div class="task-card">
-        <h1>{{ task.taskName }}</h1>
-        <div class="task-info">
-            <p><strong>Description :</strong> {{ task.taskDescription }}</p>
-            <p><strong>Type :</strong> {{ task.taskType }}</p>
-            <p><strong>Statut :</strong> {{ task.taskStatus }}</p>
-            <p><strong>Catégorie :</strong> {{ task.taskCategory }}</p>
-            <p><strong>Date de début :</strong> <span>{{ task.taskDateFrom ? task.taskDateFrom.format('d-m-Y') : 'Non définie' }}</span></p>
-            <p><strong>Date de fin :</strong> <span>{{ task.taskDateTo ? task.taskDateTo.format('d-m-Y') : 'Non définie' }}</span></p>
+    <main role="main">
+        <div class="task-card" aria-labelledby="task-title">
+            <h1 id="task-title">{{ task.taskName }}</h1>
+            <div class="task-info">
+                <p><strong id="desc-label">Description :</strong> <span aria-labelledby="desc-label">{{ task.taskDescription }}</span></p>
+                <p><strong id="type-label">Type :</strong> <span aria-labelledby="type-label">{{ task.taskType }}</span></p>
+                <p><strong id="status-label">Statut :</strong> <span aria-labelledby="status-label">{{ task.taskStatus }}</span></p>
+                <p><strong id="category-label">Catégorie :</strong> <span aria-labelledby="category-label">{{ task.taskCategory }}</span></p>
+                <p><strong id="start-date-label">Date de début :</strong> <span aria-labelledby="start-date-label">{{ task.taskDateFrom ? task.taskDateFrom.format('d-m-Y') : 'Non définie' }}</span></p>
+                <p><strong id="end-date-label">Date de fin :</strong> <span aria-labelledby="end-date-label">{{ task.taskDateTo ? task.taskDateTo.format('d-m-Y') : 'Non définie' }}</span></p>
+            </div>
+            <a class="back-to-project" href="{{ path('app_management_project', { 'id': task.project.id }) }}" aria-label="Retour au projet {{ task.project.projectName }}">Retour au projet</a>
         </div>
-        <a class="back-to-project" href="{{ path('app_management_project', { 'id': task.project.id }) }}">Retour au projet</a>
-    </div>
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
 {% endblock %}

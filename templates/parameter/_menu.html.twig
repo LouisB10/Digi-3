@@ -1,4 +1,5 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+{% set permissions = getUserPermissions() %}
 <div class="parameter_menu">
   <ul class="flex-col">
     <li class="{% if app.request.attributes.get('_route') == 'app_parameter_general_index' %}parameter_menu_active{% endif %}">

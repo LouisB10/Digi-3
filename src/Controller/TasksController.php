@@ -81,22 +81,32 @@ class TasksController extends AbstractController
         if (!$task) {
             return $this->json(['error' => 'Tâche non trouvée'], 404);
         }
+        
+        // Vérifier si l'utilisateur a le droit de modifier les tâches
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur non authentifié'], 401);
+        }
+        
+        // Les développeurs peuvent uniquement mettre à jour les tâches, pas en créer
+        if (!$this->isGranted('ROLE_LEAD_DEVELOPER') && !$this->isGranted('ROLE_PROJECT_MANAGER') && 
+            !$this->isGranted('ROLE_RESPONSABLE') && !$this->isGranted('ROLE_ADMIN')) {
+            // Vérifier si le développeur est assigné à cette tâche
+            if ($task->getTaskAssignedTo() !== $user) {
+                return $this->json(['error' => 'Vous n\'êtes pas autorisé à commenter cette tâche'], 403);
+            }
+        }
 
         $content = $request->request->get('content');
         if (empty($content)) {
             return $this->json(['error' => 'Le contenu du commentaire ne peut pas être vide'], 400);
         }
 
-        /** @var User $user */
-        $user = $this->security->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Utilisateur non authentifié'], 401);
-        }
-
         $comment = new TasksComments();
         $comment->setTask($task)
-                ->setUser($user)
-                ->setContent($content);
+                ->setContent($content)
+                ->setUser($user);
 
         $this->entityManager->persist($comment);
         $this->entityManager->flush();

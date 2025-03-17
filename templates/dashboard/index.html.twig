@@ -1,10 +1,9 @@
-{% extends 'base.html.twig' %} 
+{% extends 'base.html.twig' %}
 
-{% block title %}Digi-3 - Dashboard{% endblock %} 
+{% block title %}Digi-3 - Dashboard{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
-    {# Les styles sont maintenant dans style.scss #}
 {% endblock %}
 
 {% block javascripts %}
@@ -12,14 +11,14 @@
     {{ encore_entry_script_tags('dashboard') }}
 {% endblock %}
 
-{% block body %} 
+{% block body %}
     {% include 'includes/header.html.twig' %}
 
     <div class="dashboard-container">
         <div class="parameter_menu">
             <div class="user-info card">
                 <div class="user-avatar">
-                    <img src="{{ asset(user.userAvatar) }}" alt="User Avatar">
+                    <img src="{{ asset(user.userAvatar) }}" alt="Avatar de {{ user.userFirstName }}">
                 </div>
                 <div class="user-details">
                     <h3>{{ user.userFirstName }}</h3>
@@ -45,7 +44,7 @@
 
             <div class="user-stats card">
                 <div class="tasks">
-                    <p>Tâches</p>
+                    <p><i class="fas fa-tasks"></i> Tâches</p>
                     <h3>
                         {% if assignedTasks|length > 0 %}
                             {{ assignedTasks|length }} <span class="up-arrow">↑</span>
@@ -55,7 +54,7 @@
                     </h3>
                 </div>
                 <div class="projects">
-                    <p>Projets</p>
+                    <p><i class="fas fa-project-diagram"></i> Projets</p>
                     <h3>
                         {% if projectStats.total > 0 %}
                             {{ projectStats.total }} <span class="up-arrow">↑</span>
@@ -68,79 +67,54 @@
 
             <nav class="sidebar-nav card">
                 <ul>
-                    <a href="{{ path('app_dashboard') }}" class="btn-link">Page d'accueil <i class="fas fa-home"></i></a>
-                    
+                    <a href="{{ path('app_dashboard') }}" class="btn-link"><i class="fas fa-home"></i> Page d'accueil</a>
                     {% if permissions.canViewProjects %}
-                    <a href="{{ path('app_projects_list') }}" class="btn-link">Projets</a>
+                    <a href="{{ path('app_projects_list') }}" class="btn-link"><i class="fas fa-project-diagram"></i> Projets</a>
                     {% endif %}
-                    
                     {% if permissions.canViewCustomers %}
-                    <a href="{{ path('app_parameter_customers') }}" class="btn-link">Clients</a>
+                    <a href="{{ path('app_parameter_customers_index') }}" class="btn-link"><i class="fas fa-building"></i> Clients</a>
                     {% endif %}
-                    
-                    {% if permissions.canViewUsers %}
-                    <a href="{{ path('app_parameter_users') }}" class="btn-link">Utilisateurs</a>
-                    {% endif %}
-                    
-                    {% if permissions.canViewParameters %}
-                    <a href="#" class="btn-link">Paramètres</a>
-                    {% endif %}
-                    
-                    <a href="#" class="btn-link">Calendrier</a>
+                    <a href="#" class="btn-link" id="calendar-toggle"><i class="fas fa-calendar-alt"></i> Calendrier</a>
                 </ul>
             </nav>
         </div>
+
         <div class="main-content">
             <div class="calendar card">
                 <h4>Calendrier</h4>
                 <iframe src="https://calendar.google.com/calendar/embed?src=your_calendar_id&ctz=Europe%2FParis" 
-                        class="calendar-iframe"
                         frameborder="0" 
                         scrolling="no"></iframe>
             </div>
 
-            {% if permissions.canViewProjects %}
-            <div id="project-stats" class="project-info card">
-                <h4>{{ projectStats.total }} Projets</h4>
-                <div class="project-progress">
-                    <div class="progress-bar">
-                        {% set progressPercentage = projectStats.total > 0 ? (projectStats.inProgress / projectStats.total * 100)|round : 0 %}
-                        <span class="progress" data-percentage="{{ progressPercentage }}"></span>
+            <div class="vertical-cards">
+                <div class="project-info card">
+                    <h4>{{ projectStats.total }} Projets</h4>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            {% set progressPercentage = projectStats.total > 0 ? (projectStats.inProgress / projectStats.total * 100)|round : 0 %}
+                            <span class="progress" data-percentage="{{ progressPercentage }}"></span>
+                        </div>
+                        <p>{{ projectStats.inProgress }} en cours</p>
                     </div>
-                    <p>{{ projectStats.inProgress }} en cours</p>
+                    <p>{{ projectStats.completed }} terminés, {{ projectStats.onHold }} en attente</p>
+                    <a href="{{ path('app_projects_list') }}" class="more-info"><i class="fas fa-info-circle"></i> En savoir plus</a>
                 </div>
-                <p>{{ projectStats.completed }} terminés, {{ projectStats.onHold }} en attente</p>
-                <a href="{{ path('app_projects_list') }}" class="more-info">En savoir plus</a>
-            </div>
-            
-            <div class="recent-projects card">
-                <h4>Projets récents</h4>
-                <div class="projects-list">
-                    {% if projectStats.recent|length > 0 %}
-                        {% for project in projectStats.recent %}
-                            <div class="project-item clickable-card" data-target="{{ path('app_management_project', {'id': project.id}) }}">
-                                <div class="project-details">
-                                    <h5>{{ project.projectName }}</h5>
-                                    <p>Client: {{ project.projectCustomer ? project.projectCustomer.name : 'Non défini' }}</p>
-                                    <p>Statut: {{ project.projectStatus.value }}</p>
-                                </div>
-                                <div class="project-dates">
-                                    <p>Début: {{ project.projectStartDate|date('d/m/Y') }}</p>
-                                    {% if project.projectTargetDate %}
-                                        <p>Fin prévue: {{ project.projectTargetDate|date('d/m/Y') }}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="no-data">Aucun projet récent</p>
-                    {% endif %}
+                
+                <div class="efficiency-box card">
+                    <h4><i class="fas fa-cogs"></i> Efficacité des tâches</h4>
+                    <p>Analyse de la performance des tâches en cours...</p>
+                </div>
+                
+                <div class="productivity-box card">
+                    <h4><i class="fas fa-rocket"></i> Productivité individuelle</h4>
+                    <p>Vous avez {{ assignedTasks|length }} tâches assignées</p>
+                    <p>Consultez vos projets pour plus de détails</p>
                 </div>
             </div>
-            {% endif %}
 
             <div id="assigned-tasks" class="tasks-list card">
-                <h4>Tâches assignées</h4>
+                <h4><i class="fas fa-clipboard-list"></i> Tâches assignées</h4>
                 {% if assignedTasks|length > 0 %}
                     <div class="tasks-container">
                         {% for task in assignedTasks %}
@@ -160,7 +134,6 @@
                     <p class="no-data">Aucune tâche assignée</p>
                 {% endif %}
             </div>
-
         </div>
     </div>
 {% endblock %}
