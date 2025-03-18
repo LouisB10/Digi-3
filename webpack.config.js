@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
+const path = require('path');
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -20,17 +21,17 @@ Encore
      * Each entry will result in one JavaScript file (e.g. app.js)
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
-    .addEntry('app', './assets/app.js')
-    .addEntry('auth', './assets/js/auth.js')
-    .addEntry('header', './assets/js/header.js')
-    .addEntry('parameter/general', './assets/js/parameter/general.js')
-    .addEntry('parameter/users', './assets/js/parameter/users.js')
-    .addEntry('parameter/customers', './assets/js/parameter/customers.js')
-    .addEntry('parameter/config', './assets/js/parameter/config.js')
-    .addEntry('dashboard', './assets/js/dashboard.js')
-    .addEntry('project', './assets/js/project/project.js')
-    .addEntry('project_list', './assets/js/project/list.js')
-    .addEntry('project_management', './assets/js/project/management.js')
+    .addEntry('app', './assets/ts/app.ts')
+    .addEntry('auth', './assets/ts/auth.ts')
+    .addEntry('header', './assets/ts/header.ts')
+    .addEntry('parameter/general', './assets/ts/parameter/general.ts')
+    .addEntry('parameter/users', './assets/ts/parameter/users.ts')
+    .addEntry('parameter/customers', './assets/ts/parameter/customers.ts')
+    .addEntry('parameter/config', './assets/ts/parameter/config.ts')
+    .addEntry('dashboard', './assets/ts/dashboard.ts')
+    .addEntry('project', './assets/ts/project/project.ts')
+    .addEntry('project_list', './assets/ts/project/list.ts')
+    .addEntry('project_management', './assets/ts/project/management.ts')
     .addStyleEntry('styles', './assets/styles/style.scss')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
@@ -76,8 +77,11 @@ Encore
     // uncomment if you use PostCSS/Autoprefixer
     .enablePostCssLoader()
 
-    // uncomment if you use TypeScript
-    //.enableTypeScriptLoader()
+    // enable TypeScript
+    .enableTypeScriptLoader()
+    .configureBabel((config) => {
+        config.presets.push('@babel/preset-typescript');
+    })
 
     // uncomment if you use React
     //.enableReactPreset()
@@ -94,6 +98,14 @@ Encore
         from: './assets/images',
         to: 'images/[path][name].[hash:8].[ext]',
         pattern: /\.(png|jpg|jpeg|gif|ico|svg|webp)$/
+    })
+
+    // Alias pour simplifier les imports
+    .addAliases({
+        '@': path.resolve(__dirname, 'assets'),
+        '@ts': path.resolve(__dirname, 'assets/ts'),
+        '@services': path.resolve(__dirname, 'assets/ts/services'),
+        '@types': path.resolve(__dirname, 'assets/ts/types')
     })
 ;
 
