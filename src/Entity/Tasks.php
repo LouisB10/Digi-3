@@ -296,26 +296,4 @@ class Tasks
             self::TASK_TYPE_HIGHTEST,
         ];
     }
-
-    public function getTaskRank(): int
-    {
-        return $this->taskRank;
-    }
-
-    public function setTaskRank(int $taskRank): static
-    {
-        $this->taskRank = $taskRank;
-        return $this;
-    }
-
-    public function getTaskColumnRank(): int
-    {
-        return $this->taskColumnRank;
-    }
-
-    public function setTaskColumnRank(int $taskColumnRank): static
-    {
-        $this->taskColumnRank = $taskColumnRank;
-        return $this;
-    }
 }

@@ -62,7 +62,6 @@ class CustomersController extends AbstractController
             'user' => $currentUser,     // Pour le template header
             'customers' => $customers,  // Pour la liste des clients
             'permissions' => $permissions,
-            'customerPermissions' => $customerPermissions // Permissions spécifiques à chaque client
         ]);
     }
 
