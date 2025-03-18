@@ -3,6 +3,31 @@ d'authentification{% endblock %} {% block stylesheets %}
 {{ parent() }}
 {% endblock %} {% block body_class %}auth-page{% endblock %}
 {% block body %}
+<!-- Flash messages container - moved to top and styled for better visibility -->
+<div class="flash-messages-container">
+  {% for label, messages in app.flashes %}
+    {% for message in messages %}
+      <div class="flash-message flash-{{ label }}" role="alert">
+        <div class="flash-content">
+          <span class="flash-icon">{% if label == 'error' %}⚠️{% else %}✓{% endif %}</span>
+          <span class="flash-text">{{ message }}</span>
+        </div>
+        <button type="button" class="flash-close" aria-label="Fermer">×</button>
+      </div>
+    {% endfor %}
+  {% endfor %}
+  
+  {% if error %}
+  <div class="flash-message flash-error" role="alert">
+    <div class="flash-content">
+      <span class="flash-icon">⚠️</span>
+      <span class="flash-text">{{ error }}</span>
+    </div>
+    <button type="button" class="flash-close" aria-label="Fermer">×</button>
+  </div>
+  {% endif %}
+</div>
+
 <main class="auth-container">
   <!-- Section de connexion -->
   <div class="auth-section flex" id="loginSection">
@@ -35,10 +60,6 @@ d'authentification{% endblock %} {% block stylesheets %}
       {% endif %}
 
       <a href="{{ path('app_reset_password_request') }}" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
-
-      {% if error %}
-      <div class="error" role="alert">{{ error }}</div>
-      {% endif %}
 
       <button type="submit" class="auth-submit">Se connecter</button>
     {{ form_end(login_form) }}
@@ -94,7 +115,13 @@ d'authentification{% endblock %} {% block stylesheets %}
       </div>
       
       <div id="password-requirements" class="password-requirements">
-        <!-- Les exigences de mot de passe seront ajoutées ici par JavaScript -->
+        <ul>
+          <li id="req-length">Au moins 8 caractères</li>
+          <li id="req-uppercase">Au moins une majuscule</li>
+          <li id="req-lowercase">Au moins une minuscule</li>
+          <li id="req-number">Au moins un chiffre</li>
+          <li id="req-special">Au moins un caractère spécial</li>
+        </ul>
       </div>
 
       <div class="form-group">
@@ -108,22 +135,15 @@ d'authentification{% endblock %} {% block stylesheets %}
         {{ form_errors(registration_form.password.second) }}
       </div>
 
-      {% if error %}
-      <div class="error" role="alert">{{ error }}</div>
-      {% endif %}
+      <div id="registerErrors" class="error-container"></div>
 
       <button type="submit" class="auth-submit">S'inscrire</button>
     {{ form_end(registration_form) }}
   </div>
 </main>
 
-{% for label, messages in app.flashes %}
-  {% for message in messages %}
-    <div class="flash-{{ label }}" role="alert">
-      {{ message }}
-    </div>
-  {% endfor %}
-{% endfor %}
+<!-- Hidden data pour le JavaScript -->
+<div id="formState" data-has-errors="{{ (error is not null or app.flashes|length > 0) ? 'true' : 'false' }}"></div>
 
 {% endblock %}
 

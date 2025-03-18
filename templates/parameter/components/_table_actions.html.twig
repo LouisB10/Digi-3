@@ -13,7 +13,7 @@
                 {% endfor %}
             {% endif %}
         >
-            <img src="{{ asset('build/images/icons/edit.png') }}" alt="Modifier">
+            <img src="{{ asset('build/images/icons/edit.png') }}" alt="" aria-hidden="true">
         </button>
     {% endif %}
     
@@ -24,7 +24,7 @@
             data-{{ entity_name }}-name="{{ item_name|default('') }}"
             aria-label="Supprimer {{ item_name|default('') }}"
         >
-            <img src="{{ asset('build/images/icons/delete.png') }}" alt="Supprimer">
+            <img src="{{ asset('build/images/icons/delete.png') }}" alt="" aria-hidden="true">
         </button>
     {% endif %}
 </td> 

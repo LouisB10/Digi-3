@@ -39,7 +39,7 @@
 
 {% block modals %}
     {# Modal pour ajouter/modifier un utilisateur #}
-    <div class="modal" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalTitle" aria-modal="false" aria-hidden="true">
+    <div class="modal" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalTitle" aria-modal="false" aria-hidden="true" hidden>
         <div class="modal-content" role="document">
             <div class="modal-header">
                 <h2 class="modal-title" id="userModalTitle">Ajouter un utilisateur</h2>
@@ -96,5 +96,5 @@
 {% endblock %}
 
 {% block crud_scripts %}
-    {{ encore_entry_script_tags('parameter_users') }}
+    {{ encore_entry_script_tags('parameter/users') }}
 {% endblock %} 

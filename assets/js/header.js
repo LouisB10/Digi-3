@@ -8,9 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Référence au formulaire de déconnexion
     const logoutForm = document.querySelector('.logout-form');
     const logoutDialog = document.getElementById('logout-dialog');
+    
+    // Si les éléments n'existent pas, ne pas continuer l'exécution
+    if (!logoutForm || !logoutDialog) return;
+    
     const closeButton = logoutDialog.querySelector('.close');
-    const cancelButton = logoutDialog.querySelector('.logout-dialog-buttons button:first-child');
-    const confirmButton = logoutDialog.querySelector('.logout-dialog-buttons button:last-child');
+    const cancelButton = document.getElementById('cancel-logout') || logoutDialog.querySelector('.logout-dialog-buttons button:first-child');
+    const confirmButton = document.getElementById('confirm-logout') || logoutDialog.querySelector('.logout-dialog-buttons button:last-child');
     
     // Variables pour la gestion du focus
     let lastFocusedElement = null;

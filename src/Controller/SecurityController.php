@@ -128,7 +128,7 @@ class SecurityController extends AbstractController
                 // Vérifier si l'utilisateur existe déjà
                 $existingUser = $entityManager->getRepository(User::class)->findOneBy(['userEmail' => $data['email']]);
                 if ($existingUser) {
-                    $this->addFlash('error', 'Cet email est déjà utilisé.');
+                    $this->addFlash('error', 'Cet email est déjà utilisé. Veuillez utiliser un autre email ou récupérer votre compte.');
                     return $this->redirectToRoute('app_auth');
                 }
 
@@ -153,9 +153,19 @@ class SecurityController extends AbstractController
                 try {
                     $entityManager->persist($user);
                     $entityManager->flush();
+                    
+                    $this->logger->info('Nouvel utilisateur inscrit avec succès', [
+                        'user_id' => $user->getId(),
+                        'email' => $user->getUserEmail()
+                    ]);
+                    
+                    // Rediriger vers la page de connexion avec un message de succès
+                    $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
+                    return $this->redirectToRoute('app_auth');
+                    
                 } catch (\Exception $e) {
                     $this->logger->error('Erreur lors de la persistance : ' . $e->getMessage());
-                    $this->addFlash('error', 'Erreur lors de la création du compte');
+                    $this->addFlash('error', 'Une erreur est survenue lors de la création du compte. Veuillez réessayer.');
                     return $this->redirectToRoute('app_auth');
                 }
 
@@ -167,7 +177,7 @@ class SecurityController extends AbstractController
                     );
                 } catch (\Exception $e) {
                     $this->logger->error('Erreur lors de l\'authentification : ' . $e->getMessage());
-                    $this->addFlash('success', 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+                    $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
                     return $this->redirectToRoute('app_auth');
                 }
             } else {
@@ -179,7 +189,7 @@ class SecurityController extends AbstractController
             }
         } catch (\Exception $e) {
             $this->logger->error('Erreur lors de l\'inscription : ' . $e->getMessage());
-            $this->addFlash('error', 'Une erreur est survenue lors de l\'inscription');
+            $this->addFlash('error', 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer ultérieurement.');
             return $this->redirectToRoute('app_auth');
         }
     }
@@ -245,7 +255,7 @@ class SecurityController extends AbstractController
                 }
                 
                 // Toujours afficher le même message, que l'utilisateur existe ou non
-                $this->addFlash('success', 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.');
+                $this->addFlash('success', 'Si votre adresse email est enregistrée, vous recevrez un lien de réinitialisation de mot de passe dans les prochaines minutes.');
                 return $this->redirectToRoute('app_auth');
             } catch (\Exception $e) {
                 $this->logger->error('Erreur lors de la demande de réinitialisation: ' . $e->getMessage(), [
@@ -253,7 +263,7 @@ class SecurityController extends AbstractController
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                $this->addFlash('error', 'Une erreur est survenue. Veuillez réessayer ultérieurement.');
+                $this->addFlash('error', 'Une erreur est survenue lors de l\'envoi de l\'email. Veuillez réessayer ultérieurement.');
                 return $this->redirectToRoute('app_auth');
             }
         }
@@ -274,7 +284,7 @@ class SecurityController extends AbstractController
 
         // Vérifier si le token est valide et non expiré
         if (!$user || !$user->getResetTokenExpiresAt() || $user->getResetTokenExpiresAt() < new \DateTimeImmutable()) {
-            $this->addFlash('error', 'Le lien de réinitialisation est invalide ou a expiré.');
+            $this->addFlash('error', 'Le lien de réinitialisation est invalide ou a expiré. Veuillez effectuer une nouvelle demande.');
             return $this->redirectToRoute('app_auth');
         }
 
@@ -294,11 +304,11 @@ class SecurityController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Votre mot de passe a été réinitialisé avec succès.');
+                $this->addFlash('success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.');
                 return $this->redirectToRoute('app_auth');
             } catch (\Exception $e) {
                 $this->logger->error('Erreur lors de la réinitialisation du mot de passe: ' . $e->getMessage());
-                $this->addFlash('error', 'Une erreur est survenue. Veuillez réessayer ultérieurement.');
+                $this->addFlash('error', 'Une erreur est survenue lors de la réinitialisation de votre mot de passe. Veuillez réessayer.');
             }
         }
 

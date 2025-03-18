@@ -7,6 +7,16 @@ let backupIdToRestore = null;
 let backupIdToDelete = null;
 
 /**
+ * Récupère un token CSRF spécifique
+ * @param {string} tokenId - L'identifiant du token CSRF
+ * @returns {string} Le token CSRF ou une chaîne vide
+ */
+function getCsrfToken(tokenId) {
+    const metaElement = document.querySelector(`meta[name="csrf-token-${tokenId}"]`);
+    return metaElement ? metaElement.getAttribute('content') : '';
+}
+
+/**
  * Initialisation des onglets
  */
 function initTabs() {
@@ -15,6 +25,10 @@ function initTabs() {
             // Retirer la classe active de tous les boutons et contenus
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Mettre à jour les attributs aria
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.setAttribute('aria-selected', 'false'));
+            this.setAttribute('aria-selected', 'true');
             
             // Ajouter la classe active au bouton cliqué
             this.classList.add('active');
@@ -121,10 +135,17 @@ function createManualBackup() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': getCsrfToken('backup-create') || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Une erreur est survenue');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             alert(data.message || 'Sauvegarde créée avec succès');
@@ -135,7 +156,7 @@ function createManualBackup() {
     })
     .catch(error => {
         console.error('Erreur:', error);
-        alert('Une erreur est survenue lors de la création de la sauvegarde');
+        alert('Une erreur est survenue lors de la création de la sauvegarde: ' + error.message);
     });
 }
 
@@ -175,7 +196,7 @@ function restoreBackup() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': getCsrfToken('backup-restore') || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
         }
     })
     .then(response => response.json())
@@ -223,7 +244,7 @@ function deleteBackup() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': getCsrfToken('backup-delete') || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
         }
     })
     .then(response => response.json())

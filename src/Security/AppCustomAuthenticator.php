@@ -85,7 +85,7 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
                     'formData' => $formData,
                     'request' => $request->request->all(),
                 ]);
-                throw new CustomUserMessageAuthenticationException('Formulaire de connexion invalide.');
+                throw new CustomUserMessageAuthenticationException('Problème lors de la soumission du formulaire. Veuillez réessayer.');
             }
             
             $email = $formData['email'] ?? '';
@@ -100,11 +100,11 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
             
             // Vérifications des champs obligatoires
             if (empty($email)) {
-                throw new CustomUserMessageAuthenticationException('L\'email ne peut pas être vide.');
+                throw new CustomUserMessageAuthenticationException('Veuillez saisir votre adresse email pour vous connecter.');
             }
             
             if (empty($password)) {
-                throw new CustomUserMessageAuthenticationException('Le mot de passe ne peut pas être vide.');
+                throw new CustomUserMessageAuthenticationException('Veuillez saisir votre mot de passe pour vous connecter.');
             }
 
             // Stocker l'email pour l'afficher en cas d'erreur
@@ -160,7 +160,7 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
                 'exception' => $e,
                 'ip' => $request->getClientIp(),
             ]);
-            throw new CustomUserMessageAuthenticationException('Une erreur est survenue lors de la connexion. Veuillez réessayer.');
+            throw new CustomUserMessageAuthenticationException('Une erreur technique est survenue lors de la connexion. Veuillez réessayer ultérieurement ou contacter le support si le problème persiste.');
         }
     }
 

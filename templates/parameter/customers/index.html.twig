@@ -38,7 +38,7 @@
 
 {% block modals %}
     {# Modal pour ajouter/modifier un client #}
-    <div class="modal" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalTitle" aria-modal="false" aria-hidden="true">
+    <div class="modal" id="customerModal" tabindex="-1" role="dialog" aria-labelledby="customerModalTitle" aria-modal="false" aria-hidden="true" hidden>
         <div class="modal-content" role="document">
             <div class="modal-header">
                 <h2 class="modal-title" id="customerModalTitle">Ajouter un client</h2>
@@ -107,5 +107,5 @@
 {% endblock %}
 
 {% block crud_scripts %}
-    {{ encore_entry_script_tags('parameter_customers') }}
+    {{ encore_entry_script_tags('parameter/customers') }}
 {% endblock %} 

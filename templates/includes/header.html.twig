@@ -39,14 +39,10 @@
                 <p class="logout-subtitle">Vous devrez vous reconnecter pour accéder à votre compte.</p>
             </div>
             <div class="logout-dialog-buttons">
-                <button type="button">Annuler</button>
-                <button type="button">Se déconnecter</button>
+                <button type="button" id="cancel-logout" class="btn-cancel">Annuler</button>
+                <button type="button" id="confirm-logout" class="btn-confirm">Se déconnecter</button>
             </div>
         </div>
     </div>
 </header>
 
-{# Utiliser un bloc spécifique pour le header plutôt que javascripts #}
-{% block header_scripts %}
-    {{ encore_entry_script_tags('header') }}
-{% endblock %}

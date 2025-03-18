@@ -1,7 +1,7 @@
 {# templates/parameter/components/_modal_base.html.twig #}
 {# Paramètres attendus : modal_id, modal_title, submit_button_text, cancel_button_text #}
 
-<div class="modal" id="{{ modal_id }}" tabindex="-1" role="dialog" aria-labelledby="{{ modal_id }}Title" aria-modal="false" hidden>
+<div class="modal" id="{{ modal_id }}" tabindex="-1" role="dialog" aria-labelledby="{{ modal_id }}Title" aria-modal="false" aria-hidden="true">
     <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="{{ modal_id }}Title">{{ modal_title }}</h2>
@@ -11,8 +11,8 @@
             {% block modal_content %}{% endblock %}
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-cancel">{{ cancel_button_text|default('Annuler') }}</button>
-            <button type="button" class="btn-submit">{{ submit_button_text|default('Enregistrer') }}</button>
+            <button type="button" class="btn-cancel" aria-label="{{ cancel_button_text|default('Annuler') }}">{{ cancel_button_text|default('Annuler') }}</button>
+            <button type="button" class="btn-submit" aria-label="{{ submit_button_text|default('Enregistrer') }}">{{ submit_button_text|default('Enregistrer') }}</button>
         </div>
     </div>
 </div> 

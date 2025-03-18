@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %} 
-{% block title %}Digi-3 - Paramètres généraux{%endblock %}
+{% block title %}Digi-3 - Paramètres généraux{% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
-<script src="{{ asset('build/parameter/general.js') }}"></script>
+{{ encore_entry_script_tags('parameter/general') }}
 {% endblock %}
 
 {% block body %}
-{% include 'includes/header.html.twig' with {'user': user} %}
+{% include 'includes/header.html.twig' %}
 {% set permissions = getUserPermissions() %}
 <section class="parameter_landing flex">
   {% include 'parameter/_menu.html.twig' %}
@@ -17,9 +17,9 @@
         <h2>Mon compte</h2>
         <div class="account-info flex">
           <div class="title flex-col">
-            <p>{{ user.userFirstName }}</p>
-            <p>{{ user.userLastName }}</p>
-            <p>{{ user.userEmail }}</p>
+            <p>{{ app.user.userFirstName }}</p>
+            <p>{{ app.user.userLastName }}</p>
+            <p>{{ app.user.userEmail }}</p>
           </div>
           <div class="profile-pic flex">
             <label class="flex" for="file">
@@ -31,12 +31,22 @@
             <input id="file" type="file" name="profile_picture" accept="image/jpeg,image/png,image/gif,image/webp" data-url="{{ path('app_parameter_general_update_profile') }}" />
             <img
               id="output"
-              src="{{ asset(user.userAvatar) }}"
-              alt="Photo de profil de {{ user.userEmail }}"
+              src="{{ asset(app.user.userAvatar) }}"
+              alt="Photo de profil de {{ app.user.userEmail }}"
             />
           </div>
         </div>
       </div>
+      
+      {# Messages flash centralisés #}
+      <div class="flash-messages">
+        {% for label, messages in app.flashes %}
+          {% for message in messages %}
+            <div class="alert alert-{{ label }}">{{ message }}</div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+      
       <div class="account-body flex">
         <div class="account-email flex-col">
           <h3>Modifier son adresse e-mail</h3>
@@ -65,14 +75,6 @@
           </div>
 
           {{ form_end(emailForm) }}
-          
-          {# Les messages flash seront remplacés par des messages AJAX #}
-          {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-          {% endfor %}
-          {% for message in app.flashes('success') %}
-            <div class="alert alert-success">{{ message }}</div>
-          {% endfor %}
         </div>
         <div class="account-password flex-col">
           <h3>Modifier son mot de passe</h3>
@@ -125,14 +127,6 @@
           
           <button type="submit" class="btn-submit">Nouveau mot de passe</button>
           {{ form_end(passwordForm) }}
-          
-          {# Les messages flash seront remplacés par des messages AJAX #}
-          {% for message in app.flashes('error') %}
-            <div class="alert alert-danger">{{ message }}</div>
-          {% endfor %}
-          {% for message in app.flashes('success') %}
-            <div class="alert alert-success">{{ message }}</div>
-          {% endfor %}
         </div>
       </div>
     </div>

@@ -28,6 +28,7 @@
                 </div>
 
                 {# Messages flash #}
+                <div class="flash-messages" aria-live="polite">
                 {% for label, messages in app.flashes %}
                     {% for message in messages %}
                         <div class="alert alert-{{ label }}" role="alert">
@@ -35,6 +36,7 @@
                         </div>
                     {% endfor %}
                 {% endfor %}
+                </div>
 
                 {# Table principale #}
                 <div class="crud-table" role="region" aria-label="Liste des {{ entity_label_plural|default(entity_label ~ 's') }}">

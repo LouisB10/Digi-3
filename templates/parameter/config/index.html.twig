@@ -2,6 +2,13 @@
 
 {% block title %}Digi-3 - Configuration{% endblock %}
 
+{% block head_meta %}
+    <meta name="csrf-token" content="{{ csrf_token('app') }}">
+    <meta name="csrf-token-backup-create" content="{{ csrf_token('backup-create') }}">
+    <meta name="csrf-token-backup-restore" content="{{ csrf_token('backup-restore') }}">
+    <meta name="csrf-token-backup-delete" content="{{ csrf_token('backup-delete') }}">
+{% endblock %}
+
 {% block body %}
 {% include 'includes/header.html.twig' %}
 {% set permissions = getUserPermissions() %}
@@ -16,23 +23,23 @@
                 
                 {% for label, messages in app.flashes %}
                     {% for message in messages %}
-                        <div class="alert alert-{{ label }}" role="alert">
+                        <div class="alert alert-{{ label }}" role="alert" aria-live="polite">
                             {{ message }}
                         </div>
                     {% endfor %}
                 {% endfor %}
                 
                 <div class="config-tabs">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="general">Général</button>
-                        <button class="tab-btn" data-tab="email">Email</button>
-                        <button class="tab-btn" data-tab="security">Sécurité</button>
-                        <button class="tab-btn" data-tab="backup">Sauvegarde</button>
+                    <div class="tabs-header" role="tablist">
+                        <button class="tab-btn active" id="tab-general" data-tab="general" role="tab" aria-selected="true" aria-controls="general-tab">Général</button>
+                        <button class="tab-btn" id="tab-email" data-tab="email" role="tab" aria-selected="false" aria-controls="email-tab">Email</button>
+                        <button class="tab-btn" id="tab-security" data-tab="security" role="tab" aria-selected="false" aria-controls="security-tab">Sécurité</button>
+                        <button class="tab-btn" id="tab-backup" data-tab="backup" role="tab" aria-selected="false" aria-controls="backup-tab">Sauvegarde</button>
                     </div>
                     
                     <div class="tabs-content">
                         <!-- Onglet Général -->
-                        <div class="tab-content active" id="general-tab">
+                        <div class="tab-content active" id="general-tab" role="tabpanel" aria-labelledby="tab-general">
                             <form id="generalForm" class="config-form">
                                 <div class="form-group">
                                     <label for="siteName">Nom du site</label>
@@ -84,7 +91,7 @@
                         </div>
                         
                         <!-- Onglet Email -->
-                        <div class="tab-content" id="email-tab">
+                        <div class="tab-content" id="email-tab" role="tabpanel" aria-labelledby="tab-email">
                             <form id="emailForm" class="config-form">
                                 <div class="form-group">
                                     <label for="mailDriver">Service d'envoi d'emails</label>
@@ -147,7 +154,7 @@
                         </div>
                         
                         <!-- Onglet Sécurité -->
-                        <div class="tab-content" id="security-tab">
+                        <div class="tab-content" id="security-tab" role="tabpanel" aria-labelledby="tab-security">
                             <form id="securityForm" class="config-form">
                                 <div class="form-group">
                                     <label for="sessionLifetime">Durée de session (minutes)</label>
@@ -194,7 +201,7 @@
                         </div>
                         
                         <!-- Onglet Sauvegarde -->
-                        <div class="tab-content" id="backup-tab">
+                        <div class="tab-content" id="backup-tab" role="tabpanel" aria-labelledby="tab-backup">
                             <form id="backupForm" class="config-form">
                                 <div class="form-group">
                                     <label for="autoBackup">Sauvegarde automatique</label>
@@ -339,238 +346,5 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
-        // Gestion des onglets
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                // Retirer la classe active de tous les boutons et contenus
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                
-                // Ajouter la classe active au bouton cliqué
-                this.classList.add('active');
-                
-                // Afficher le contenu correspondant
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-            });
-        });
-        
-        // Soumission des formulaires
-        document.querySelectorAll('.config-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formId = this.id;
-                const formData = new FormData(this);
-                let endpoint;
-                
-                switch(formId) {
-                    case 'generalForm':
-                        endpoint = '/parameter/config/general';
-                        break;
-                    case 'emailForm':
-                        endpoint = '/parameter/config/email';
-                        break;
-                    case 'securityForm':
-                        endpoint = '/parameter/config/security';
-                        break;
-                    case 'backupForm':
-                        endpoint = '/parameter/config/backup';
-                        break;
-                }
-                
-                fetch(endpoint, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Afficher un message de succès
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = 'alert alert-success';
-                        alertDiv.setAttribute('role', 'alert');
-                        alertDiv.textContent = data.message || 'Configuration enregistrée avec succès';
-                        
-                        // Insérer le message avant le premier formulaire
-                        const configTabs = document.querySelector('.config-tabs');
-                        configTabs.parentNode.insertBefore(alertDiv, configTabs);
-                        
-                        // Faire disparaître le message après 3 secondes
-                        setTimeout(() => {
-                            alertDiv.remove();
-                        }, 3000);
-                    } else {
-                        alert(data.message || 'Une erreur est survenue');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    alert('Une erreur est survenue lors de l\'enregistrement');
-                });
-            });
-        });
-        
-        // Gestion de l'affichage/masquage du mot de passe
-        document.querySelectorAll('.toggle-password').forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                const targetId = this.getAttribute('data-target');
-                const passwordInput = document.getElementById(targetId);
-                
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    this.querySelector('img').src = "{{ asset('build/images/icons/eye-off.png') }}";
-                } else {
-                    passwordInput.type = 'password';
-                    this.querySelector('img').src = "{{ asset('build/images/icons/eye.png') }}";
-                }
-            });
-        });
-        
-        // Fonctions pour les sauvegardes
-        let backupIdToRestore = null;
-        let backupIdToDelete = null;
-        
-        function createManualBackup() {
-            fetch('/parameter/config/backup/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': "{{ csrf_token('backup-create') }}"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Sauvegarde créée avec succès');
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Une erreur est survenue lors de la création de la sauvegarde');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la création de la sauvegarde');
-            });
-        }
-        
-        function downloadBackup(backupId) {
-            window.location.href = `/parameter/config/backup/${backupId}/download`;
-        }
-        
-        function confirmRestoreBackup(backupId, backupName) {
-            backupIdToRestore = backupId;
-            document.getElementById('backupToRestoreName').textContent = backupName;
-            document.getElementById('restoreConfirmModal').hidden = false;
-        }
-        
-        function closeRestoreModal() {
-            document.getElementById('restoreConfirmModal').hidden = true;
-        }
-        
-        function restoreBackup() {
-            if (!backupIdToRestore) return;
-            
-            fetch(`/parameter/config/backup/${backupIdToRestore}/restore`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': "{{ csrf_token('backup-restore') }}"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                closeRestoreModal();
-                if (data.success) {
-                    alert(data.message || 'Sauvegarde restaurée avec succès');
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Une erreur est survenue lors de la restauration');
-                }
-            })
-            .catch(error => {
-                closeRestoreModal();
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la restauration');
-            });
-        }
-        
-        function confirmDeleteBackup(backupId, backupName) {
-            backupIdToDelete = backupId;
-            document.getElementById('backupToDeleteName').textContent = backupName;
-            document.getElementById('deleteBackupConfirmModal').hidden = false;
-        }
-        
-        function closeDeleteBackupModal() {
-            document.getElementById('deleteBackupConfirmModal').hidden = true;
-        }
-        
-        function deleteBackup() {
-            if (!backupIdToDelete) return;
-            
-            fetch(`/parameter/config/backup/${backupIdToDelete}/delete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': "{{ csrf_token('backup-delete') }}"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                closeDeleteBackupModal();
-                if (data.success) {
-                    alert(data.message || 'Sauvegarde supprimée avec succès');
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Une erreur est survenue lors de la suppression');
-                }
-            })
-            .catch(error => {
-                closeDeleteBackupModal();
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de la suppression');
-            });
-        }
-        
-        // Fonctions pour le test d'email
-        function testEmailConfig() {
-            document.getElementById('testEmailModal').hidden = false;
-        }
-        
-        function closeTestEmailModal() {
-            document.getElementById('testEmailModal').hidden = true;
-        }
-        
-        function sendTestEmail() {
-            const emailAddress = document.getElementById('testEmailAddress').value;
-            if (!emailAddress) {
-                alert('Veuillez saisir une adresse email');
-                return;
-            }
-            
-            // Récupérer les valeurs du formulaire email
-            const formData = new FormData(document.getElementById('emailForm'));
-            formData.append('testEmailAddress', emailAddress);
-            
-            fetch('/parameter/config/email/test', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                closeTestEmailModal();
-                if (data.success) {
-                    alert(data.message || 'Email de test envoyé avec succès');
-                } else {
-                    alert(data.message || 'Une erreur est survenue lors de l\'envoi de l\'email');
-                }
-            })
-            .catch(error => {
-                closeTestEmailModal();
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue lors de l\'envoi de l\'email');
-            });
-        }
-    </script>
+    {{ encore_entry_script_tags('parameter/config') }}
 {% endblock %} 

@@ -1,5 +1,4 @@
-{% if is_granted('IS_AUTHENTICATED_FULLY') %}
-{% set permissions = getUserPermissions() %}
+{# Le menu des paramètres n'est inclus que dans des pages qui requièrent déjà l'authentification #}
 <div class="parameter_menu">
   <ul class="flex-col">
     <li class="{% if app.request.attributes.get('_route') == 'app_parameter_general_index' %}parameter_menu_active{% endif %}">
@@ -39,4 +38,3 @@
     </li>
   </ul>
 </div>
-{% endif %}

@@ -13,7 +13,7 @@ function showCreateTaskForm() {
  
 document.addEventListener('DOMContentLoaded', function () {
     let projectIdToDelete;
- 
+    
     window.showDeletePopup = function (projectId) {
         projectIdToDelete = projectId;
         document.getElementById('deletePopup').style.display = 'flex';
@@ -51,7 +51,7 @@ function showDeletePopup(projectId) {
     };
  
     document.getElementById('cancelDelete').onclick = function () {
-        deletePopup.style.display = 'none';
+            deletePopup.style.display = 'none';
     };
 }
  
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
             this.classList.remove('drag-over');
         });
     });
- 
+    
     function handleDragStart(e) {
         draggedItem = this;
         e.dataTransfer.setData('text/plain', this.getAttribute('data-task-id'));
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
  
     function handleDrop(e) {
-        e.preventDefault();
+            e.preventDefault();
         e.stopPropagation();
  
         const taskContainer = this.querySelector('.kanban-tasks') || this;
@@ -132,14 +132,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }));
  
         fetch('/management-project/update-task-position', {
-            method: 'POST',
+                method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 taskId,
                 newColumn: columnStatus,
                 taskOrder: taskIds
             })
-        })
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
