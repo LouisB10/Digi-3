@@ -4,10 +4,6 @@
 
 {% block head_meta %}
     {{ parent() }}
-    <meta name="csrf-token" content="{{ csrf_token('app') }}">
-    <meta name="csrf-token-project" content="{{ csrf_token('project_form') }}">
-    <meta name="csrf-token-task" content="{{ csrf_token('task_form') }}">
-    <meta name="csrf-token-delete" content="{{ csrf_token('delete-project') }}">
 {% endblock %}
 
 {% block javascripts %}
@@ -29,8 +25,8 @@
                 <a href="{{ path('app_management_project', { 'id': project.id }) }}" {% if current_project and current_project.id == project.id %}aria-current="page"{% endif %}>
                     {{ project.projectName }}
                 </a>
-                <button type="button" class="delete-button" data-project-id="{{ project.id }}" aria-label="Supprimer le projet {{ project.projectName }}">
-                    <img src="/build/images/delete.png" alt="" class="delete-icon" aria-hidden="true">
+                <button type="button" class="delete-button" data-project-id="{{ project.id }}" aria-label="Supprimer le projet {{ project.projectName }}" onclick="window.showDeletePopup('{{ project.id }}')">
+                    <img src="{{ asset('build/images/delete.png') }}" alt="" class="delete-icon" aria-hidden="true">
                 </button>
             </li>
             {% endfor %}
@@ -65,7 +61,7 @@
             <div id="createTaskForm" style="display: none;" aria-labelledby="task-form-title">
                 <h3 id="task-form-title" class="visually-hidden">Formulaire de création de tâche</h3>
                 {{ form_start(taskForm, {'attr': {'id': 'taskForm', 'aria-labelledby': 'task-form-title'}}) }}
-                    <input type="hidden" name="_token" value="{{ csrf_token('task_form') }}">
+                    {{ form_widget(taskForm._token) }}
                     {{ form_row(taskForm.taskName) }}
                     {{ form_row(taskForm.taskDescription) }}
                     {{ form_row(taskForm.taskType) }}
@@ -212,7 +208,7 @@
         <div id="createProjectForm" style="display: none;" aria-labelledby="project-form-title">
             <h3 id="project-form-title" class="visually-hidden">Formulaire de création de projet</h3>
             {{ form_start(form, {'attr': {'id': 'projectForm', 'aria-labelledby': 'project-form-title'}}) }}
-                <input type="hidden" name="_token" value="{{ csrf_token('project_form') }}">
+                {{ form_widget(form._token) }}
                 {{ form_row(form.projectName) }}
                 {{ form_row(form.projectDescription) }}
                 {{ form_row(form.projectStartDate) }}
@@ -224,6 +220,12 @@
         {# Messages flash #}
         {% for message in app.flashes('success') %}
             <div class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+        
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger" role="alert">
                 {{ message }}
             </div>
         {% endfor %}

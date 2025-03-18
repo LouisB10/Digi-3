@@ -73,46 +73,58 @@ class ProjectController extends AbstractController
         }
     
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$project->getProjectStartDate()) {
-                $project->setProjectStartDate(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
+            try {
+                if (!$project->getProjectStartDate()) {
+                    $project->setProjectStartDate(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
+                }
+                $project->setProjectManager($this->getUser());
+        
+                $entityManager->persist($project);
+                $entityManager->flush();
+        
+                $this->addFlash('success', 'Projet créé avec succès !');
+                return $this->redirectToRoute('app_management_project');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors de la création du projet: ' . $e->getMessage());
             }
-            $project->setProjectManager($this->getUser());
-    
-            $entityManager->persist($project);
-            $entityManager->flush();
-    
-            $this->addFlash('success', 'Projet créé avec succès !');
-            return $this->redirectToRoute('app_management_project');
+        } else if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Le formulaire contient des erreurs.');
         }
     
         if ($taskForm->isSubmitted() && $taskForm->isValid()) {
-            if (!$this->permissionService->canPerform('create', 'task')) {
-                throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à créer des tâches.');
-            }
-            
-            if (!$task->getTaskStartDate()) {
-                $task->setTaskStartDate(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
-            }
-    
-            if ($currentProject) {
-                $task->setTaskProject($currentProject);
-                
-                // S'assurer que l'utilisateur de mise à jour est défini
-                if (!$task->getTaskUpdatedBy() && $currentUser) {
-                    $task->setTaskUpdatedBy($currentUser);
+            try {
+                if (!$this->permissionService->canPerform('create', 'task')) {
+                    throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à créer des tâches.');
                 }
                 
-                $entityManager->persist($task);
-                $entityManager->flush();
-                
-                $this->updateTaskRank($entityManager, $currentProject);
-            } else {
-                $this->addFlash('error', 'Aucun projet sélectionné pour cette tâche.');
-                return $this->redirectToRoute('app_management_project');
+                if (!$task->getTaskStartDate()) {
+                    $task->setTaskStartDate(new \DateTime('now', new \DateTimeZone('Europe/Paris')));
+                }
+        
+                if ($currentProject) {
+                    $task->setTaskProject($currentProject);
+                    
+                    // S'assurer que l'utilisateur de mise à jour est défini
+                    if (!$task->getTaskUpdatedBy() && $currentUser) {
+                        $task->setTaskUpdatedBy($currentUser);
+                    }
+                    
+                    $entityManager->persist($task);
+                    $entityManager->flush();
+                    
+                    $this->updateTaskRank($entityManager, $currentProject);
+                } else {
+                    $this->addFlash('error', 'Aucun projet sélectionné pour cette tâche.');
+                    return $this->redirectToRoute('app_management_project');
+                }
+        
+                $this->addFlash('success', 'Tâche ajoutée avec succès !');
+                return $this->redirectToRoute('app_management_project', ['id' => $currentProject->getId()]);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors de la création de la tâche: ' . $e->getMessage());
             }
-    
-            $this->addFlash('success', 'Tâche ajoutée avec succès !');
-            return $this->redirectToRoute('app_management_project', ['id' => $currentProject->getId()]);
+        } else if ($taskForm->isSubmitted() && !$taskForm->isValid()) {
+            $this->addFlash('error', 'Le formulaire de tâche contient des erreurs.');
         }
     
         return $this->render('project/management_project.html.twig', [

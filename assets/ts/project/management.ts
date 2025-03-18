@@ -18,6 +18,26 @@ interface KanbanUpdateData {
     taskOrder: TaskData[];
 }
 
+// Déclaration des jetons CSRF globaux
+declare global {
+    interface Window {
+        CSRF_TOKENS: {
+            project: string;
+            task: string;
+            delete: string;
+        };
+        showCreateForm: typeof showCreateForm;
+        showCreateTaskForm: typeof showCreateTaskForm;
+        showTaskForm: typeof showTaskForm;
+        showDeletePopup: (projectId: string) => void;
+        openTaskModal: typeof openTaskModal;
+        closeTaskModal: typeof closeTaskModal;
+    }
+}
+
+// Variables globales pour le script
+let projectIdToDelete: string | null = null;
+
 /**
  * Affiche le formulaire de création de projet
  */
@@ -27,12 +47,27 @@ function showCreateForm(): void {
         form.style.display = 'block';
         console.log('Formulaire de création de projet affiché');
         
-        // Vérifier que le jeton CSRF est présent
-        const token = form.querySelector('input[name="_token"]');
-        if (!token) {
-            console.error('Jeton CSRF manquant dans le formulaire de projet');
-        } else {
-            console.log('Jeton CSRF trouvé dans le formulaire de projet');
+        // Vérifier que le jeton CSRF est présent et valide
+        const csrfToken = window.CSRF_TOKENS?.project;
+        if (!csrfToken) {
+            console.error('Jeton CSRF du projet non disponible dans les variables globales');
+            return;
+        }
+        
+        // S'assurer que le formulaire a un champ caché pour le jeton CSRF
+        const formElement = form.querySelector('form') as HTMLFormElement;
+        if (formElement) {
+            let tokenInput = formElement.querySelector('input[name="_token"]') as HTMLInputElement;
+            if (!tokenInput) {
+                // Créer le champ si nécessaire
+                tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                formElement.appendChild(tokenInput);
+            }
+            // Définir ou mettre à jour la valeur du jeton
+            tokenInput.value = csrfToken;
+            console.log('Jeton CSRF du projet défini avec succès dans le formulaire');
         }
     } else {
         console.error('Formulaire de création de projet non trouvé');
@@ -48,12 +83,27 @@ function showCreateTaskForm(): void {
         form.style.display = 'block';
         console.log('Formulaire de création de tâche affiché');
         
-        // Vérifier que le jeton CSRF est présent
-        const token = form.querySelector('input[name="_token"]');
-        if (!token) {
-            console.error('Jeton CSRF manquant dans le formulaire de tâche');
-        } else {
-            console.log('Jeton CSRF trouvé dans le formulaire de tâche');
+        // Vérifier que le jeton CSRF est présent et valide
+        const csrfToken = window.CSRF_TOKENS?.task;
+        if (!csrfToken) {
+            console.error('Jeton CSRF de tâche non disponible dans les variables globales');
+            return;
+        }
+        
+        // S'assurer que le formulaire a un champ caché pour le jeton CSRF
+        const formElement = form.querySelector('form') as HTMLFormElement;
+        if (formElement) {
+            let tokenInput = formElement.querySelector('input[name="_token"]') as HTMLInputElement;
+            if (!tokenInput) {
+                // Créer le champ si nécessaire
+                tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                formElement.appendChild(tokenInput);
+            }
+            // Définir ou mettre à jour la valeur du jeton
+            tokenInput.value = csrfToken;
+            console.log('Jeton CSRF de tâche défini avec succès dans le formulaire');
         }
     } else {
         console.error('Formulaire de création de tâche non trouvé');
@@ -64,8 +114,6 @@ function showCreateTaskForm(): void {
  * Initialisation des gestionnaires d'événements pour la suppression de projet
  */
 document.addEventListener('DOMContentLoaded', function() {
-    let projectIdToDelete: string | null = null;
-    
     // Initialiser les boutons de création
     const createProjectBtn = document.getElementById('createProjectBtn');
     if (createProjectBtn) {
@@ -94,14 +142,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (projectForm) {
         console.log('Formulaire de projet trouvé, ajout du gestionnaire de soumission');
         projectForm.addEventListener('submit', function(e) {
-            // Ne pas empêcher la soumission par défaut, mais vérifier que le CSRF est présent
-            const csrfToken = this.querySelector('input[name="_token"]');
-            if (!csrfToken) {
+            // S'assurer que le jeton CSRF est présent dans le formulaire
+            const csrfToken = this.querySelector('input[name="_token"]') as HTMLInputElement;
+            if (!csrfToken || !csrfToken.value) {
                 e.preventDefault();
                 console.error('Soumission du formulaire de projet annulée : jeton CSRF manquant');
-                alert('Impossible de soumettre le formulaire : jeton de sécurité manquant.');
-            } else {
-                console.log('Soumission du formulaire de projet avec jeton CSRF');
+                
+                // Utiliser le jeton depuis les variables globales
+                const tokenValue = window.CSRF_TOKENS?.project;
+                if (tokenValue) {
+                    // Créer ou mettre à jour le champ du jeton
+                    if (!csrfToken) {
+                        const newToken = document.createElement('input');
+                        newToken.type = 'hidden';
+                        newToken.name = '_token';
+                        newToken.value = tokenValue;
+                        this.appendChild(newToken);
+                    } else {
+                        csrfToken.value = tokenValue;
+                    }
+                    console.log('Jeton CSRF ajouté au formulaire de projet, tentative de soumission');
+                    setTimeout(() => this.submit(), 50);
+                } else {
+                    alert('Impossible de soumettre le formulaire : jeton de sécurité manquant.');
+                }
             }
         });
     }
@@ -110,14 +174,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (taskForm) {
         console.log('Formulaire de tâche trouvé, ajout du gestionnaire de soumission');
         taskForm.addEventListener('submit', function(e) {
-            // Ne pas empêcher la soumission par défaut, mais vérifier que le CSRF est présent
-            const csrfToken = this.querySelector('input[name="_token"]');
-            if (!csrfToken) {
+            // S'assurer que le jeton CSRF est présent dans le formulaire
+            const csrfToken = this.querySelector('input[name="_token"]') as HTMLInputElement;
+            if (!csrfToken || !csrfToken.value) {
                 e.preventDefault();
                 console.error('Soumission du formulaire de tâche annulée : jeton CSRF manquant');
-                alert('Impossible de soumettre le formulaire : jeton de sécurité manquant.');
-            } else {
-                console.log('Soumission du formulaire de tâche avec jeton CSRF');
+                
+                // Utiliser le jeton depuis les variables globales
+                const tokenValue = window.CSRF_TOKENS?.task;
+                if (tokenValue) {
+                    // Créer ou mettre à jour le champ du jeton
+                    if (!csrfToken) {
+                        const newToken = document.createElement('input');
+                        newToken.type = 'hidden';
+                        newToken.name = '_token';
+                        newToken.value = tokenValue;
+                        this.appendChild(newToken);
+                    } else {
+                        csrfToken.value = tokenValue;
+                    }
+                    console.log('Jeton CSRF ajouté au formulaire de tâche, tentative de soumission');
+                    setTimeout(() => this.submit(), 50);
+                } else {
+                    alert('Impossible de soumettre le formulaire : jeton de sécurité manquant.');
+                }
             }
         });
     }
@@ -126,6 +206,21 @@ document.addEventListener('DOMContentLoaded', function() {
         projectIdToDelete = projectId;
         const popup = document.getElementById('deletePopup');
         if (popup) popup.style.display = 'flex';
+        
+        // Assurer que le jeton CSRF est présent
+        const csrfTokenInput = document.getElementById('delete-project-token') as HTMLInputElement;
+        if (!csrfTokenInput || !csrfTokenInput.value) {
+            console.error('Jeton CSRF manquant pour la suppression du projet');
+            const csrfMeta = document.querySelector('meta[name="csrf-token-delete"]');
+            if (csrfMeta && csrfMeta.getAttribute('content')) {
+                if (csrfTokenInput) {
+                    csrfTokenInput.value = csrfMeta.getAttribute('content') || '';
+                    console.log('Jeton CSRF pour la suppression récupéré depuis les méta-données');
+                }
+            }
+        } else {
+            console.log('Jeton CSRF pour la suppression disponible');
+        }
     };
  
     const confirmDelete = document.getElementById('confirmDelete');
@@ -145,18 +240,17 @@ document.addEventListener('DOMContentLoaded', function() {
             csrfInput.type = 'hidden';
             csrfInput.name = '_token';
             
-            // Récupérer le jeton CSRF depuis les méta-données, s'il existe
-            const csrfMeta = document.querySelector('meta[name="csrf-token-delete"]');
-            if (csrfMeta && csrfMeta.getAttribute('content')) {
-                csrfInput.value = csrfMeta.getAttribute('content') || '';
-                console.log('Jeton CSRF trouvé pour la suppression');
+            // Récupérer le jeton CSRF depuis les variables globales
+            const tokenValue = window.CSRF_TOKENS?.delete;
+            if (tokenValue) {
+                csrfInput.value = tokenValue;
+                form.appendChild(csrfInput);
+                document.body.appendChild(form);
+                form.submit();
             } else {
                 console.error('Aucun jeton CSRF trouvé pour la suppression de projet');
+                alert('Impossible de supprimer le projet : jeton de sécurité manquant.');
             }
-            
-            form.appendChild(csrfInput);
-            document.body.appendChild(form);
-            form.submit();
         };
     }
  
@@ -182,21 +276,23 @@ function showTaskForm(): void {
  * @param projectId - L'ID du projet à supprimer
  */
 function showDeletePopup(projectId: string): void {
-    const deletePopup = document.getElementById('deletePopup');
-    if (deletePopup) deletePopup.style.display = 'block';
- 
-    const confirmDelete = document.getElementById('confirmDelete');
-    if (confirmDelete) {
-        confirmDelete.onclick = function(): void {
-            window.location.href = `/delete-project/${projectId}`;
-        };
-    }
- 
-    const cancelDelete = document.getElementById('cancelDelete');
-    if (cancelDelete) {
-        cancelDelete.onclick = function(): void {
-            if (deletePopup) deletePopup.style.display = 'none';
-        };
+    projectIdToDelete = projectId;
+    const popup = document.getElementById('deletePopup');
+    if (popup) popup.style.display = 'flex';
+    
+    // Assurer que le jeton CSRF est présent
+    const csrfTokenInput = document.getElementById('delete-project-token') as HTMLInputElement;
+    if (!csrfTokenInput || !csrfTokenInput.value) {
+        console.error('Jeton CSRF manquant pour la suppression du projet');
+        const csrfMeta = document.querySelector('meta[name="csrf-token-delete"]');
+        if (csrfMeta && csrfMeta.getAttribute('content')) {
+            if (csrfTokenInput) {
+                csrfTokenInput.value = csrfMeta.getAttribute('content') || '';
+                console.log('Jeton CSRF pour la suppression récupéré depuis les méta-données');
+            }
+        }
+    } else {
+        console.log('Jeton CSRF pour la suppression disponible');
     }
 }
  
@@ -318,9 +414,15 @@ document.addEventListener('DOMContentLoaded', function() {
             rank: index + 1
         }));
  
+        // Utiliser le jeton CSRF global pour l'en-tête de la requête
+        const csrfToken = window.CSRF_TOKENS?.task || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        
         fetch('/management-project/update-task-position', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
             body: JSON.stringify({
                 taskId,
                 newColumn: columnStatus,
@@ -349,6 +451,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!errorBox) {
             errorBox = document.createElement('div');
             errorBox.className = 'error-box';
+            errorBox.style.position = 'fixed';
+            errorBox.style.top = '20px';
+            errorBox.style.right = '20px';
+            errorBox.style.padding = '15px 20px';
+            errorBox.style.backgroundColor = '#e74c3c';
+            errorBox.style.color = 'white';
+            errorBox.style.borderRadius = '5px';
+            errorBox.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.3)';
+            errorBox.style.zIndex = '9999';
             document.body.appendChild(errorBox);
         }
         errorBox.innerText = message;
@@ -418,18 +529,6 @@ function closeTaskModal(): void {
     if (modal) modal.style.display = 'none';
     // Réactiver le défilement
     document.body.style.overflow = 'auto';
-}
-
-// Exposer les fonctions à l'objet window
-declare global {
-    interface Window {
-        showCreateForm: typeof showCreateForm;
-        showCreateTaskForm: typeof showCreateTaskForm;
-        showTaskForm: typeof showTaskForm;
-        showDeletePopup: (projectId: string) => void;
-        openTaskModal: typeof openTaskModal;
-        closeTaskModal: typeof closeTaskModal;
-    }
 }
 
 window.showCreateForm = showCreateForm;

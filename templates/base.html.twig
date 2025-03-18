@@ -11,7 +11,10 @@
     <meta name="referrer" content="no-referrer">
     <meta name="google-site-verification" content="">
     {% if app.user %}
-    <meta name="csrf-token" content="{{ csrf_token('upload') }}">
+    <meta name="csrf-token" content="{{ csrf_token('app') }}">
+    <meta name="csrf-token-project" content="{{ csrf_token('project_form') }}">
+    <meta name="csrf-token-task" content="{{ csrf_token('task_form') }}">
+    <meta name="csrf-token-delete" content="{{ csrf_token('delete-project') }}">
     {% endif %}
 
     <!-- Favicon -->
@@ -39,6 +42,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.digi-3.fr">
     
+    {% block head_meta %}{% endblock %}
     {% block stylesheets %}{% endblock %}
     {{ encore_entry_link_tags('app') }}
 

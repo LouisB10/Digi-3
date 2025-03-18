@@ -7,12 +7,12 @@
   display: flex;
   background-color: #2C2C2C;
   color: #fff;
-  height: 100vh;
+  min-height: 100vh;
+  position: relative;
   
   @include tablet {
     flex-direction: column;
     height: auto;
-    min-height: 100vh;
   }
   
   @include mobile {
@@ -30,6 +30,12 @@
   margin-bottom: 10px;
   cursor: pointer;
   border-radius: 5px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #1a7f6a;
+  }
   
   @include mobile {
     width: 100%;
@@ -40,12 +46,15 @@
 
 aside.parameter_menu {
   background: linear-gradient(-130deg, $blue, $green);
-  width: 250px;
+  width: 280px;
   padding: 20px;
   overflow-y: auto;
   border-radius: 10px;
   max-height: 100vh;
   align-self: flex-start;
+  transition: all 0.3s ease;
+  z-index: 5;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
   
   @include tablet {
     width: 100%;
@@ -64,6 +73,7 @@ aside.parameter_menu {
     color: $dark;
     margin-bottom: 20px;
     font-size: 1.4rem;
+    font-weight: 600;
     
     @include mobile {
       font-size: 1.2rem;
@@ -76,6 +86,21 @@ aside.parameter_menu {
     padding: 0;
     overflow-y: auto;
     max-height: calc(100vh - 150px);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(41, 41, 41, 0.5) transparent;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(41, 41, 41, 0.5);
+      border-radius: 6px;
+    }
     
     @include tablet {
       max-height: 180px;
@@ -95,6 +120,13 @@ aside.parameter_menu {
       justify-content: space-between;
       align-items: center;
       border: 2px solid rgba(41, 41, 41, 0.15);
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: rgba(41, 41, 41, 0.25);
+        border-color: rgba(41, 41, 41, 0.3);
+        transform: translateY(-2px);
+      }
       
       @include mobile {
         padding: 8px;
@@ -107,6 +139,11 @@ aside.parameter_menu {
         
         a {
           color: $white;
+          font-weight: bold;
+        }
+        
+        &:hover {
+          transform: none;
         }
       }
 
@@ -115,6 +152,7 @@ aside.parameter_menu {
         text-decoration: none;
         flex-grow: 1;
         font-size: 1rem;
+        font-weight: 500;
         
         @include mobile {
           font-size: 0.9rem;
@@ -129,8 +167,14 @@ aside.parameter_menu {
   border: none;
   color: white;
   cursor: pointer;
-  padding: 0;
+  padding: 5px;
   margin-left: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .delete-icon {
@@ -151,6 +195,26 @@ main.project-details {
   overflow-y: auto;
   max-height: 100vh;
   position: relative;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
   
   @include tablet {
     padding: 30px 20px;
@@ -166,6 +230,8 @@ main.project-details {
   h2 {
     font-size: 24px;
     margin-bottom: 10px;
+    color: #00FFCC;
+    font-weight: 600;
     
     @include mobile {
       font-size: 20px;
@@ -175,6 +241,7 @@ main.project-details {
   p {
     font-size: 18px;
     margin-bottom: 20px;
+    line-height: 1.5;
     
     @include mobile {
       font-size: 16px;
@@ -202,11 +269,11 @@ main.project-details {
   div {
     display: flex;
     flex-direction: column;
-    background: #3C3C3C;
+    background: rgba(60, 60, 60, 0.7);
     color: #ffffff;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     min-width: 180px;
     text-align: center;
     
@@ -228,28 +295,41 @@ main.project-details {
 }
 
 .add-task-button {
-  padding: 10px 15px;
+  padding: 12px 18px;
   background: linear-gradient(-130deg, $blue, $green);
   color: $dark;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-weight: 500;
-  margin-top: 10px;
+  font-weight: 600;
+  margin-top: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
   
   @include mobile {
-    padding: 8px 12px;
+    padding: 10px 15px;
     font-size: 0.9rem;
     width: 100%;
   }
 }
 
 .alert {
-  padding: 10px;
+  padding: 12px 15px;
   margin-top: 20px;
   background-color: #249F84;
   color: white;
   border-radius: 5px;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 // ======================================
@@ -263,6 +343,25 @@ main.project-details {
   padding: 20px 0;
   min-height: 50vh;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
   
   @include tablet {
     flex-wrap: wrap;
@@ -283,11 +382,17 @@ main.project-details {
   width: 90%;
   min-width: 280px;
   max-width: 400px;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   text-align: center;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  }
   
   @include tablet {
     width: 45%;
@@ -305,6 +410,7 @@ main.project-details {
     color: #00FFCC;
     margin-bottom: 15px;
     font-size: 1.3rem;
+    font-weight: 600;
     
     @include mobile {
       font-size: 1.1rem;
@@ -320,6 +426,30 @@ main.project-details {
   padding: 10px;
   max-height: 500px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+  
+  &.drag-over {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
   
   @include tablet {
     max-height: 400px;
@@ -332,15 +462,15 @@ main.project-details {
 }
 
 .task-card {
-  background-color: #3C3C3C;
-  border: 2px solid #fff;
+  background-color: #4A4A4A;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   padding: 15px;
   margin: 10px 0;
   color: #fff;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   
   @include mobile {
     padding: 12px;
@@ -350,12 +480,18 @@ main.project-details {
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 255, 204, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(-1px);
   }
 
   h4 {
     font-size: 16px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     color: #00FFCC;
+    font-weight: 600;
     
     @include mobile {
       font-size: 14px;
@@ -365,7 +501,7 @@ main.project-details {
   .task-info {
     p {
       font-size: 14px;
-      margin: 2px 0;
+      margin: 4px 0;
       color: #fff;
       
       @include mobile {
@@ -374,10 +510,11 @@ main.project-details {
 
       strong {
         color: #00FFCC;
+        font-weight: 600;
       }
 
       span {
-        font-weight: bold;
+        font-weight: 500;
       }
     }
   }
@@ -389,6 +526,12 @@ main.project-details {
   padding: 20px;
   margin-top: 20px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  }
   
   @include mobile {
     padding: 15px;
@@ -399,6 +542,7 @@ main.project-details {
     color: #00FFCC;
     margin-bottom: 15px;
     font-size: 1.4rem;
+    font-weight: 600;
     
     @include mobile {
       font-size: 1.2rem;
@@ -422,6 +566,7 @@ main.project-details {
         margin-bottom: 5px;
         color: #fff;
         font-size: 1rem;
+        font-weight: 500;
         
         @include mobile {
           font-size: 0.9rem;
@@ -430,19 +575,22 @@ main.project-details {
       
       input, textarea, select {
         width: 100%;
-        padding: 8px;
+        padding: 10px;
         border-radius: 5px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background-color: #444;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background-color: #4A4A4A;
         color: #fff;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
         
         @include mobile {
-          padding: 6px;
+          padding: 8px;
         }
         
         &:focus {
-          outline: 2px solid #00FFCC;
+          outline: none;
           border-color: #00FFCC;
+          box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.2);
         }
       }
       
@@ -456,19 +604,27 @@ main.project-details {
       background: linear-gradient(-130deg, $blue, $green);
       color: $dark;
       border: none;
-      padding: 10px 15px;
+      padding: 12px 20px;
       border-radius: 5px;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 600;
       align-self: flex-start;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       
       @include mobile {
         width: 100%;
-        padding: 8px 12px;
+        padding: 10px 15px;
       }
       
       &:hover {
         background: linear-gradient(-130deg, $green, $blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      &:active {
+        transform: translateY(0);
       }
     }
   }
@@ -491,6 +647,7 @@ main.project-details {
   font-size: 1.75rem;
   cursor: pointer;
   z-index: 100;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   
   &:hover {
     transform: scale(1.05);
@@ -524,24 +681,41 @@ main.project-details {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  
+  &[style*="display: flex"], &[style*="display:flex"] {
+    opacity: 1;
+    visibility: visible;
+  }
   
   .popup-content, .modal-content {
     background: #2C2C2C;
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    &[style*="display: block"], &[style*="display:block"] {
+      transform: translateY(0);
+    }
     
     @include mobile {
       width: 95%;
-      padding: 15px;
+      padding: 20px;
     }
     
     h2 {
       color: #00FFCC;
       margin-bottom: 15px;
       font-size: 1.5rem;
+      font-weight: 600;
       
       @include mobile {
         font-size: 1.3rem;
@@ -551,6 +725,8 @@ main.project-details {
     p {
       margin-bottom: 20px;
       color: #fff;
+      font-size: 1rem;
+      line-height: 1.4;
       
       @include mobile {
         margin-bottom: 15px;
@@ -558,26 +734,43 @@ main.project-details {
     }
     
     button {
-      padding: 10px 15px;
+      padding: 10px 20px;
       border-radius: 5px;
       border: none;
       margin-right: 10px;
       cursor: pointer;
       font-weight: 500;
+      transition: background-color 0.2s ease, transform 0.2s ease;
       
       @include mobile {
-        padding: 8px 12px;
+        padding: 8px 15px;
         font-size: 0.9rem;
+      }
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+      
+      &:active {
+        transform: translateY(0);
       }
       
       &.confirm-button {
         background: linear-gradient(-130deg, #e74c3c, #c0392b);
         color: white;
+        
+        &:hover {
+          background: linear-gradient(-130deg, #c0392b, #e74c3c);
+        }
       }
       
       &.cancel-button {
         background: #444;
         color: white;
+        
+        &:hover {
+          background: #555;
+        }
       }
     }
     
@@ -590,16 +783,45 @@ main.project-details {
       background: none;
       border: none;
       cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+      
+      &:hover {
+        opacity: 1;
+      }
     }
     
     .task-details {
       margin-bottom: 20px;
       
       p {
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         
         strong {
           color: #00FFCC;
+          font-weight: 600;
+          margin-right: 5px;
+        }
+      }
+    }
+    
+    .modal-footer {
+      margin-top: 20px;
+      text-align: right;
+      
+      a {
+        display: inline-block;
+        padding: 8px 15px;
+        background: linear-gradient(-130deg, $blue, $green);
+        color: $dark;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
       }
     }

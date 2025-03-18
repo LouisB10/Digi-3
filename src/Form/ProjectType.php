@@ -41,6 +41,7 @@ class ProjectType extends AbstractType
             'csrf_protection' => true,
             'csrf_field_name' => '_token',
             'csrf_token_id' => 'project_form',
+            'attr' => ['novalidate' => 'novalidate'], // Désactiver la validation HTML5 pour permettre la validation côté serveur
         ]);
     }
 } 
