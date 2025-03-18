@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Project;
 use App\Entity\Tasks;
+use App\Enum\TaskStatus;
 use App\Form\ProjectType;
 use App\Form\TaskType;
 use App\Repository\ProjectRepository;
@@ -44,6 +45,14 @@ class ProjectController extends AbstractController
         // Création d'une nouvelle tâche
         $task = new Tasks();
         $task->setTaskRank(1); // Définir la valeur par défaut du taskRank
+        $task->setTaskColumnRank(1); // Définir la valeur par défaut du taskColumnRank
+        
+        // Initialiser l'utilisateur de mise à jour
+        $currentUser = $this->getUser();
+        if ($currentUser) {
+            $task->setTaskUpdatedBy($currentUser);
+        }
+        
         $taskForm = $this->createForm(TaskType::class, $task);
     
         // Traiter la soumission des formulaires
@@ -88,6 +97,11 @@ class ProjectController extends AbstractController
             if ($currentProject) {
                 $task->setTaskProject($currentProject);
                 
+                // S'assurer que l'utilisateur de mise à jour est défini
+                if (!$task->getTaskUpdatedBy() && $currentUser) {
+                    $task->setTaskUpdatedBy($currentUser);
+                }
+                
                 $entityManager->persist($task);
                 $entityManager->flush();
                 
@@ -122,13 +136,21 @@ class ProjectController extends AbstractController
         $rank = 1;
         foreach ($tasks as $task) {
             $task->setTaskRank($rank);
+            $rank++; // Incrémenter le rang pour la prochaine tâche
         }
         $entityManager->flush();
     }
 
     #[Route('/management-project/delete/{id}', name: 'app_project_delete', methods: ['POST'])]
-    public function deleteProject(Project $project, EntityManagerInterface $entityManager): Response
+    public function deleteProject(Request $request, Project $project, EntityManagerInterface $entityManager): Response
     {
+        // Vérifier le jeton CSRF
+        $submittedToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('delete-project', $submittedToken)) {
+            $this->addFlash('error', 'Jeton CSRF invalide lors de la suppression du projet.');
+            return $this->redirectToRoute('app_management_project');
+        }
+        
         // Vérifier si l'utilisateur peut supprimer des projets
         if (!$this->permissionService->canPerform('delete', 'project')) {
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à supprimer des projets.');
@@ -168,7 +190,8 @@ class ProjectController extends AbstractController
         }
 
         // Mettre à jour le statut de la tâche
-        $task->setTaskStatus($content['newStatus']);
+        $task->setTaskStatus(TaskStatus::from($content['newStatus']));
+        $task->setTaskUpdatedBy($this->getUser()); // Mettre à jour l'utilisateur qui modifie la tâche
         $entityManager->persist($task);
         $entityManager->flush();
 
@@ -206,11 +229,13 @@ class ProjectController extends AbstractController
         }
     
         $task->setTaskColumnRank($columnRanks[$content['newColumn']]);
+        $task->setTaskUpdatedBy($this->getUser()); // Mettre à jour l'utilisateur qui modifie la tâche
         
         foreach ($content['taskOrder'] as $taskData) {
             $taskToUpdate = $entityManager->getRepository(Tasks::class)->find($taskData['id']);
             if ($taskToUpdate) {
                 $taskToUpdate->setTaskRank($taskData['rank']);
+                $taskToUpdate->setTaskUpdatedBy($this->getUser()); // Mettre à jour l'utilisateur
                 $entityManager->persist($taskToUpdate);
             }
         }

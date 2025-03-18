@@ -1,0 +1,607 @@
+@use "../app" as *;
+
+// ======================================
+// GESTION DE PROJET
+// ======================================
+.project-management-container {
+  display: flex;
+  background-color: #2C2C2C;
+  color: #fff;
+  height: 100vh;
+  
+  @include tablet {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  @include mobile {
+    flex-direction: column;
+    height: auto;
+    overflow-x: hidden;
+  }
+}
+
+.create-project-button {
+  background-color: #249F84;
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  
+  @include mobile {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}
+
+aside.parameter_menu {
+  background: linear-gradient(-130deg, $blue, $green);
+  width: 250px;
+  padding: 20px;
+  overflow-y: auto;
+  border-radius: 10px;
+  max-height: 100vh;
+  align-self: flex-start;
+  
+  @include tablet {
+    width: 100%;
+    max-height: 300px;
+    margin-bottom: 1rem;
+    border-radius: 0 0 10px 10px;
+  }
+  
+  @include mobile {
+    width: 100%;
+    padding: 15px;
+    max-height: 250px;
+  }
+
+  h3 {
+    color: $dark;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+    
+    @include mobile {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 150px);
+    
+    @include tablet {
+      max-height: 180px;
+    }
+    
+    @include mobile {
+      max-height: 150px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: rgba(41, 41, 41, 0.15);
+      border-radius: 5px;
+      color: $dark;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid rgba(41, 41, 41, 0.15);
+      
+      @include mobile {
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+
+      &.active {
+        background-color: $dark;
+        border: 2px solid rgba(41, 41, 41, 0.2);
+        
+        a {
+          color: $white;
+        }
+      }
+
+      a {
+        color: $dark;
+        text-decoration: none;
+        flex-grow: 1;
+        font-size: 1rem;
+        
+        @include mobile {
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+}
+
+.delete-icon {
+  width: 25px;
+  height: 25px;
+  
+  @include mobile {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+main.project-details {
+  flex-grow: 1;
+  padding: 40px;
+  background-color: #3C3C3C;
+  border-radius: 10px;
+  overflow-y: auto;
+  max-height: 100vh;
+  position: relative;
+  
+  @include tablet {
+    padding: 30px 20px;
+    max-height: none;
+    border-radius: 10px;
+  }
+  
+  @include mobile {
+    padding: 20px 15px;
+    border-radius: 8px;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    
+    @include mobile {
+      font-size: 20px;
+    }
+  }
+
+  p {
+    font-size: 18px;
+    margin-bottom: 20px;
+    
+    @include mobile {
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+  }
+}
+
+.project-dates {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 30px;
+  gap: 15px;
+  
+  @include tablet {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  @include mobile {
+    margin-bottom: 20px;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    background: #3C3C3C;
+    color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    min-width: 180px;
+    text-align: center;
+    
+    @include mobile {
+      padding: 12px;
+      min-width: 0;
+    }
+  }
+
+  span {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .real {
+    color: #00FFCC;
+    font-size: 16px;
+  }
+}
+
+.add-task-button {
+  padding: 10px 15px;
+  background: linear-gradient(-130deg, $blue, $green);
+  color: $dark;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 10px;
+  
+  @include mobile {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+}
+
+.alert {
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #249F84;
+  color: white;
+  border-radius: 5px;
+}
+
+// ======================================
+// KANBAN BOARD
+// ======================================
+.kanban-board {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 0;
+  min-height: 50vh;
+  overflow-x: auto;
+  
+  @include tablet {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  @include mobile {
+    padding: 10px 0;
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+.kanban-column {
+  background-color: #3C3C3C;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  min-width: 280px;
+  max-width: 400px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  
+  @include tablet {
+    width: 45%;
+    min-width: 250px;
+    padding: 15px;
+  }
+  
+  @include mobile {
+    width: 100%;
+    padding: 15px;
+    max-width: none;
+  }
+
+  h3 {
+    color: #00FFCC;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    
+    @include mobile {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.kanban-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+  
+  @include tablet {
+    max-height: 400px;
+  }
+  
+  @include mobile {
+    max-height: 300px;
+    padding: 5px;
+  }
+}
+
+.task-card {
+  background-color: #3C3C3C;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  margin: 10px 0;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  @include mobile {
+    padding: 12px;
+    margin: 8px 0;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  h4 {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #00FFCC;
+    
+    @include mobile {
+      font-size: 14px;
+    }
+  }
+
+  .task-info {
+    p {
+      font-size: 14px;
+      margin: 2px 0;
+      color: #fff;
+      
+      @include mobile {
+        font-size: 12px;
+      }
+
+      strong {
+        color: #00FFCC;
+      }
+
+      span {
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+#createProjectForm, #createTaskForm {
+  background-color: #2C2C2C;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  
+  @include mobile {
+    padding: 15px;
+    margin-top: 15px;
+  }
+  
+  h3 {
+    color: #00FFCC;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+    
+    @include mobile {
+      font-size: 1.2rem;
+    }
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+    @include mobile {
+      gap: 12px;
+    }
+    
+    div {
+      margin-bottom: 10px;
+      
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #fff;
+        font-size: 1rem;
+        
+        @include mobile {
+          font-size: 0.9rem;
+        }
+      }
+      
+      input, textarea, select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background-color: #444;
+        color: #fff;
+        
+        @include mobile {
+          padding: 6px;
+        }
+        
+        &:focus {
+          outline: 2px solid #00FFCC;
+          border-color: #00FFCC;
+        }
+      }
+      
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+    }
+    
+    button[type="submit"] {
+      background: linear-gradient(-130deg, $blue, $green);
+      color: $dark;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      align-self: flex-start;
+      
+      @include mobile {
+        width: 100%;
+        padding: 8px 12px;
+      }
+      
+      &:hover {
+        background: linear-gradient(-130deg, $green, $blue);
+      }
+    }
+  }
+}
+
+.floating-add-project {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: linear-gradient(-130deg, $blue, $green);
+  color: $dark;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.75rem;
+  cursor: pointer;
+  z-index: 100;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.35);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  @include mobile {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.5rem;
+  }
+}
+
+// ======================================
+// POPUP & MODAL STYLES
+// ======================================
+.popup, .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  
+  .popup-content, .modal-content {
+    background: #2C2C2C;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    
+    @include mobile {
+      width: 95%;
+      padding: 15px;
+    }
+    
+    h2 {
+      color: #00FFCC;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+      
+      @include mobile {
+        font-size: 1.3rem;
+      }
+    }
+    
+    p {
+      margin-bottom: 20px;
+      color: #fff;
+      
+      @include mobile {
+        margin-bottom: 15px;
+      }
+    }
+    
+    button {
+      padding: 10px 15px;
+      border-radius: 5px;
+      border: none;
+      margin-right: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      
+      @include mobile {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+      
+      &.confirm-button {
+        background: linear-gradient(-130deg, #e74c3c, #c0392b);
+        color: white;
+      }
+      
+      &.cancel-button {
+        background: #444;
+        color: white;
+      }
+    }
+    
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .task-details {
+      margin-bottom: 20px;
+      
+      p {
+        margin-bottom: 8px;
+        
+        strong {
+          color: #00FFCC;
+        }
+      }
+    }
+  }
+} 

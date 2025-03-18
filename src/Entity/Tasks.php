@@ -288,6 +288,46 @@ class Tasks
         return $this;
     }
 
+    /**
+     * Get the value of taskRank
+     */ 
+    public function getTaskRank(): int
+    {
+        return $this->taskRank;
+    }
+
+    /**
+     * Set the value of taskRank
+     *
+     * @param int $taskRank
+     * @return static
+     */ 
+    public function setTaskRank(int $taskRank): static
+    {
+        $this->taskRank = $taskRank;
+        return $this;
+    }
+
+    /**
+     * Get the value of taskColumnRank
+     */ 
+    public function getTaskColumnRank(): int
+    {
+        return $this->taskColumnRank;
+    }
+
+    /**
+     * Set the value of taskColumnRank
+     *
+     * @param int $taskColumnRank
+     * @return static
+     */ 
+    public function setTaskColumnRank(int $taskColumnRank): static
+    {
+        $this->taskColumnRank = $taskColumnRank;
+        return $this;
+    }
+
     public static function getAllowedTaskTypes(): array
     {
         return [

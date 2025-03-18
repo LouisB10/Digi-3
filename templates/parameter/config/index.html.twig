@@ -147,7 +147,7 @@
                                 </div>
                                 
                                 <div class="form-actions">
-                                    <button type="button" class="btn-secondary" onclick="testEmailConfig()">Tester la configuration</button>
+                                    <button type="button" class="btn-secondary" id="test-email-config-btn">Tester la configuration</button>
                                     <button type="submit" class="btn-submit">Enregistrer</button>
                                 </div>
                             </form>
@@ -235,7 +235,7 @@
                                 </div>
                                 
                                 <div class="form-actions">
-                                    <button type="button" class="btn-secondary" onclick="createManualBackup()">Créer une sauvegarde maintenant</button>
+                                    <button type="button" class="btn-secondary" id="create-manual-backup-btn">Créer une sauvegarde maintenant</button>
                                     <button type="submit" class="btn-submit">Enregistrer</button>
                                 </div>
                             </form>
@@ -259,13 +259,13 @@
                                                     <td>{{ backup.date|date('d/m/Y H:i') }}</td>
                                                     <td>{{ backup.size }}</td>
                                                     <td class="actions">
-                                                        <button class="download-btn" onclick="downloadBackup('{{ backup.id }}')" aria-label="Télécharger la sauvegarde">
+                                                        <button class="download-btn" data-backup-id="{{ backup.id }}">
                                                             <img src="{{ asset('build/images/settings/download.png') }}" alt="Télécharger">
                                                         </button>
-                                                        <button class="restore-btn" onclick="confirmRestoreBackup('{{ backup.id }}', '{{ backup.name }}')" aria-label="Restaurer la sauvegarde">
+                                                        <button class="restore-btn" data-backup-id="{{ backup.id }}" data-backup-name="{{ backup.name }}">
                                                             <img src="{{ asset('build/images/settings/restore.png') }}" alt="Restaurer">
                                                         </button>
-                                                        <button class="delete-btn" onclick="confirmDeleteBackup('{{ backup.id }}', '{{ backup.name }}')" aria-label="Supprimer la sauvegarde">
+                                                        <button class="delete-btn" data-backup-id="{{ backup.id }}" data-backup-name="{{ backup.name }}">
                                                             <img src="{{ asset('build/images/settings/delete.png') }}" alt="Supprimer">
                                                         </button>
                                                     </td>
@@ -292,15 +292,15 @@
     <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="restoreConfirmModalTitle">Confirmer la restauration</h2>
-            <button type="button" class="close" onclick="closeRestoreModal()" aria-label="Fermer">&times;</button>
+            <button type="button" class="close restore-modal-close">&times;</button>
         </div>
         <div class="modal-body">
             <p>Êtes-vous sûr de vouloir restaurer la sauvegarde <span id="backupToRestoreName"></span> ?</p>
             <p class="warning">Attention : Cette action remplacera toutes les données actuelles par celles de la sauvegarde. Cette opération est irréversible.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-cancel" onclick="closeRestoreModal()">Annuler</button>
-            <button type="button" class="btn-danger" onclick="restoreBackup()">Restaurer</button>
+            <button type="button" class="btn-cancel cancel-restore">Annuler</button>
+            <button type="button" class="btn-danger confirm-restore">Restaurer</button>
         </div>
     </div>
 </div>
@@ -309,15 +309,15 @@
     <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="deleteBackupConfirmModalTitle">Confirmer la suppression</h2>
-            <button type="button" class="close" onclick="closeDeleteBackupModal()" aria-label="Fermer">&times;</button>
+            <button type="button" class="close delete-backup-modal-close">&times;</button>
         </div>
         <div class="modal-body">
             <p>Êtes-vous sûr de vouloir supprimer la sauvegarde <span id="backupToDeleteName"></span> ?</p>
             <p>Cette action est irréversible.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-cancel" onclick="closeDeleteBackupModal()">Annuler</button>
-            <button type="button" class="btn-danger" onclick="deleteBackup()">Supprimer</button>
+            <button type="button" class="btn-cancel cancel-delete-backup">Annuler</button>
+            <button type="button" class="btn-danger confirm-delete-backup">Supprimer</button>
         </div>
     </div>
 </div>
@@ -326,7 +326,7 @@
     <div class="modal-content" role="document">
         <div class="modal-header">
             <h2 class="modal-title" id="testEmailModalTitle">Tester la configuration email</h2>
-            <button type="button" class="close" onclick="closeTestEmailModal()" aria-label="Fermer">&times;</button>
+            <button type="button" class="close test-email-modal-close">&times;</button>
         </div>
         <div class="modal-body">
             <form id="testEmailForm">
@@ -337,8 +337,8 @@
             </form>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-cancel" onclick="closeTestEmailModal()">Annuler</button>
-            <button type="button" class="btn-submit" onclick="sendTestEmail()">Envoyer</button>
+            <button type="button" class="btn-cancel cancel-test-email">Annuler</button>
+            <button type="button" class="btn-submit confirm-test-email">Envoyer</button>
         </div>
     </div>
 </div>

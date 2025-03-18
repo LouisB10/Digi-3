@@ -10,29 +10,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Ajouter un écouteur d'événement pour le clic sur le bouton
     if (calendarBtn && calendarSection) {
+        // Par défaut, le calendrier est visible
+        calendarBtn.classList.add('active-link');
+        calendarBtn.setAttribute('aria-expanded', 'true');
+        
         calendarBtn.addEventListener('click', function(e: MouseEvent) {
             e.preventDefault(); // Empêcher le comportement par défaut du lien
             
-            // Basculer la classe active sur la section calendrier
-            calendarSection.classList.toggle('active');
-            
-            // Changer le style du bouton pour indiquer qu'il est actif
-            if (calendarSection.classList.contains('active')) {
+            // Basculer la visibilité du calendrier
+            if (calendarSection.style.display === 'none') {
+                calendarSection.style.display = 'block';
                 calendarBtn.classList.add('active-link');
-                
-                // Accessibilité - indiquer que le calendrier est déplié
                 calendarBtn.setAttribute('aria-expanded', 'true');
             } else {
+                calendarSection.style.display = 'none';
                 calendarBtn.classList.remove('active-link');
-                
-                // Accessibilité - indiquer que le calendrier est replié
                 calendarBtn.setAttribute('aria-expanded', 'false');
             }
         });
         
         // Configuration initiale pour l'accessibilité
         calendarBtn.setAttribute('aria-controls', 'calendar-section');
-        calendarBtn.setAttribute('aria-expanded', calendarSection.classList.contains('active') ? 'true' : 'false');
     }
 
     // Initialiser les barres de progression

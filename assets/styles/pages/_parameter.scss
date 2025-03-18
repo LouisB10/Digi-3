@@ -1,0 +1,1117 @@
+@use "../app" as *;
+
+// ======================================
+// PARAMÈTRES
+// ======================================
+.parameter_landing {
+  width: 100%;
+  height: 90vh;
+  padding: 2rem;
+  gap: 2rem;
+  
+  @include tablet {
+    height: auto;
+    min-height: 90vh;
+    padding: 1.5rem;
+    flex-direction: column;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
+
+.parameter_menu {
+  padding: 2rem 1rem;
+  height: 100%;
+  width: 18%;
+  border-radius: 2rem;
+  background: linear-gradient(-130deg, $blue, $green);
+  
+  @include tablet {
+    width: 100%;
+    height: auto;
+    padding: 1.5rem 1rem;
+  }
+  
+  @include mobile {
+    padding: 0.75rem;
+    border-radius: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  ul {
+    height: 100%;
+    gap: 1rem;
+    justify-content: flex-start;
+    
+    @include tablet {
+      flex-direction: row;
+      flex-wrap: wrap;
+      height: auto;
+    }
+    
+    @include mobile {
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      justify-content: flex-start;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+      
+      &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+      }
+    }
+
+    li {
+      padding: 1rem;
+      width: 100%;
+      border-radius: 1.5rem;
+      border: 2px solid rgba(41, 41, 41, 0.15);
+      background-color: rgba(41, 41, 41, 0.15);
+      cursor: pointer;
+      
+      @include tablet {
+        width: auto;
+        padding: 0.75rem 1rem;
+      }
+      
+      @include mobile {
+        padding: 0.5rem;
+        border-radius: 0.75rem;
+        min-width: 3rem;
+        display: flex;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      a {
+        font-size: 1.5rem;
+        text-align: start;
+        color: $dark;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        @include tablet {
+          font-size: 1.25rem;
+        }
+        
+        @include mobile {
+          font-size: 1rem;
+          
+          i {
+            font-size: 1.2rem;
+            margin: 0 auto;
+          }
+          
+          span {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+.parameter_menu_active {
+  background-color: $dark !important;
+
+  a {
+    color: $white !important;
+  }
+}
+
+.parameter_content {
+  padding: 2rem;
+  height: 100%;
+  width: 75%;
+  border-radius: 2rem;
+  border: 2px solid $white-alpha-15;
+  background-color: $white-alpha-15;
+  
+  @include tablet {
+    width: 100%;
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+    border-radius: 1.5rem;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+    
+    @include tablet {
+      font-size: 2rem;
+    }
+    
+    @include mobile {
+      font-size: 1.75rem;
+    }
+  }
+}
+
+// ======================================
+// COMPTE UTILISATEUR
+// ======================================
+.account-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.account-header {
+  justify-content: space-between;
+  padding: 1rem;
+  border: 2px solid rgba(41, 41, 41, 0.15);
+  background: rgba(41, 41, 41, 0.15);
+  border-radius: 2rem;
+  
+  @include tablet {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  @include mobile {
+    padding: 0.75rem;
+    border-radius: 1rem;
+  }
+}
+
+.account-info,
+.account-info div {
+  gap: 1rem;
+  
+  @include mobile {
+    gap: 0.5rem;
+  }
+}
+
+.account-info div {
+  height: 5rem;
+  justify-content: flex-start;
+  
+  @include mobile {
+    height: 4rem;
+  }
+}
+
+.account-info p:nth-child(1) {
+  width: 100%;
+  font-size: 1.5rem;
+  text-align: end;
+  
+  @include tablet {
+    text-align: start;
+    font-size: 1.25rem;
+  }
+  
+  @include mobile {
+    font-size: 1.1rem;
+  }
+}
+
+#output {
+  position: absolute;
+  object-fit: cover;
+  border-radius: 10px;
+  height: 5rem;
+  width: 5rem;
+  z-index: 0;
+  
+  @include mobile {
+    height: 4rem;
+    width: 4rem;
+  }
+}
+
+.profile-pic {
+  position: relative;
+  color: transparent;
+  transition: all 0.3s ease;
+
+  input {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+    height: 5rem;
+    width: 5rem;
+    z-index: 1;
+    
+    @include mobile {
+      height: 4rem;
+      width: 4rem;
+    }
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      color: rgb(250, 250, 250);
+      margin-bottom: 0;
+      transition: height .2s ease-in-out;
+      border-radius: 10px;
+
+      img {
+        height: 0rem;
+        &:hover {
+          height: 2rem;
+        }
+      }
+    }
+  }
+}
+
+.account-body {
+  width: 100%;
+  justify-content: space-between;
+  align-self: flex-start;
+  gap: 1rem;
+  
+  @include tablet {
+    flex-direction: column;
+  }
+
+  h3 {
+    font-size: 1.75rem;
+    width: 100%;
+    text-align: start;
+    
+    @include tablet {
+      font-size: 1.5rem;
+    }
+    
+    @include mobile {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.account-email,
+.account-password {
+  align-self: flex-start;
+  width: 50%;
+  padding: 2rem;
+  border: 2px solid rgba(41,41,41, 0.15);
+  background: rgba(41,41,41, 0.15);
+  border-radius: 2rem;
+  gap: 2rem;
+  
+  @include tablet {
+    width: 100%;
+    padding: 1.5rem;
+  }
+  
+  @include mobile {
+    padding: 1rem;
+    gap: 1rem;
+    border-radius: 1rem;
+  }
+}
+
+.account-body form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  
+  @include mobile {
+    gap: 1rem;
+  }
+
+  div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    @include mobile {
+      gap: 0.25rem;
+    }
+  }
+
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid rgba(41,41,41, 0.15);
+    background: rgba(41,41,41, 0.15);
+    border-radius: 5px;
+    color: $white;
+    
+    @include mobile {
+      padding: 0.4rem;
+    }
+  }
+}
+
+.btn-submit {
+  font-size: 1rem;
+  width: 50%;
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(-130deg, $blue, $green);
+  color: $dark;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  @include mobile {
+    width: 100%;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+// ======================================
+// MENTIONS LÉGALES
+// ======================================
+.about-page {
+  gap: 2rem;
+  align-items: flex-start;
+  
+  @include mobile {
+    gap: 1.5rem;
+  }
+
+  p,
+  h2,
+  h3 {
+    color: $white;
+    text-align: start;
+    width: 100%;
+  }
+}
+
+.legal-mentions,
+.terms-of-service,
+.privacy-policy {
+  gap: 1rem;
+  
+  @include mobile {
+    gap: 0.75rem;
+  }
+}
+
+// ======================================
+// CONFIG PAGE
+// ======================================
+.config-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  
+  h1 {
+    font-size: 2.25rem;
+    margin-bottom: 1rem;
+    
+    @include tablet {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    @include mobile {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+.config-tabs {
+  width: 100%;
+  
+  .tabs-header {
+    display: flex;
+    border-bottom: 2px solid $white-alpha-15;
+    margin-bottom: 1.5rem;
+    
+    @include tablet {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    @include mobile {
+      margin-bottom: 0.75rem;
+    }
+    
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: $white-alpha-85;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      
+      @include tablet {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        white-space: nowrap;
+      }
+      
+      @include mobile {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+      }
+      
+      &.active {
+        color: $white;
+        border-bottom-color: $blue;
+      }
+    }
+  }
+}
+
+.tab-content {
+  display: none;
+  
+  &.active {
+    display: block;
+  }
+}
+
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 600px;
+  
+  @include mobile {
+    gap: 1rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    
+    label {
+      font-size: 1.1rem;
+      color: $white;
+      
+      @include mobile {
+        font-size: 1rem;
+      }
+    }
+    
+    input, select, textarea {
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid $white-alpha-15;
+      background: rgba(41, 41, 41, 0.2);
+      color: $white;
+      
+      @include mobile {
+        padding: 0.5rem;
+      }
+      
+      &:focus {
+        outline: 2px solid $blue;
+        border-color: $blue;
+      }
+    }
+  }
+  
+  .form-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    
+    @include mobile {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+}
+
+.backup-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  
+  @include mobile {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    color: $dark;
+    font-weight: 500;
+    cursor: pointer;
+    
+    @include mobile {
+      padding: 0.5rem 1rem;
+    }
+    
+    &.btn-primary {
+      background: linear-gradient(-130deg, $blue, $green);
+    }
+    
+    &.btn-warning {
+      background: linear-gradient(-130deg, #f3a953, #e67e22);
+    }
+  }
+}
+
+.backup-list {
+  width: 100%;
+  margin-top: 1rem;
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 0.75rem;
+      border-bottom: 1px solid $white-alpha-15;
+      
+      @include mobile {
+        padding: 0.5rem;
+      }
+    }
+    
+    th {
+      text-align: left;
+      font-weight: 600;
+      color: $white;
+    }
+    
+    tr:hover td {
+      background: rgba(41, 41, 41, 0.3);
+    }
+    
+    td {
+      color: $white-alpha-85;
+      
+      .backup-actions {
+        margin-bottom: 0;
+        justify-content: flex-end;
+        
+        button {
+          padding: 0.4rem 0.75rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+  
+  @include mobile {
+    overflow-x: auto;
+  }
+}
+
+// ======================================
+// CRUD PAGES (USERS & CUSTOMERS)
+// ======================================
+.crud-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  
+  @include mobile {
+    gap: 1rem;
+  }
+  
+  h1 {
+    font-size: 2.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    @include tablet {
+      font-size: 2rem;
+    }
+    
+    @include mobile {
+      font-size: 1.75rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+  }
+  
+  .action-button {
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    background: linear-gradient(-130deg, $blue, $green);
+    color: $dark;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    @include mobile {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      width: 100%;
+      justify-content: center;
+    }
+    
+    i {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.crud-page {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  .crud-header {
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    
+    @include mobile {
+      margin-bottom: 1rem;
+    }
+    
+    .btn-add {
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      background: linear-gradient(-130deg, $blue, $green);
+      color: $dark;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      
+      @include mobile {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+.crud-table {
+  height: calc(100% - 5rem);
+  position: relative;
+  overflow: hidden;
+  
+  @include mobile {
+    height: auto;
+    overflow: visible;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    @include mobile {
+      border: none;
+    }
+  }
+  
+  th, td {
+    padding: 0.75rem;
+    border-bottom: 1px solid $white-alpha-15;
+    text-align: left;
+    
+    @include mobile {
+      padding: 0.5rem;
+      border: none;
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      text-align: right;
+    }
+  }
+  
+  th {
+    font-weight: 600;
+    color: $white;
+    position: sticky;
+    top: 0;
+    background: $dark;
+    z-index: 1;
+    
+    @include mobile {
+      display: none;
+    }
+  }
+  
+  tr:hover td {
+    background: rgba(41, 41, 41, 0.3);
+  }
+  
+  tr {
+    @include mobile {
+      display: block;
+      margin-bottom: 1.5rem;
+      background-color: rgba(41, 41, 41, 0.2);
+      border-radius: 8px;
+      padding: 0.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  td {
+    color: $white-alpha-85;
+    
+    @include mobile {
+      text-align: right;
+      
+      &:before {
+        content: attr(data-label);
+        font-weight: 600;
+        float: left;
+        text-align: left;
+        color: $white;
+      }
+    }
+    
+    .row-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      
+      @include mobile {
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        justify-content: center;
+        width: 100%;
+        &:before {
+          display: none;
+        }
+      }
+      
+      button {
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        border: none;
+        color: $dark;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        
+        @include mobile {
+          justify-content: center;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.9rem;
+          width: 48%;
+          flex: 1;
+        }
+        
+        &.edit-btn {
+          background: linear-gradient(-130deg, #f3a953, #e67e22);
+        }
+        
+        &.delete-btn {
+          background: linear-gradient(-130deg, #e74c3c, #c0392b);
+        }
+      }
+    }
+  }
+  
+  @include tablet {
+    overflow-x: auto;
+  }
+  
+  @include mobile {
+    overflow-x: visible;
+    min-width: auto;
+  }
+  
+  tbody {
+    max-height: calc(100vh - 20rem);
+    overflow-y: auto;
+    display: block;
+    
+    tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+    
+    @include tablet {
+      max-height: calc(100vh - 22rem);
+    }
+    
+    @include mobile {
+      max-height: none;
+      display: block;
+      
+      tr {
+        display: block;
+        margin-bottom: 1rem;
+      }
+    }
+  }
+  
+  thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    
+    @include mobile {
+      display: none;
+    }
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  position: relative;
+  height: 100%;
+  
+  @include mobile {
+    overflow-x: visible;
+  }
+}
+
+.floating-add-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: linear-gradient(-130deg, $blue, $green);
+  color: $dark;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.75rem;
+  cursor: pointer;
+  z-index: 100;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.35);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  @include mobile {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.5rem;
+  }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  
+  .modal-content {
+    background: $dark;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    
+    @include mobile {
+      width: 95%;
+      max-height: 95vh;
+      margin: 2.5vh auto;
+    }
+    
+    .modal-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid $white-alpha-15;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      @include mobile {
+        padding: 0.75rem 1rem;
+        position: sticky;
+        top: 0;
+        background: $dark;
+        z-index: 5;
+      }
+      
+      h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        
+        @include mobile {
+          font-size: 1.25rem;
+        }
+      }
+      
+      .close {
+        background: none;
+        border: none;
+        color: $white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        
+        @include mobile {
+          font-size: 1.25rem;
+          padding: 0.5rem;
+          margin: -0.5rem;
+        }
+      }
+    }
+    
+    .modal-body {
+      padding: 1.25rem;
+      
+      @include mobile {
+        padding: 1rem 0.75rem;
+      }
+      
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        
+        @include mobile {
+          gap: 0.75rem;
+        }
+        
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          
+          @include mobile {
+            gap: 0.25rem;
+          }
+          
+          label {
+            font-size: 1.1rem;
+            color: $white;
+            
+            @include mobile {
+              font-size: 0.9rem;
+            }
+          }
+          
+          input, select, textarea {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid $white-alpha-15;
+            background: rgba(41, 41, 41, 0.2);
+            color: $white;
+            
+            @include mobile {
+              padding: 0.6rem;
+              font-size: 1rem;
+            }
+            
+            &:focus {
+              outline: 2px solid $blue;
+              border-color: $blue;
+            }
+          }
+        }
+        
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+          margin-top: 1rem;
+          
+          @include mobile {
+            flex-direction: column-reverse;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            
+            button {
+              width: 100%;
+            }
+          }
+          
+          button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            
+            @include mobile {
+              padding: 0.6rem 1rem;
+            }
+            
+            &.btn-cancel {
+              background: $white-alpha-15;
+              color: $white;
+            }
+            
+            &.btn-submit {
+              background: linear-gradient(-130deg, $blue, $green);
+              color: $dark;
+              width: auto;
+              
+              @include mobile {
+                font-weight: 600;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Flash messages
+.flash-messages {
+  margin: 1rem 0;
+  
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    color: $dark;
+    
+    @include mobile {
+      padding: 0.5rem 0.75rem;
+    }
+    
+    &.alert-success {
+      background: linear-gradient(-130deg, #2ecc71, #27ae60);
+    }
+    
+    &.alert-danger {
+      background: linear-gradient(-130deg, #e74c3c, #c0392b);
+    }
+    
+    &.alert-warning {
+      background: linear-gradient(-130deg, #f3a953, #e67e22);
+    }
+    
+    &.alert-info {
+      background: linear-gradient(-130deg, $blue, $green);
+    }
+  }
+} 

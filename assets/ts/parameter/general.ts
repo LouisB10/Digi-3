@@ -8,13 +8,14 @@ import { ProfileResponse, ApiResponse } from '../types/api';
 import { showAlert } from '../services/notification';
 
 document.addEventListener("DOMContentLoaded", (): void => {
-  console.log("Script parameter/general.ts chargé");
-  
   // Gestion de la mise à jour de la photo de profil
   initProfilePictureUpload();
   
   // Gestion des formulaires
   initForms();
+  
+  // Initialisation des toggles de mot de passe
+  initPasswordToggles();
   
   /**
    * Initialise le gestionnaire de téléchargement de la photo de profil
@@ -22,15 +23,11 @@ document.addEventListener("DOMContentLoaded", (): void => {
   function initProfilePictureUpload(): void {
     const fileInput = document.getElementById("file") as HTMLInputElement;
     if (fileInput) {
-      console.log("Input file trouvé:", fileInput);
-      
       fileInput.addEventListener("change", function (event: Event): void {
         const target = event.target as HTMLInputElement;
         const file = target.files?.[0];
         
         if (file) {
-          console.log("Fichier sélectionné:", file.name, "type:", file.type, "taille:", file.size);
-          
           // Vérifier le type de fichier
           const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
           if (!allowedTypes.includes(file.type)) {
@@ -52,22 +49,17 @@ document.addEventListener("DOMContentLoaded", (): void => {
           // Récupérer le token CSRF si disponible
           const csrfMetaTag = document.querySelector('meta[name="csrf-token"]');
           const csrfToken = csrfMetaTag ? csrfMetaTag.getAttribute('content') : null;
-          console.log("CSRF Token trouvé:", csrfToken ? "Oui" : "Non");
           
           if (csrfToken) {
             formData.append('_token', csrfToken);
-          } else {
-            console.warn("Aucun token CSRF trouvé. L'upload pourrait échouer.");
           }
 
           // Récupérer l'URL depuis l'attribut data-url
           const updateUrl = fileInput.getAttribute("data-url");
           if (!updateUrl) {
-            console.error("Aucune URL trouvée pour l'upload de l'image");
+            showAlert('error', "Erreur lors du téléchargement de l'image");
             return;
           }
-          
-          console.log("URL pour l'upload:", updateUrl);
           
           // Afficher un indicateur de chargement
           const outputImg = document.getElementById("output") as HTMLImageElement;
@@ -111,7 +103,6 @@ document.addEventListener("DOMContentLoaded", (): void => {
             }
           })
           .catch(error => {
-            console.error("Erreur:", error);
             showAlert('error', error.message);
           })
           .finally(() => {
@@ -135,7 +126,7 @@ document.addEventListener("DOMContentLoaded", (): void => {
    */
   function initForms(): void {
     // Formulaire de mise à jour de l'email
-    const emailForm = document.getElementById("updateEmailForm") as HTMLFormElement;
+    const emailForm = document.getElementById("email_form") as HTMLFormElement;
     if (emailForm) {
       emailForm.addEventListener("submit", function(event: Event): void {
         event.preventDefault();
@@ -144,7 +135,7 @@ document.addEventListener("DOMContentLoaded", (): void => {
     }
     
     // Formulaire de mise à jour du mot de passe
-    const passwordForm = document.getElementById("updatePasswordForm") as HTMLFormElement;
+    const passwordForm = document.getElementById("password_form") as HTMLFormElement;
     if (passwordForm) {
       passwordForm.addEventListener("submit", function(event: Event): void {
         event.preventDefault();
@@ -154,29 +145,100 @@ document.addEventListener("DOMContentLoaded", (): void => {
   }
   
   /**
+   * Initialise les toggles de mot de passe
+   */
+  function initPasswordToggles(): void {
+    // Pour chaque toggle, trouver le champ de mot de passe associé par sa position dans le DOM
+    document.querySelectorAll<HTMLElement>('.toggle-password').forEach(toggle => {
+      // Chercher l'input password le plus proche dans le même conteneur
+      const container = toggle.closest('.password-container');
+      if (!container) {
+        return;
+      }
+      
+      const passwordInput = container.querySelector('input[type="password"]');
+      if (!passwordInput) {
+        return;
+      }
+      
+      // Ajouter l'écouteur d'événement
+      toggle.addEventListener('click', function(this: HTMLElement) {
+        // Obtenir le champ directement depuis le conteneur parent
+        const container = this.closest('.password-container');
+        if (!container) return;
+        
+        const input = container.querySelector('input[type="password"]') as HTMLInputElement;
+        if (!input) return;
+        
+        const img = this.querySelector('img');
+        if (!img) {
+          return;
+        }
+        
+        const eyeIcon = img.getAttribute('data-eye');
+        const eyeOffIcon = img.getAttribute('data-eye-off');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          if (eyeOffIcon) img.src = eyeOffIcon;
+          this.setAttribute('aria-label', 'Masquer le mot de passe');
+        } else {
+          input.type = 'password';
+          if (eyeIcon) img.src = eyeIcon;
+          this.setAttribute('aria-label', 'Afficher le mot de passe');
+        }
+      });
+    });
+  }
+  
+  /**
    * Soumet un formulaire via AJAX
    * @param form - Le formulaire à soumettre
    * @param action - Type d'action (update-email ou update-password)
    */
   function submitForm(form: HTMLFormElement, action: string): void {
+    // Récupérer le token CSRF
+    const csrfFieldNames = ['_token', 'email_token', 'password_token', form.id + '_token'];
+    let csrfToken: string | null = null;
+
+    // Essayer de trouver le token dans le formulaire
+    for (const name of csrfFieldNames) {
+      const csrfField = form.querySelector(`input[name="${name}"]`) as HTMLInputElement | null;
+      if (csrfField && csrfField.value) {
+        csrfToken = csrfField.value;
+        break;
+      }
+    }
+
+    // Si non trouvé, chercher dans les balises meta
+    if (!csrfToken) {
+      const metaSelectors = [
+        'meta[name="csrf-token"]',
+        'meta[name="csrf-param"]',
+        'meta[name="csrf_token"]'
+      ];
+      
+      for (const selector of metaSelectors) {
+        const metaTag = document.querySelector(selector);
+        if (metaTag && metaTag.getAttribute('content')) {
+          csrfToken = metaTag.getAttribute('content');
+          break;
+        }
+      }
+    }
+
+    // Si toujours pas trouvé, afficher une erreur
+    if (!csrfToken) {
+      showAlert('error', "Token CSRF manquant");
+      return;
+    }
+    
     // Récupérer l'URL depuis l'attribut action du formulaire
     const url = form.getAttribute("action");
     if (!url) {
       showAlert('error', "Aucune URL trouvée pour le formulaire");
       return;
     }
-    
-    // Récupérer le token CSRF
-    const csrfField = form.querySelector('input[name="_token"]') as HTMLInputElement;
-    const csrfToken = csrfField ? csrfField.value : null;
-    
-    if (!csrfToken) {
-      showAlert('error', "Token CSRF manquant");
-      return;
-    }
-    
-    // Préparer les données du formulaire
-    const formData = new FormData(form);
     
     // Désactiver le bouton de soumission pendant le traitement
     const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -185,17 +247,76 @@ document.addEventListener("DOMContentLoaded", (): void => {
       submitButton.innerHTML = '<span class="spinner"></span> Traitement...';
     }
     
-    // Envoyer les données au serveur
+    // Construire un objet JSON pour les données
+    const formData: Record<string, any> = {};
+    
+    // Ajouter le token CSRF et les données du formulaire
+    if (action === 'update-email') {
+      formData['email_token'] = csrfToken;
+      
+      // Récupérer les champs du formulaire d'email
+      const emailField = form.querySelector('#email_update_email') as HTMLInputElement;
+      const passwordField = form.querySelector('#email_update_password') as HTMLInputElement;
+      
+      if (!emailField || !passwordField) {
+        showAlert('error', "Formulaire incomplet");
+        return;
+      }
+      
+      formData['email'] = emailField.value;
+      formData['password'] = passwordField.value;
+      
+    } else if (action === 'update-password') {
+      formData['password_token'] = csrfToken;
+      
+      // Récupérer les champs du formulaire de mot de passe
+      const actualPasswordField = form.querySelector('#password_form_actual_password') as HTMLInputElement;
+      const newPasswordField = form.querySelector('#password_form_password') as HTMLInputElement;
+      const confirmPasswordField = form.querySelector('#password_form_confirm_password') as HTMLInputElement;
+      
+      if (!actualPasswordField || !newPasswordField || !confirmPasswordField) {
+        showAlert('error', "Formulaire incomplet");
+        return;
+      }
+      
+      formData['currentPassword'] = actualPasswordField.value;
+      formData['newPassword'] = newPasswordField.value;
+      formData['confirmPassword'] = confirmPasswordField.value;
+    }
+    
+    // Envoyer les données au serveur en JSON
     fetch(url, {
       method: "POST",
-      body: formData,
+      body: JSON.stringify(formData),
       headers: {
+        'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
       }
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error("Erreur lors de la soumission du formulaire");
+        // Essayer de lire le corps de la réponse pour plus de détails
+        return response.text().then(text => {
+          let errorMessage = `Erreur ${response.status}`;
+          try {
+            // Essayer de parser la réponse comme JSON
+            const errorData = JSON.parse(text);
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch (e) {
+            // Si ce n'est pas du JSON, essayer de trouver des indices dans le HTML
+            if (text.includes('<title>')) {
+              const titleMatch = text.match(/<title>(.*?)<\/title>/);
+              if (titleMatch && titleMatch[1]) {
+                errorMessage = titleMatch[1].trim();
+              }
+            }
+          }
+          throw new Error(errorMessage);
+        });
       }
       return response.json() as Promise<ApiResponse>;
     })
@@ -208,12 +329,11 @@ document.addEventListener("DOMContentLoaded", (): void => {
           form.reset();
         }
       } else {
-        showAlert('error', data.message);
+        showAlert('error', data.message || "Une erreur est survenue");
       }
     })
     .catch(error => {
-      console.error("Erreur:", error);
-      showAlert('error', error.message);
+      showAlert('error', error.message || "Erreur lors de la soumission du formulaire");
     })
     .finally(() => {
       // Réactiver le bouton de soumission

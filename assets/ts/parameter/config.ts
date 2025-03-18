@@ -11,6 +11,111 @@ let backupIdToRestore: string | null = null;
 let backupIdToDelete: string | null = null;
 
 /**
+ * Initialisation des écouteurs d'événements
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    initTabs();
+    initForms();
+    initPasswordToggles();
+    initEventListeners();
+});
+
+/**
+ * Initialisation des écouteurs d'événements pour remplacer les onclick
+ */
+function initEventListeners(): void {
+    // Bouton pour tester la configuration email
+    const testEmailConfigBtn = document.getElementById('test-email-config-btn');
+    if (testEmailConfigBtn) {
+        testEmailConfigBtn.addEventListener('click', testEmailConfig);
+    }
+    
+    // Bouton pour créer une sauvegarde manuelle
+    const createManualBackupBtn = document.getElementById('create-manual-backup-btn');
+    if (createManualBackupBtn) {
+        createManualBackupBtn.addEventListener('click', createManualBackup);
+    }
+    
+    // Boutons de téléchargement des sauvegardes
+    document.querySelectorAll<HTMLButtonElement>('.download-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const backupId = this.getAttribute('data-backup-id');
+            if (backupId) {
+                downloadBackup(backupId);
+            }
+        });
+    });
+    
+    // Boutons de restauration des sauvegardes
+    document.querySelectorAll<HTMLButtonElement>('.restore-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const backupId = this.getAttribute('data-backup-id');
+            const backupName = this.getAttribute('data-backup-name');
+            if (backupId && backupName) {
+                confirmRestoreBackup(backupId, backupName);
+            }
+        });
+    });
+    
+    // Boutons de suppression des sauvegardes
+    document.querySelectorAll<HTMLButtonElement>('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const backupId = this.getAttribute('data-backup-id');
+            const backupName = this.getAttribute('data-backup-name');
+            if (backupId && backupName) {
+                confirmDeleteBackup(backupId, backupName);
+            }
+        });
+    });
+    
+    // Boutons de fermeture des modales
+    const restoreModalClose = document.querySelector<HTMLButtonElement>('.restore-modal-close');
+    if (restoreModalClose) {
+        restoreModalClose.addEventListener('click', closeRestoreModal);
+    }
+    
+    const cancelRestoreBtn = document.querySelector<HTMLButtonElement>('.cancel-restore');
+    if (cancelRestoreBtn) {
+        cancelRestoreBtn.addEventListener('click', closeRestoreModal);
+    }
+    
+    const confirmRestoreBtn = document.querySelector<HTMLButtonElement>('.confirm-restore');
+    if (confirmRestoreBtn) {
+        confirmRestoreBtn.addEventListener('click', restoreBackup);
+    }
+    
+    const deleteBackupModalClose = document.querySelector<HTMLButtonElement>('.delete-backup-modal-close');
+    if (deleteBackupModalClose) {
+        deleteBackupModalClose.addEventListener('click', closeDeleteBackupModal);
+    }
+    
+    const cancelDeleteBackupBtn = document.querySelector<HTMLButtonElement>('.cancel-delete-backup');
+    if (cancelDeleteBackupBtn) {
+        cancelDeleteBackupBtn.addEventListener('click', closeDeleteBackupModal);
+    }
+    
+    const confirmDeleteBackupBtn = document.querySelector<HTMLButtonElement>('.confirm-delete-backup');
+    if (confirmDeleteBackupBtn) {
+        confirmDeleteBackupBtn.addEventListener('click', deleteBackup);
+    }
+    
+    const testEmailModalClose = document.querySelector<HTMLButtonElement>('.test-email-modal-close');
+    if (testEmailModalClose) {
+        testEmailModalClose.addEventListener('click', closeTestEmailModal);
+    }
+    
+    const cancelTestEmailBtn = document.querySelector<HTMLButtonElement>('.cancel-test-email');
+    if (cancelTestEmailBtn) {
+        cancelTestEmailBtn.addEventListener('click', closeTestEmailModal);
+    }
+    
+    const confirmTestEmailBtn = document.querySelector<HTMLButtonElement>('.confirm-test-email');
+    if (confirmTestEmailBtn) {
+        confirmTestEmailBtn.addEventListener('click', sendTestEmail);
+    }
+}
+
+/**
  * Récupère un token CSRF spécifique
  * @param tokenId - L'identifiant du token CSRF
  * @returns Le token CSRF ou une chaîne vide
@@ -386,11 +491,4 @@ window.closeDeleteBackupModal = closeDeleteBackupModal;
 window.deleteBackup = deleteBackup;
 window.testEmailConfig = testEmailConfig;
 window.closeTestEmailModal = closeTestEmailModal;
-window.sendTestEmail = sendTestEmail;
-
-// Initialisation
-document.addEventListener('DOMContentLoaded', function() {
-    initTabs();
-    initForms();
-    initPasswordToggles();
-}); 
+window.sendTestEmail = sendTestEmail; 

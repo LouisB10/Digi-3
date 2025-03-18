@@ -105,7 +105,8 @@ Encore
         '@': path.resolve(__dirname, 'assets'),
         '@ts': path.resolve(__dirname, 'assets/ts'),
         '@services': path.resolve(__dirname, 'assets/ts/services'),
-        '@types': path.resolve(__dirname, 'assets/ts/types')
+        '@types': path.resolve(__dirname, 'assets/ts/types'),
+        '@images': path.resolve(__dirname, 'assets/images')
     })
 ;
 

@@ -13,18 +13,9 @@
         
         <div class="parameter_content">
             <div class="crud-page {{ entity_name }}-page">
-                {# En-tête avec titre et bouton d'ajout #}
+                {# En-tête avec titre #}
                 <div class="crud-header flex">
                     <h1>{{ page_title|default('Gestion') }}</h1>
-                    {% if can_create %}
-                        <button 
-                            class="btn-add" 
-                            type="button" 
-                            aria-label="Ajouter un nouveau {{ entity_label }}"
-                        >
-                            Ajouter {{ entity_label }}
-                        </button>
-                    {% endif %}
                 </div>
 
                 {# Messages flash #}
@@ -38,10 +29,9 @@
                 {% endfor %}
                 </div>
 
-                {# Table principale #}
+                {# Table principale avec scrolling #}
                 <div class="crud-table" role="region" aria-label="Liste des {{ entity_label_plural|default(entity_label ~ 's') }}">
                     <table aria-describedby="table-description">
-                        <caption id="table-description">Liste des {{ entity_label_plural|default(entity_label ~ 's') }} avec leurs informations</caption>
                         <thead>
                             <tr>
                                 {% block table_headers %}{% endblock %}
@@ -55,6 +45,17 @@
                         </tbody>
                     </table>
                 </div>
+                
+                {# Bouton flottant d'ajout #}
+                {% if can_create %}
+                <button 
+                    class="floating-add-button btn-add" 
+                    type="button"
+                    aria-label="Ajouter un nouveau {{ entity_label }}"
+                >
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                </button>
+                {% endif %}
             </div>
         </div>
     </section>

@@ -23,7 +23,20 @@ interface KanbanUpdateData {
  */
 function showCreateForm(): void {
     const form = document.getElementById('createProjectForm');
-    if (form) form.style.display = 'block';
+    if (form) {
+        form.style.display = 'block';
+        console.log('Formulaire de création de projet affiché');
+        
+        // Vérifier que le jeton CSRF est présent
+        const token = form.querySelector('input[name="_token"]');
+        if (!token) {
+            console.error('Jeton CSRF manquant dans le formulaire de projet');
+        } else {
+            console.log('Jeton CSRF trouvé dans le formulaire de projet');
+        }
+    } else {
+        console.error('Formulaire de création de projet non trouvé');
+    }
 }
  
 /**
@@ -31,7 +44,20 @@ function showCreateForm(): void {
  */
 function showCreateTaskForm(): void {
     const form = document.getElementById('createTaskForm');
-    if (form) form.style.display = 'block';
+    if (form) {
+        form.style.display = 'block';
+        console.log('Formulaire de création de tâche affiché');
+        
+        // Vérifier que le jeton CSRF est présent
+        const token = form.querySelector('input[name="_token"]');
+        if (!token) {
+            console.error('Jeton CSRF manquant dans le formulaire de tâche');
+        } else {
+            console.log('Jeton CSRF trouvé dans le formulaire de tâche');
+        }
+    } else {
+        console.error('Formulaire de création de tâche non trouvé');
+    }
 }
  
 /**
@@ -39,6 +65,62 @@ function showCreateTaskForm(): void {
  */
 document.addEventListener('DOMContentLoaded', function() {
     let projectIdToDelete: string | null = null;
+    
+    // Initialiser les boutons de création
+    const createProjectBtn = document.getElementById('createProjectBtn');
+    if (createProjectBtn) {
+        console.log('Bouton de création de projet trouvé');
+        createProjectBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showCreateForm();
+        });
+    } else {
+        console.log('Bouton de création de projet non trouvé');
+    }
+    
+    const createTaskBtn = document.getElementById('createTaskBtn');
+    if (createTaskBtn) {
+        console.log('Bouton de création de tâche trouvé');
+        createTaskBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showCreateTaskForm();
+        });
+    } else {
+        console.log('Bouton de création de tâche non trouvé');
+    }
+    
+    // Gérer la soumission des formulaires
+    const projectForm = document.getElementById('projectForm') as HTMLFormElement;
+    if (projectForm) {
+        console.log('Formulaire de projet trouvé, ajout du gestionnaire de soumission');
+        projectForm.addEventListener('submit', function(e) {
+            // Ne pas empêcher la soumission par défaut, mais vérifier que le CSRF est présent
+            const csrfToken = this.querySelector('input[name="_token"]');
+            if (!csrfToken) {
+                e.preventDefault();
+                console.error('Soumission du formulaire de projet annulée : jeton CSRF manquant');
+                alert('Impossible de soumettre le formulaire : jeton de sécurité manquant.');
+            } else {
+                console.log('Soumission du formulaire de projet avec jeton CSRF');
+            }
+        });
+    }
+    
+    const taskForm = document.getElementById('taskForm') as HTMLFormElement;
+    if (taskForm) {
+        console.log('Formulaire de tâche trouvé, ajout du gestionnaire de soumission');
+        taskForm.addEventListener('submit', function(e) {
+            // Ne pas empêcher la soumission par défaut, mais vérifier que le CSRF est présent
+            const csrfToken = this.querySelector('input[name="_token"]');
+            if (!csrfToken) {
+                e.preventDefault();
+                console.error('Soumission du formulaire de tâche annulée : jeton CSRF manquant');
+                alert('Impossible de soumettre le formulaire : jeton de sécurité manquant.');
+            } else {
+                console.log('Soumission du formulaire de tâche avec jeton CSRF');
+            }
+        });
+    }
     
     window.showDeletePopup = function(projectId: string): void {
         projectIdToDelete = projectId;
@@ -57,7 +139,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const form = document.createElement('form');
             form.method = 'post';
             form.action = `/management-project/delete/${projectIdToDelete}`;
-     
+            
+            // Ajouter le jeton CSRF
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            
+            // Récupérer le jeton CSRF depuis les méta-données, s'il existe
+            const csrfMeta = document.querySelector('meta[name="csrf-token-delete"]');
+            if (csrfMeta && csrfMeta.getAttribute('content')) {
+                csrfInput.value = csrfMeta.getAttribute('content') || '';
+                console.log('Jeton CSRF trouvé pour la suppression');
+            } else {
+                console.error('Aucun jeton CSRF trouvé pour la suppression de projet');
+            }
+            
+            form.appendChild(csrfInput);
             document.body.appendChild(form);
             form.submit();
         };
@@ -111,11 +208,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const tasksContainers = document.querySelectorAll<HTMLElement>('.kanban-tasks');
     let draggedItem: HTMLElement | null = null;
  
+    // Initialisation du drag and drop pour les cartes de tâches
     document.querySelectorAll<HTMLElement>('.task-card').forEach(task => {
         task.addEventListener('dragstart', handleDragStart);
         task.addEventListener('dragend', handleDragEnd);
+        // Ajouter un écouteur de clic pour ouvrir la modal de détail
+        task.addEventListener('click', function() {
+            openTaskModal(this);
+        });
     });
- 
+    
+    // Écouteur pour le bouton de fermeture de la modal
+    const closeButton = document.querySelector<HTMLElement>('.task-modal-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', closeTaskModal);
+    }
+    
+    // Fermer la modal si on clique en dehors du contenu
+    const taskModal = document.getElementById('taskDetailModal');
+    if (taskModal) {
+        taskModal.addEventListener('click', function(event) {
+            if (event.target === taskModal) {
+                closeTaskModal();
+            }
+        });
+    }
+    
     columns.forEach(column => {
         column.addEventListener('dragover', handleDragOver);
         column.addEventListener('drop', handleDrop);
@@ -300,14 +418,6 @@ function closeTaskModal(): void {
     if (modal) modal.style.display = 'none';
     // Réactiver le défilement
     document.body.style.overflow = 'auto';
-}
- 
-// Fermer la modal si on clique en dehors du contenu
-window.onclick = function(event: MouseEvent): void {
-    const modal = document.getElementById('taskDetailModal');
-    if (modal && event.target === modal) {
-        closeTaskModal();
-    }
 }
 
 // Exposer les fonctions à l'objet window

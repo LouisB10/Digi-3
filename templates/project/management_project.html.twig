@@ -2,6 +2,14 @@
 
 {% block title %}Digi 3 - Gestion Projets{% endblock %}
 
+{% block head_meta %}
+    {{ parent() }}
+    <meta name="csrf-token" content="{{ csrf_token('app') }}">
+    <meta name="csrf-token-project" content="{{ csrf_token('project_form') }}">
+    <meta name="csrf-token-task" content="{{ csrf_token('task_form') }}">
+    <meta name="csrf-token-delete" content="{{ csrf_token('delete-project') }}">
+{% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
     {{ encore_entry_script_tags('project') }}
@@ -15,7 +23,6 @@
 <div class="project-management-container">
     <aside class="parameter_menu" role="complementary" aria-label="Liste des projets">
         <h3 id="project-list-heading">Liste des projets</h3>
-        <button class="create-project-button" id="createProjectBtn" aria-label="Créer un nouveau projet">Créer un projet</button>
         <ul aria-labelledby="project-list-heading">
             {% for project in projects %}
             <li class="{{ current_project and current_project.id == project.id ? 'active' : '' }}">
@@ -58,6 +65,7 @@
             <div id="createTaskForm" style="display: none;" aria-labelledby="task-form-title">
                 <h3 id="task-form-title" class="visually-hidden">Formulaire de création de tâche</h3>
                 {{ form_start(taskForm, {'attr': {'id': 'taskForm', 'aria-labelledby': 'task-form-title'}}) }}
+                    <input type="hidden" name="_token" value="{{ csrf_token('task_form') }}">
                     {{ form_row(taskForm.taskName) }}
                     {{ form_row(taskForm.taskDescription) }}
                     {{ form_row(taskForm.taskType) }}
@@ -67,7 +75,7 @@
                     {{ form_row(taskForm.taskStartDate) }}
                     {{ form_row(taskForm.taskTargetDate) }}
                     <button type="submit">Ajouter la tâche</button>
-                {{ form_end(taskForm) }}
+                {{ form_end(taskForm, {'render_rest': false}) }}
             </div>
             {% endif %}
         </div>
@@ -88,8 +96,7 @@
                             data-complexity="{{ task.taskComplexity }}"
                             data-date-from="{{ task.taskStartDate ? task.taskStartDate.format('d-m-Y') : 'Non définie' }}"
                             data-date-to="{{ task.taskEndDate ? task.taskEndDate.format('d-m-Y') : 'Non définie' }}"
-                            role="listitem" aria-label="Tâche: {{ task.taskName }}" 
-                            onclick="openTaskModal(this)">
+                            role="listitem" aria-label="Tâche: {{ task.taskName }}">
                             <h4>{{ task.taskName }}</h4>
                             <div class="task-info">
                                 <p><strong>Description :</strong> {{ task.taskDescription }}</p>
@@ -119,8 +126,7 @@
                             data-complexity="{{ task.taskComplexity }}"
                             data-date-from="{{ task.taskStartDate ? task.taskStartDate.format('d-m-Y') : 'Non définie' }}"
                             data-date-to="{{ task.taskEndDate ? task.taskEndDate.format('d-m-Y') : 'Non définie' }}"
-                            role="listitem" aria-label="Tâche: {{ task.taskName }}" 
-                            onclick="openTaskModal(this)">
+                            role="listitem" aria-label="Tâche: {{ task.taskName }}">
                             <h4>{{ task.taskName }}</h4>
                             <div class="task-info">
                                 <p><strong>Description :</strong> {{ task.taskDescription }}</p>
@@ -150,8 +156,7 @@
                             data-complexity="{{ task.taskComplexity }}"
                             data-date-from="{{ task.taskStartDate ? task.taskStartDate.format('d-m-Y') : 'Non définie' }}"
                             data-date-to="{{ task.taskEndDate ? task.taskEndDate.format('d-m-Y') : 'Non définie' }}"
-                            role="listitem" aria-label="Tâche: {{ task.taskName }}" 
-                            onclick="openTaskModal(this)">
+                            role="listitem" aria-label="Tâche: {{ task.taskName }}">
                             <h4>{{ task.taskName }}</h4>
                             <div class="task-info">
                                 <p><strong>Description :</strong> {{ task.taskDescription }}</p>
@@ -181,8 +186,7 @@
                             data-complexity="{{ task.taskComplexity }}"
                             data-date-from="{{ task.taskStartDate ? task.taskStartDate.format('d-m-Y') : 'Non définie' }}"
                             data-date-to="{{ task.taskEndDate ? task.taskEndDate.format('d-m-Y') : 'Non définie' }}"
-                            role="listitem" aria-label="Tâche: {{ task.taskName }}" 
-                            onclick="openTaskModal(this)">
+                            role="listitem" aria-label="Tâche: {{ task.taskName }}">
                             <h4>{{ task.taskName }}</h4>
                             <div class="task-info">
                                 <p><strong>Description :</strong> {{ task.taskDescription }}</p>
@@ -208,12 +212,13 @@
         <div id="createProjectForm" style="display: none;" aria-labelledby="project-form-title">
             <h3 id="project-form-title" class="visually-hidden">Formulaire de création de projet</h3>
             {{ form_start(form, {'attr': {'id': 'projectForm', 'aria-labelledby': 'project-form-title'}}) }}
+                <input type="hidden" name="_token" value="{{ csrf_token('project_form') }}">
                 {{ form_row(form.projectName) }}
                 {{ form_row(form.projectDescription) }}
                 {{ form_row(form.projectStartDate) }}
                 {{ form_row(form.projectTargetDate) }}
                 <button type="submit">Créer un nouveau projet</button>
-            {{ form_end(form) }}
+            {{ form_end(form, {'render_rest': false}) }}
         </div>
 
         {# Messages flash #}
@@ -224,6 +229,10 @@
         {% endfor %}
 </main>
 
+{# Bouton flottant pour créer un projet #}
+<button class="floating-add-project" id="createProjectBtn" aria-label="Créer un nouveau projet">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+</button>
 
 </div>
 
@@ -232,6 +241,7 @@
     <div class="popup-content">
         <h3 id="delete-popup-title" class="visually-hidden">Confirmation de suppression</h3>
         <p>Êtes-vous sûr de vouloir supprimer ce projet ?</p>
+        <input type="hidden" id="delete-project-token" value="{{ csrf_token('delete-project') }}">
         <button id="confirmDelete" class="confirm-button">Confirmer</button>
         <button id="cancelDelete" class="cancel-button">Annuler</button>
     </div>
@@ -240,7 +250,7 @@
 {# Modal de détail de tâche #}
 <div id="taskDetailModal" class="modal" style="display: none;">
     <div class="modal-content">
-        <span class="close" onclick="closeTaskModal()">&times;</span>
+        <span class="close task-modal-close">&times;</span>
         <h2 id="taskTitle"></h2>
         <div class="task-details">
             <p><strong>Description:</strong> <span id="taskDescription"></span></p>
