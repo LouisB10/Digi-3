@@ -78,45 +78,6 @@ Digi-3 est une application web de gestion de projets développée avec Symfony 7
 
 Digi-3 utilise un système de sécurité avancé basé sur les Voters de Symfony pour gérer les permissions de manière granulaire.
 
-### Voters
-
-Les Voters sont des classes qui déterminent si un utilisateur a le droit d'effectuer une action spécifique sur une ressource donnée.
-
-#### **ProjectVoter** (Permissions sur les projets)
-- `view` : Voir un projet
-- `edit` : Modifier un projet
-- `delete` : Supprimer un projet
-- `create` : Créer un projet
-- `manage_tasks` : Gérer les tâches d'un projet
-
-#### **TaskVoter** (Permissions sur les tâches)
-- `view` : Voir une tâche
-- `edit` : Modifier une tâche
-- `delete` : Supprimer une tâche
-- `create` : Créer une tâche
-- `change_status` : Changer le statut d'une tâche
-- `assign` : Assigner une tâche à un utilisateur
-
-#### **CustomerVoter** (Permissions sur les clients)
-- `view` : Voir un client
-- `edit` : Modifier un client
-- `delete` : Supprimer un client
-- `create` : Créer un client
-
-#### **UserVoter** (Permissions sur les utilisateurs)
-- `view` : Voir un utilisateur
-- `edit` : Modifier un utilisateur
-- `delete` : Supprimer un utilisateur
-- `create` : Créer un utilisateur
-- `change_role` : Changer le rôle d'un utilisateur
-
-### Vérification des permissions dans les contrôleurs
-
-```php
-$this->denyAccessUnlessGranted('view', $project);
-$this->denyAccessUnlessGranted('create', null);
-```
-
 ## Utilisateurs par défaut
 
 | Email | Mot de passe | Rôle |
